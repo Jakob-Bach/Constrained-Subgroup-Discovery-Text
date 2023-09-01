@@ -1,0 +1,177 @@
+\documentclass{article}
+
+\title{
+	Optimal Subgroup Discovery
+}
+\author{
+	Jakob Bach~\orcidlink{0000-0003-0301-2798}\\
+	\small Karlsruhe Institute of Technology (KIT), Germany\\
+	\small \href{mailto:jakob.bach@kit.edu}{jakob.bach@kit.edu}
+}
+\date{} % don't display a date
+
+\usepackage[style=numeric, backend=bibtex]{biblatex}
+\usepackage[ruled,linesnumbered,vlined]{algorithm2e} % pseudo-code
+\usepackage{amsmath} % mathematical symbols
+\usepackage{amssymb} % mathematical symbols
+\usepackage{amsthm} % theorems, definitions etc.
+\usepackage{booktabs} % nicely formatted tables (with top, mid, and bottom rule)
+\usepackage{graphicx} % plots
+\usepackage{orcidlink} % ORCID icon
+\usepackage{subcaption} % figures with multiple sub-figures and sub-captions
+\usepackage{hyperref} % links and URLs
+
+\addbibresource{references.bib}
+
+\newtheorem{proposition}{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\end{abstract}
+%
+\textbf{Keywords:} subgroup discovery, alternatives, constraints, satisfiability modulo theories, mixed-integer programming, explainability, interpretability, XAI
+
+\section{Introduction}
+\label{sec:osd:introduction}
+
+\paragraph{Motivation}
+
+\cite{carvalho2019machine} \cite{molnar2020interpretable}
+
+\paragraph{Problem statement}
+
+\paragraph{Related work}
+
+\paragraph{Contributions}
+
+\paragraph{Experimental results}
+
+\paragraph{Outline}
+
+Section~\ref{sec:osd:fundamentals} introduces notation and fundamentals.
+Section~\ref{sec:osd:approach} describes and analyzes alternative feature selection.
+Section~\ref{sec:osd:related-work} reviews related work.
+Section~\ref{sec:osd:experimental-design} outlines our experimental design, while Section~\ref{sec:osd:evaluation} presents the experimental results.
+Section~\ref{sec:osd:conclusion} concludes.
+Appendix~\ref{sec:osd:appendix} contains supplementary materials.
+
+\section{Fundamentals}
+\label{sec:osd:fundamentals}
+
+\subsection{Notation}
+\label{sec:osd:fundamentals:notation}
+
+$X \in \mathbb{R}^{m \times n}$ stands for a dataset in the form of a matrix.
+Each row is a data object, and each column is a feature.
+$F = \{f_1, \dots, f_n\}$ is the corresponding set of feature names.
+We assume that categorical features have already been made numeric, e.g., via one-hot encoding.
+$X_{\cdot{}j} \in \mathbb{R}^m$ denotes the vector representation of the $j$-th feature.
+$y \in Y^m$ represents the prediction target with domain $Y$, e.g., $Y=\{0,1\}$ for binary classification or $Y=\mathbb{R}$ for regression.
+
+In subgroup discovery, one ... (goal, decision variables)
+The function $Q(...,X,y)$ returns the quality of such a subgroup.
+Without loss of generality, we assume that this function should be maximized.
+
+\section{Approach}
+\label{sec:osd:approach}
+
+\subsection{Optimization Problem}
+\label{sec:osd:approach:problem}
+
+MaxSAT: \cite{li2021maxsat} \cite{bacchus2021maximum}
+SMT: \cite{barrett2018satisfiability}
+
+\subsection{Constraints}
+\label{sec:osd:approach:constraints}
+
+\cite{mosek2022modeling}
+\cite{sinz2005towards}
+\cite{ulrich2022selecting}
+
+\subsection{Objective Functions}
+\label{sec:osd:approach:objectives}
+
+\subsection{Computational Complexity}
+\label{sec:osd:approach:complexity}
+
+\section{Related Work}
+\label{sec:osd:related-work}
+
+\subsection{Subgroup Discovery}
+\label{sec:osd:related-work:subgroup-discovery}
+
+\cite{leeuwen2012diverse}
+
+\subsection{Feature Selection}
+\label{sec:osd:related-work:feature-selection}
+
+\cite{bach2022empirical}
+
+\subsection{Other Fields}
+\label{sec:osd:related-work:other}
+
+\cite{bailey2014alternative} \cite{grossi2017survey}
+\cite{guidotti2022counterfactual}
+\cite{narodytska2018learning} \cite{schidler2021sat} \cite{yu2021learning}
+
+\section{Experimental Design}
+\label{sec:osd:experimental-design}
+
+\subsection{Overview}
+\label{sec:osd:experimental-design:overview}
+
+\subsection{Evaluation Metrics}
+\label{sec:osd:experimental-design:evaluation}
+
+\paragraph{Quality}
+
+\paragraph{Runtime}
+
+\subsection{Methods}
+\label{sec:osd:experimental-design:methods}
+
+\subsection{Datasets}
+\label{sec:osd:experimental-design:datasets}
+
+\subsection{Implementation and Execution}
+\label{sec:osd:experimental-design:implementation}
+
+\cite{bestuzheva2021scip}
+\cite{deMoura2008z3}
+\cite{perron2022or-tools}
+
+\section{Evaluation}
+\label{sec:osd:evaluation}
+
+\subsection{Summary}
+\label{sec:osd:evaluation:summary}
+
+\section{Conclusions and Future Work}
+\label{sec:osd:conclusion}
+
+\subsection{Conclusions}
+\label{sec:osd:conclusion:conclusion}
+
+\subsection{Future Work}
+\label{sec:osd:conclusion:future-work}
+
+%~\\
+%\noindent \textsc{Acknowledgments}\quad
+%This work was supported by the Ministry of Science, Research and the Arts Baden-Württemberg, project \emph{Algorithm Engineering for the Scalability Challenge (AESC)}.
+
+\appendix
+
+\section{Appendix}
+\label{sec:osd:appendix}
+
+In this section, we provide supplementary materials.
+
+\renewcommand*{\bibfont}{\small} % use a smaller font for bib than for main text
+\printbibliography
+
+\end{document}

@@ -1,7 +1,7 @@
 \documentclass{article}
 
 \title{
-	Optimal Subgroup Discovery
+	Constrained Subgroup Discovery
 }
 \author{
 	Jakob Bach~\orcidlink{0000-0003-0301-2798}\\
@@ -63,7 +63,7 @@ Appendix~\ref{sec:osd:appendix} contains supplementary materials.
 \section{Fundamentals}
 \label{sec:osd:fundamentals}
 
-\cite{herrera2011overview} \cite{atzmueller2015subgroup} \cite{ventura2018subgroup} \cite{meeng2021real}
+\cite{helal2016subgroup} \cite{herrera2011overview} \cite{atzmueller2015subgroup} \cite{ventura2018subgroup} \cite{meeng2021real}
 
 \subsection{Notation}
 \label{sec:osd:fundamentals:notation}
@@ -71,7 +71,7 @@ Appendix~\ref{sec:osd:appendix} contains supplementary materials.
 $X \in \mathbb{R}^{m \times n}$ stands for a dataset in the form of a matrix.
 Each row is a data object, and each column is a feature.
 $F = \{f_1, \dots, f_n\}$ is the corresponding set of feature names.
-We assume that categorical features have already been made numeric, e.g., via one-hot encoding.
+We assume that categorical features have already been made numeric, e.g., via one-hot or ordinal encoding.
 $X_{\cdot{}j} \in \mathbb{R}^m$ denotes the vector representation of the $j$-th feature.
 $y \in Y^m$ represents the prediction target with domain $Y$, e.g., $Y=\{0,1\}$ for binary classification or $Y=\mathbb{R}$ for regression.
 
@@ -125,6 +125,8 @@ from chair: \cite{arzamasov2021reds} \cite{arzamasov2022pedagogical} \cite{vollm
 
 minimizing subgroups NP-hard~\cite{boley2009non}
 
+measures of subgroup complexity \cite{helal2016subgroup, herrera2011overview, ventura2018subgroup} -> num subgroups and num selected features
+
 \subsection{Feature Selection}
 \label{sec:osd:related-work:feature-selection}
 
@@ -152,6 +154,8 @@ minimizing subgroups NP-hard~\cite{boley2009non}
 
 \subsection{Methods}
 \label{sec:osd:experimental-design:methods}
+
+according to Vadim's Medium blog post, REDS article should say that pasting phase of PRIM has little effect on quality
 
 \subsection{Datasets}
 \label{sec:osd:experimental-design:datasets}
@@ -190,6 +194,9 @@ minimizing subgroups NP-hard~\cite{boley2009non}
 \label{sec:osd:appendix}
 
 In this section, we provide supplementary materials.
+
+MIP?
+MaxSAT?
 
 \renewcommand*{\bibfont}{\small} % use a smaller font for bib than for main text
 \printbibliography

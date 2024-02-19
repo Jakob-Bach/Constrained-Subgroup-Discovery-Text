@@ -6,7 +6,7 @@
 \author{
 	Jakob Bach~\orcidlink{0000-0003-0301-2798}\\
 	\small Karlsruhe Institute of Technology (KIT), Germany\\
-	\small \href{mailto:jakob.bach@kit.edu}{jakob.bach@kit.edu}
+	\small \href{mailto:jakob.bach@student.kit.edu}{jakob.bach@student.kit.edu}
 }
 \date{} % don't display a date
 
@@ -17,6 +17,7 @@
 \usepackage{amsthm} % theorems, definitions etc.
 \usepackage{booktabs} % nicely formatted tables (with top, mid, and bottom rule)
 \usepackage{graphicx} % plots
+\usepackage{multirow} % cells spanning multiple rows in tables
 \usepackage{orcidlink} % ORCID icon
 \usepackage{subcaption} % figures with multiple sub-figures and sub-captions
 \usepackage{hyperref} % links and URLs
@@ -156,6 +157,52 @@ measures of subgroup complexity \cite{helal2016subgroup, herrera2011overview, ve
 \label{sec:osd:experimental-design:methods}
 
 according to Vadim's Medium blog post, REDS article should say that pasting phase of PRIM has little effect on quality
+
+\begin{table}[p]
+	\centering
+	\begin{tabular}{lrrll}
+		\toprule
+		\multirow{2}{*}{Dataset} & \multirow{2}{*}{$m$} & \multirow{2}{*}{$n$} & \multicolumn{2}{c}{Timeouts} \\
+		\cmidrule(lr){4-5}
+		& & & Max~$k$ & Any~$k$ \\
+		\midrule
+		backache & 180 & 32 & No & No \\
+		chess & 3196 & 36 & No & No \\
+		churn & 5000 & 20 & Yes & Yes \\
+		clean1 & 476 & 168 & No & No \\
+		clean2 & 6598 & 168 & No & No \\
+		coil2000 & 9822 & 85 & Yes & Yes \\
+		credit\_g & 1000 & 20 & Yes & Yes \\
+		dis & 3772 & 29 & No & No \\
+		GE\_2\_Way\_20atts\_0.1H\_EDM\_1\_1 & 1600 & 20 & Yes & Yes \\
+		GE\_2\_Way\_20atts\_0.4H\_EDM\_1\_1 & 1600 & 20 & No & No \\
+		GE\_3\_Way\_20atts\_0.2H\_EDM\_1\_1 & 1600 & 20 & Yes & Yes \\
+		GH\_20atts\_1600\_Het\_0.4\_0.2\_50\_EDM\_2\_001 & 1600 & 20 & Yes & Yes \\
+		GH\_20atts\_1600\_Het\_0.4\_0.2\_75\_EDM\_2\_001 & 1600 & 20 & Yes & Yes \\
+		Hill\_Valley\_with\_noise & 1212 & 100 & Yes & Yes \\
+		horse\_colic & 368 & 22 & No & No \\
+		hypothyroid & 3163 & 25 & No & No \\
+		ionosphere & 351 & 34 & Yes & Yes \\
+		molecular\_biology\_promoters & 106 & 57 & No & No \\
+		mushroom & 8124 & 22 & No & No \\
+		ring & 7400 & 20 & Yes & Yes \\
+		sonar & 208 & 60 & No & Yes \\
+		spambase & 4601 & 57 & No & Yes \\
+		spect & 267 & 22 & No & No \\
+		spectf & 349 & 44 & No & Yes \\
+		tokyo1 & 959 & 44 & No & Yes \\
+		twonorm & 7400 & 20 & Yes & Yes \\
+		wdbc & 569 & 30 & No & No \\
+		\bottomrule
+	\end{tabular}
+	\caption{
+		Datasets from PMLB used in our experiments.
+		$m$~denotes the number of data objects and $n$~the number of features.
+		In dataset names, we replaced \emph{GAMETES\_Epistasis} with  \emph{GE\_} and \emph{GAMETES\_Heterogeneity} with \emph{GH\_} to reduce the table's width.
+		The column \emph{Timeouts} indicates whether at least one timeout occurred with \emph{SMT} as the subgroup-discovery method and the highest timeout (2048~s), optimizing the original subgroup without cardinality constraints (\emph{Max~$k$}) or in any cardinality setting (\emph{Any~$k$}).
+	}
+	\label{tab:afs:datasets}
+\end{table}
 
 \subsection{Datasets}
 \label{sec:osd:experimental-design:datasets}

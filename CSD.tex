@@ -207,6 +207,16 @@ according to Vadim's Medium blog post, REDS article should say that pasting phas
 \subsection{Datasets}
 \label{sec:osd:experimental-design:datasets}
 
+We use binary-classification datasets from the Penn Machine Learning Benchmarks (PMLB)~\cite{olson2017pmlb, romano2021pmlb}.
+If both classes occur with different frequencies, we encode the minority class as the class of interest, i.e., assign~1 as it class label.
+To avoid prediction scenarios that may be too easy or have not enough features for alternative subgroup descriptions, we only select datasets with at least 100 data objects and 20 features.
+Next, we exclude one dataset with 1000 features, which has a significantly higher dimensionality than all remaining datasets.
+Finally, we manually exclude datasets that seem duplicated or modified versions of other datasets in our experiments.
+
+Based on these criteria, we obtain 27 datasets with 106 to 9822 data objects and 20 to 168 features (cf.~Table~\ref{tab:afs:datasets}).
+The datasets do not contain any missing values.
+Further, there are no categorical feature values since PMLB encodes them ordinally by default.
+
 \subsection{Implementation and Execution}
 \label{sec:osd:experimental-design:implementation}
 

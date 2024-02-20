@@ -38,7 +38,7 @@
 \textbf{Keywords:} subgroup discovery, alternatives, constraints, satisfiability modulo theories, mixed-integer programming, explainability, interpretability, XAI
 
 \section{Introduction}
-\label{sec:osd:introduction}
+\label{sec:csd:introduction}
 
 \paragraph{Motivation}
 
@@ -54,20 +54,24 @@
 
 \paragraph{Outline}
 
-Section~\ref{sec:osd:fundamentals} introduces notation and fundamentals.
-Section~\ref{sec:osd:approach} describes and analyzes alternative feature selection.
-Section~\ref{sec:osd:related-work} reviews related work.
-Section~\ref{sec:osd:experimental-design} outlines our experimental design, while Section~\ref{sec:osd:evaluation} presents the experimental results.
-Section~\ref{sec:osd:conclusion} concludes.
-Appendix~\ref{sec:osd:appendix} contains supplementary materials.
+Section~\ref{sec:csd:fundamentals} introduces notation and fundamentals.
+Section~\ref{sec:csd:approach} describes and analyzes alternative feature selection.
+Section~\ref{sec:csd:related-work} reviews related work.
+Section~\ref{sec:csd:experimental-design} outlines our experimental design, while Section~\ref{sec:csd:evaluation} presents the experimental results.
+Section~\ref{sec:csd:conclusion} concludes.
+Appendix~\ref{sec:csd:appendix} contains supplementary materials.
 
 \section{Fundamentals}
-\label{sec:osd:fundamentals}
+\label{sec:csd:fundamentals}
+
+In this section, (cf.~Section~\ref{sec:csd:fundamentals:notation}) (cf.~Section~\ref{sec:csd:fundamentals:subgroup-discovery})
 
 \cite{helal2016subgroup} \cite{herrera2011overview} \cite{atzmueller2015subgroup} \cite{ventura2018subgroup} \cite{meeng2021real}
 
+To harmonize evaluation, we only consider binary-classification datasets, though subgroup discovery also works for regression problems.
+
 \subsection{Notation}
-\label{sec:osd:fundamentals:notation}
+\label{sec:csd:fundamentals:notation}
 
 $X \in \mathbb{R}^{m \times n}$ stands for a dataset in the form of a matrix.
 Each row is a data object, and each column is a feature.
@@ -80,33 +84,83 @@ In subgroup discovery, one ... (goal, decision variables)
 The function $Q(...,X,y)$ returns the quality of such a subgroup.
 Without loss of generality, we assume that this function should be maximized.
 
-\section{Approach}
-\label{sec:osd:approach}
+\subsection{Subgroup Discovery}
+\label{sec:csd:fundamentals:subgroup-discovery}
 
-\subsection{Optimization Problem}
-\label{sec:osd:approach:problem}
+In this section,
 
-MaxSAT: \cite{li2021maxsat} \cite{bacchus2021maximum}
-SMT: \cite{barrett2018satisfiability}
+\paragraph{Problem}
 
-\subsection{Constraints}
-\label{sec:osd:approach:constraints}
+\paragraph{PRIM}
+
+\paragraph{Beam search}
+
+\paragraph{BI}
+
+\section{Constrained Subgroup Discovery}
+\label{sec:csd:approach}
+
+In this section, (cf.~Section~\ref{sec:csd:approach:smt}) (cf.~Section~\ref{sec:csd:approach:baselines}) (cf.~Section~\ref{sec:csd:approach:cardinality}) (cf.~Section~\ref{sec:csd:approach:alternatives})
+
+\subsection{SMT}
+\label{sec:csd:approach:smt}
+
+Appendix~\ref{sec:csd:appendix:further-encodings} describes encodings of subgroup discovery with mixed-integer programming (MIP) and maximum satisfiability (MaxSAT).
+
+\subsection{Baselines}
+\label{sec:csd:approach:baselines}
+
+\subsection{Feature-Cardinality Constraints}
+\label{sec:csd:approach:cardinality}
+
+In this section, In this section, (cf.~Section~\ref{sec:csd:approach:cardinality:concept}) (cf.~Section~\ref{sec:csd:approach:cardinality:smt}) (cf.~Section~\ref{sec:csd:approach:cardinality:heuristics}) (cf.~Section~\ref{sec:csd:approach:cardinality:baselines}) (cf.~Section~\ref{sec:csd:approach:cardinality:complexity})
 
 \cite{mosek2022modeling}
 \cite{sinz2005towards}
 \cite{ulrich2022selecting}
 
-\subsection{Objective Functions}
-\label{sec:osd:approach:objectives}
+\subsubsection{Concept}
+\label{sec:csd:approach:cardinality:concept}
 
-\subsection{Computational Complexity}
-\label{sec:osd:approach:complexity}
+\subsubsection{SMT Formulation}
+\label{sec:csd:approach:cardinality:smt}
+
+\subsubsection{Integration into Heuristic Search}
+\label{sec:csd:approach:cardinality:heuristics}
+
+\subsubsection{Integration into Baselines}
+\label{sec:csd:approach:cardinality:baselines}
+
+\subsubsection{Computational Complexity}
+\label{sec:csd:approach:cardinality:complexity}
+
+\subsection{Alternative Subgroup Descriptions}
+\label{sec:csd:approach:alternatives}
+
+In this section, (cf.~Section~\ref{sec:csd:approach:alternatives:concept}) (cf.~Section~\ref{sec:csd:approach:alternatives:smt}) (cf.~Section~\ref{sec:csd:approach:alternatives:heuristics}) (cf.~Section~\ref{sec:csd:approach:alternatives:complexity})
+
+\subsubsection{Concept}
+\label{sec:csd:approach:alternatives:concept}
+
+\subsubsection{SMT Formulation}
+\label{sec:csd:approach:alternatives:smt}
+
+\subsubsection{Integration into Heuristic Search}
+\label{sec:csd:approach:alternatives:heuristics}
+
+Beam only, no baselines.
+
+\subsubsection{Computational Complexity}
+\label{sec:csd:approach:alternatives:complexity}
 
 \section{Related Work}
-\label{sec:osd:related-work}
+\label{sec:csd:related-work}
+
+In this section, (cf.~Section~\ref{sec:csd:related-work:subgroup-discovery}) (cf.~Section~\ref{sec:csd:related-work:feature-selection})
+(cf.~Section~\ref{sec:csd:related-work:other})
 
 \subsection{Subgroup Discovery}
-\label{sec:osd:related-work:subgroup-discovery}
+\label{sec:csd:related-work:subgroup-discovery}
 
 PRIM~\cite{friedman1999bump}, BI~\cite{mampaey2012efficient}
 depth-first~\cite{millot2020optimal}
@@ -129,34 +183,68 @@ minimizing subgroups NP-hard~\cite{boley2009non}
 measures of subgroup complexity \cite{helal2016subgroup, herrera2011overview, ventura2018subgroup} -> num subgroups and num selected features
 
 \subsection{Feature Selection}
-\label{sec:osd:related-work:feature-selection}
+\label{sec:csd:related-work:feature-selection}
 
 \cite{bach2022empirical} \cite{bach2023finding}
 
 \subsection{Other Fields}
-\label{sec:osd:related-work:other}
+\label{sec:csd:related-work:other}
 
 \cite{bailey2014alternative} \cite{grossi2017survey}
 \cite{guidotti2022counterfactual}
 \cite{narodytska2018learning} \cite{schidler2021sat} \cite{yu2021learning}
 
 \section{Experimental Design}
-\label{sec:osd:experimental-design}
+\label{sec:csd:experimental-design}
+
+In this section, (cf.~Section~\ref{sec:csd:experimental-design:overview}) (cf.~Section~\ref{sec:csd:experimental-design:metrics}) (cf.~Section~\ref{sec:csd:experimental-design:methods}) (cf.~Section~\ref{sec:csd:experimental-design:datasets}) (cf.~Section~\ref{sec:csd:experimental-design:implementation})
 
 \subsection{Overview}
-\label{sec:osd:experimental-design:overview}
+\label{sec:csd:experimental-design:overview}
 
 \subsection{Evaluation Metrics}
-\label{sec:osd:experimental-design:evaluation}
+\label{sec:csd:experimental-design:metrics}
 
 \paragraph{Quality}
 
 \paragraph{Runtime}
 
 \subsection{Methods}
-\label{sec:osd:experimental-design:methods}
+\label{sec:csd:experimental-design:methods}
+
+(cf.~Section~\ref{sec:csd:experimental-design:methods:subgroup-discovery}) (cf.~Section~\ref{sec:csd:experimental-design:methods:cardinality}) (cf.~Section~\ref{sec:csd:experimental-design:methods:alternatives})
+
+\subsubsection{Subgroup Discovery}
+\label{sec:csd:experimental-design:methods:subgroup-discovery}
 
 according to Vadim's Medium blog post, REDS article should say that pasting phase of PRIM has little effect on quality
+
+\cite{lemmerich2019pysubgroup}
+\cite{arzamasov2021reds}
+
+\paragraph{Heuristic search}
+
+Section~\ref{sec:csd:fundamentals:subgroup-discovery}
+
+\paragraph{Baselines}
+
+Section~\ref{sec:csd:approach:baselines}
+
+\paragraph{Solver-based search}
+
+Section~\ref{sec:csd:approach:smt}
+
+\paragraph{Timeouts}
+
+\subsubsection{Feature-Cardinality Constraints}
+\label{sec:csd:experimental-design:methods:cardinality}
+
+Section~\ref{sec:csd:approach:cardinality}
+
+\subsubsection{Alternative Subgroup Descriptions}
+\label{sec:csd:experimental-design:methods:alternatives}
+
+Section~\ref{sec:csd:approach:alternatives}
 
 \begin{table}[p]
 	\centering
@@ -205,7 +293,7 @@ according to Vadim's Medium blog post, REDS article should say that pasting phas
 \end{table}
 
 \subsection{Datasets}
-\label{sec:osd:experimental-design:datasets}
+\label{sec:csd:experimental-design:datasets}
 
 We use binary-classification datasets from the Penn Machine Learning Benchmarks (PMLB)~\cite{olson2017pmlb, romano2021pmlb}.
 If both classes occur with different frequencies, we encode the minority class as the class of interest, i.e., assign~1 as it class label.
@@ -218,28 +306,67 @@ The datasets do not contain any missing values.
 Further, there are no categorical feature values since PMLB encodes them ordinally by default.
 
 \subsection{Implementation and Execution}
-\label{sec:osd:experimental-design:implementation}
+\label{sec:csd:experimental-design:implementation}
 
 \cite{bestuzheva2021scip}
 \cite{deMoura2008z3}
 \cite{bjorner2015nuz}
 \cite{perron2022or-tools}
-\cite{lemmerich2019pysubgroup}
 
 \section{Evaluation}
-\label{sec:osd:evaluation}
+\label{sec:csd:evaluation}
+
+In this section, (cf.~Section~\ref{sec:csd:evaluation:unconstrained}) (cf.~Section~\ref{sec:csd:evaluation:timeouts}) (cf.~Section~\ref{sec:csd:evaluation:cardinality}) (cf.~Section~\ref{sec:csd:evaluation:alternatives}) (cf.~Section~\ref{sec:csd:evaluation:summary})
+
+\subsection{Unconstrained Subgroup Discovery}
+\label{sec:csd:evaluation:unconstrained}
+
+\paragraph{Training-set quality}
+
+\paragraph{Test-set quality}
+
+\paragraph{Overfitting}
+
+\paragraph{Runtime}
+
+\subsection{Solver Timeouts}
+\label{sec:csd:evaluation:timeouts}
+
+\subsection{Feature-Cardinality Constraints}
+\label{sec:csd:evaluation:cardinality}
+
+\paragraph{Quality}
+
+\paragraph{Runtime}
+
+\subsection{Alternative Subgroup Descriptions}
+\label{sec:csd:evaluation:alternatives}
+
+\paragraph{Quality}
+
+\paragraph{Runtime}
 
 \subsection{Summary}
-\label{sec:osd:evaluation:summary}
+\label{sec:csd:evaluation:summary}
+
+\paragraph{Unconstrained subgroup discovery (cf.~Section~\ref{sec:csd:evaluation:unconstrained})}
+
+\paragraph{Solver timeouts (cf.~Section~\ref{sec:csd:evaluation:timeouts})}
+
+\paragraph{Feature-cardinality constraints (cf.~Section~\ref{sec:csd:evaluation:cardinality})}
+
+\paragraph{Alternative subgroup descriptions (cf.~Section~\ref{sec:csd:evaluation:alternatives})}
 
 \section{Conclusions and Future Work}
-\label{sec:osd:conclusion}
+\label{sec:csd:conclusion}
+
+In this section, we recap our article (cf.~Section~\ref{sec:csd:conclusion:conclusion}) and propose directions for future work (cf.~Section~\ref{sec:csd:conclusion:future-work}).
 
 \subsection{Conclusions}
-\label{sec:osd:conclusion:conclusion}
+\label{sec:csd:conclusion:conclusion}
 
 \subsection{Future Work}
-\label{sec:osd:conclusion:future-work}
+\label{sec:csd:conclusion:future-work}
 
 %~\\
 %\noindent \textsc{Acknowledgments}\quad
@@ -248,12 +375,22 @@ Further, there are no categorical feature values since PMLB encodes them ordinal
 \appendix
 
 \section{Appendix}
-\label{sec:osd:appendix}
+\label{sec:csd:appendix}
 
 In this section, we provide supplementary materials.
+Appendix~\ref{sec:csd:appendix:further-encodings} describes further encodings of the subgroup-discovery problem, complementing the SMT formulation from Section~\ref{sec:csd:approach:smt}.
 
-MIP?
-MaxSAT?
+\subsection{Further Problem Encodings of Subgroup Discovery}
+\label{sec:csd:appendix:further-encodings}
+
+\paragraph{MIP}
+
+Our published code contains a MIP implementation with the package \emph{OR-Tools}~\cite{perron2022or-tools}, using \emph{SCIP}~\cite{bestuzheva2021scip} as the optimizer.
+However, this formulation was (on average) slower than the SMT formulation in preliminary experiments, so we stuck to the latter for our main experiments (cf.~Section~\ref{sec:csd:experimental-design:methods:subgroup-discovery}).
+
+\paragraph{MaxSAT}
+
+\cite{li2021maxsat} \cite{bacchus2021maximum}
 
 \renewcommand*{\bibfont}{\small} % use a smaller font for bib than for main text
 \printbibliography

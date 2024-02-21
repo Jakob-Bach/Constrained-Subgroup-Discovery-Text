@@ -77,10 +77,13 @@ $X \in \mathbb{R}^{m \times n}$ stands for a dataset in the form of a matrix.
 Each row is a data object, and each column is a feature.
 $F = \{f_1, \dots, f_n\}$ is the corresponding set of feature names.
 We assume that categorical features have already been made numeric, e.g., via one-hot or ordinal encoding.
+There are also subgroup-discovery methods that focus on categorical data.
 $X_{\cdot{}j} \in \mathbb{R}^m$ denotes the vector representation of the $j$-th feature.
 $y \in Y^m$ represents the prediction target with domain $Y$, e.g., $Y=\{0,1\}$ for binary classification or $Y=\mathbb{R}$ for regression.
+In this paper, we only consider binary-classification datasets, though subgroup discovery also works for regression problems.
 
 In subgroup discovery, one ... (goal, decision variables)
+Without loss of generality, we assume that the class with label~`1' is the class of interest, also called \emph{positive} class, which should be captured by subgroups.
 The function $Q(...,X,y)$ returns the quality of such a subgroup.
 Without loss of generality, we assume that this function should be maximized.
 
@@ -91,7 +94,25 @@ In this section,
 
 \paragraph{Problem}
 
+subgroup == (hyper)box
+
+introduce (here or in notation) the Iverson bracket [], which turns Boolean expressions into 0/1
+
+\paragraph{Evaluation}
+
+A popular evaluation metric for subgroup quality is Weighted Relative Accuracy (WRAcc)~\cite{lavravc1999rule}:
+%
+\begin{equation}
+	\text{WRACC} = \frac{m_b}{m} \cdot \left( \frac{m_b^+}{m_b} - \frac{m^+}{m} \right)
+	\label{eq:csd:wracc}
+\end{equation}
+%
+Besides the total number of data objects~$m$, this metric considers the number of positive data objects~$m^+$, the number of data objects in the box~$m_b$, and the number of positive data objects in the box~$m_b^+$.
+In particular, WRAcc is the product of the relative subgroup size~$m_b / m$ and the difference in share of the positive class between the box and all data.
+
 \paragraph{PRIM}
+
+Idea: in pseudocode, already use function getPermissibleFeatureIdxs(), so that part can be plugged in later (when introducing cardinality constraint) without having to repeat whole algorithm
 
 \paragraph{Beam search}
 
@@ -106,6 +127,21 @@ In this section, (cf.~Section~\ref{sec:csd:approach:smt}) (cf.~Section~\ref{sec:
 \label{sec:csd:approach:smt}
 
 Appendix~\ref{sec:csd:appendix:further-encodings} describes encodings of subgroup discovery with mixed-integer programming (MIP) and maximum satisfiability (MaxSAT).
+
+Variables: $b_i$, $s_j$, $s_j^{\text{lb}}$, $s_j^{\text{ub}}$, $lb_j$, $ub_j$
+coin term \emph{subgroup membership}
+
+In the formula for WRACC (cf.~Equation~\ref{eq:csd:wracc}), $m$ and $m^+$ are constants, while $m_b$ and $m_b^+$ depend on the decision variables.
+The previously provided formula seems to be non-linear in the decision variables since $m_b$ appears in enumerator and denominator.
+However, one can reformulate the expression by multiplying its two factors, obtaining the following expression:
+%
+\begin{equation}
+	\text{WRACC} = \frac{m_b^+}{m} - \frac{m_b \cdot m^+}{m^2}
+	\label{eq:csd:wracc-rearranged}
+\end{equation}
+%
+In this new expression, the denominators are constant and the factor~$m^+$ in the second enumerator is constant as well.
+Thus, the whole expression is linear in the variables~$m_b^+$ and~$m_b$, which themselves are linear in the binary decision variables~$b_i$, which denote whether a data object is in the box or not.
 
 \subsection{Baselines}
 \label{sec:csd:approach:baselines}
@@ -146,6 +182,28 @@ In this section, (cf.~Section~\ref{sec:csd:approach:alternatives:concept}) (cf.~
 
 $\tau_{\text{abs}}$
 The subscript \emph{abs} denotes that the dissimilarity threshold refers to an absolute number of features, i.e., the threshold is not normalized to $[0,1]$.
+
+dissimilarity between subgroup feature sets is not symmetric! (maybe indicate this by making reference subgroup a subscript)
+
+sequential search only; define \emph{original subgroup}
+
+The Hamming distance between two vectors counts how many vector entries differ~\cite{choi2010survey}.
+We turn this distance into a similarity measure by counting identical vector entries.
+Further, we normalize the similarity with the vector length, i.e., number of data objects~$m$, to obtain the following \emph{normalized Hamming similarity}:
+
+\begin{equation}
+	s_{\text{n-Hamm}}(b', b'') = \frac{\sum_{i=1}^{m} [b'_i = b''_i]}{m}
+	\label{eq:csd:hamming}
+\end{equation}
+
+If one considers one vector to be a prediction and the other one to be the ground truth, Equation~\ref{eq:csd:hamming} equals prediction accuracy.
+
+Another popular measure for the similarity between sets or binary vectors is the Jaccard index~\cite{choi2010survey}, which relates the overlap of positive vector entries to their union:
+
+\begin{equation}
+	s_{\text{Jacc}}(b', b'') = \frac{\sum_{i=1}^{m} [b'_i \land b''_i ]}{\sum_{i=1}^{m} [b'_i \lor b''_i]}
+	\label{eq:csd:jaccard}
+\end{equation}
 
 \subsubsection{SMT Formulation}
 \label{sec:csd:approach:alternatives:smt}
@@ -210,20 +268,34 @@ Finally, we shortly outline our implementation (cf.~Section~\ref{sec:csd:experim
 \label{sec:csd:experimental-design:overview}
 
 In our experiments, we evaluate six subgroup-discovery methods on 27 binary-classification datasets.
-We measure the subgroup quality in terms of Weighted Relative Accuracy (WRAcc) and also record the runtime of the methods.
+We measure the subgroup quality in terms of WRAcc and also record the runtime of the methods.
 We compare all subgroup-discovery methods without constraints as well as with a constraint on the number of selected features~$k$, varying the latter parameter.
-For solver-based optimization, we additionally vary the solver timeout.
+For solver-based search, we additionally vary the solver timeout.
 Finally, we search for alternative subgroup descriptions with one solver-based and one heuristic search method.
 We vary the number of alternatives~$a$ and the dissimilarity threshold~$\tau_{\text{abs}}$.
 
 \subsection{Evaluation Metrics}
 \label{sec:csd:experimental-design:metrics}
 
-\paragraph{Quality}
+\paragraph{Subgroup quality}
 
-\paragraph{Similarity}
+We use WRAcc (cf.~Equation~\ref{eq:csd:wracc-rearranged}) to quantify subgroup quality.
+To analyze how well the subgroup-discovery methods generalize, we conduct a stratified five-fold cross-validation.
+In particular, each run of a subgroup-discovery method only uses 80\% of the data objects of a dataset as training data, while the remaining data objects serve as test data.
+Based on the bounds of each found subgroup, we determine subgroup membership for data objects from training \emph{and} test data.
+Based on this membership information and the true class labels~$y$, we compute \emph{training-set WRAcc} and \emph{test-set WRAcc} on the corresponding part of the data separately.
+
+\paragraph{Subgroup similarity}
+
+For evaluating alternative subgroup descriptions, we not only consider their quality but also their similarity to the original subgroup.
+To this end, we use \emph{normalized Hamming similarity} (cf.~Equation~\ref{eq:csd:hamming}) and \emph{Jaccard similarity} (cf.~Equation~\ref{eq:csd:jaccard}) to compare subgroup membership of data objects between the original subgroup and an alternative subgroup description.
 
 \paragraph{Runtime}
+
+As \emph{runtime}, we consider the training time of the subgroup-discovery methods.
+In particular, we measure how long the search for each subgroup takes.
+In solver-based search for subgroups, we also register whether the solver timed or not.
+In the latter case, the found solution is optimal, at least on the training set; in the former case, it may be suboptimal.
 
 \subsection{Methods}
 \label{sec:csd:experimental-design:methods}
@@ -309,7 +381,7 @@ Section~\ref{sec:csd:evaluation:alternatives}
 		In dataset names, we replaced \emph{GAMETES\_Epistasis} with  \emph{GE\_} and \emph{GAMETES\_Heterogeneity} with \emph{GH\_} to reduce the table's width.
 		The column \emph{Timeouts} indicates whether at least one timeout occurred with \emph{SMT} as the subgroup-discovery method and the highest timeout (2048~s), optimizing the original subgroup without cardinality constraints (\emph{Max~$k$}) or in any cardinality setting (\emph{Any~$k$}).
 	}
-	\label{tab:afs:datasets}
+	\label{tab:csd:datasets}
 \end{table}
 
 \subsection{Datasets}
@@ -321,7 +393,7 @@ To avoid prediction scenarios that may be too easy or have not enough features f
 Next, we exclude one dataset with 1000 features, which has a significantly higher dimensionality than all remaining datasets.
 Finally, we manually exclude datasets that seem duplicated or modified versions of other datasets in our experiments.
 
-Based on these criteria, we obtain 27 datasets with 106 to 9822 data objects and 20 to 168 features (cf.~Table~\ref{tab:afs:datasets}).
+Based on these criteria, we obtain 27 datasets with 106 to 9822 data objects and 20 to 168 features (cf.~Table~\ref{tab:csd:datasets}).
 The datasets do not contain any missing values.
 Further, there are no categorical feature values since PMLB encodes them ordinally by default.
 

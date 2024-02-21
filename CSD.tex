@@ -122,6 +122,8 @@ In this section, In this section, (cf.~Section~\ref{sec:csd:approach:cardinality
 \subsubsection{Concept}
 \label{sec:csd:approach:cardinality:concept}
 
+define term selected == restricted
+
 \subsubsection{SMT Formulation}
 \label{sec:csd:approach:cardinality:smt}
 
@@ -141,6 +143,9 @@ In this section, (cf.~Section~\ref{sec:csd:approach:alternatives:concept}) (cf.~
 
 \subsubsection{Concept}
 \label{sec:csd:approach:alternatives:concept}
+
+$\tau_{\text{abs}}$
+The subscript \emph{abs} denotes that the dissimilarity threshold refers to an absolute number of features, i.e., the threshold is not normalized to $[0,1]$.
 
 \subsubsection{SMT Formulation}
 \label{sec:csd:approach:alternatives:smt}
@@ -197,15 +202,26 @@ measures of subgroup complexity \cite{helal2016subgroup, herrera2011overview, ve
 \section{Experimental Design}
 \label{sec:csd:experimental-design}
 
-In this section, (cf.~Section~\ref{sec:csd:experimental-design:overview}) (cf.~Section~\ref{sec:csd:experimental-design:metrics}) (cf.~Section~\ref{sec:csd:experimental-design:methods}) (cf.~Section~\ref{sec:csd:experimental-design:datasets}) (cf.~Section~\ref{sec:csd:experimental-design:implementation})
+In this section, we introduce our experimental design.
+After a brief overview of its components (cf.~Section~\ref{sec:csd:experimental-design:overview}), we describe evaluation metrics (cf.~Section~\ref{sec:csd:experimental-design:metrics}), methods (cf.~Section~\ref{sec:csd:experimental-design:methods}), and datasets (cf.~Section~\ref{sec:csd:experimental-design:datasets}).
+Finally, we shortly outline our implementation (cf.~Section~\ref{sec:csd:experimental-design:implementation}).
 
 \subsection{Overview}
 \label{sec:csd:experimental-design:overview}
+
+In our experiments, we evaluate six subgroup-discovery methods on 27 binary-classification datasets.
+We measure the subgroup quality in terms of Weighted Relative Accuracy (WRAcc) and also record the runtime of the methods.
+We compare all subgroup-discovery methods without constraints as well as with a constraint on the number of selected features~$k$, varying the latter parameter.
+For solver-based optimization, we additionally vary the solver timeout.
+Finally, we search for alternative subgroup descriptions with one solver-based and one heuristic search method.
+We vary the number of alternatives~$a$ and the dissimilarity threshold~$\tau_{\text{abs}}$.
 
 \subsection{Evaluation Metrics}
 \label{sec:csd:experimental-design:metrics}
 
 \paragraph{Quality}
+
+\paragraph{Similarity}
 
 \paragraph{Runtime}
 
@@ -236,15 +252,19 @@ Section~\ref{sec:csd:approach:smt}
 
 \paragraph{Timeouts}
 
+Section~\ref{sec:csd:evaluation:timeouts}
+
 \subsubsection{Feature-Cardinality Constraints}
 \label{sec:csd:experimental-design:methods:cardinality}
 
 Section~\ref{sec:csd:approach:cardinality}
+Section~\ref{sec:csd:evaluation:cardinality}
 
 \subsubsection{Alternative Subgroup Descriptions}
 \label{sec:csd:experimental-design:methods:alternatives}
 
 Section~\ref{sec:csd:approach:alternatives}
+Section~\ref{sec:csd:evaluation:alternatives}
 
 \begin{table}[p]
 	\centering

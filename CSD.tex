@@ -308,10 +308,12 @@ Further, there are no categorical feature values since PMLB encodes them ordinal
 \subsection{Implementation and Execution}
 \label{sec:csd:experimental-design:implementation}
 
-\cite{bestuzheva2021scip}
-\cite{deMoura2008z3}
-\cite{bjorner2015nuz}
-\cite{perron2022or-tools}
+We implemented all subgroup-discovery methods, experiments, and evaluations in Python~3.8.
+A requirements file in our repository specifies the versions of all Python packages.
+The solver \emph{Z3}~\cite{bjorner2015nuz, deMoura2008z3} carries out the SMT optimization.
+The experimental pipeline parallelizes over datasets, cross-validation folds, and subgroup-discovery methods, while each of these experimental tasks runs single-threaded.
+We ran the pipeline on a server with 128~GB RAM and an \emph{AMD EPYC 7551} CPU, having 32~physical cores and a base clock of 2.0~GHz.
+With this hardware, the parallelized pipeline run took approximately 39~hours.
 
 \section{Evaluation}
 \label{sec:csd:evaluation}

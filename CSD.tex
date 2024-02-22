@@ -110,13 +110,49 @@ A popular evaluation metric for subgroup quality is Weighted Relative Accuracy (
 Besides the total number of data objects~$m$, this metric considers the number of positive data objects~$m^+$, the number of data objects in the box~$m_b$, and the number of positive data objects in the box~$m_b^+$.
 In particular, WRAcc is the product of the relative subgroup size~$m_b / m$ and the difference in share of the positive class between the box and all data.
 
+\begin{algorithm}[t]
+	\DontPrintSemicolon
+	\caption{\emph{PRIM} for subgroup discovery.}
+	\label{al:csd:prim}
+\end{algorithm}
+
 \paragraph{PRIM}
+
+\emph{Patient Rule Induction Method (PRIM)}~\cite{friedman1999bump}
+
+Algorithm~\ref{al:csd:prim}
+
+Parameters: peeling fraction $\alpha$, support threshold $\beta_0$
+
+according to Vadim's Medium blog post, REDS article should say that pasting phase of PRIM has little effect on quality
 
 Idea: in pseudocode, already use function getPermissibleFeatureIdxs(), so that part can be plugged in later (when introducing cardinality constraint) without having to repeat whole algorithm
 
+\begin{algorithm}[t]
+	\DontPrintSemicolon
+	\caption{\emph{Beam Search} for subgroup discovery.}
+	\label{al:csd:beam-search}
+\end{algorithm}
+
 \paragraph{Beam search}
 
-\paragraph{BI}
+Algorithm~\ref{al:csd:beam-search}
+
+Parameter: Beam width $w$
+
+\begin{algorithm}[t]
+	\DontPrintSemicolon
+	\caption{\emph{Best Interval} for subgroup discovery.}
+	\label{al:csd:best-interval}
+\end{algorithm}
+
+\paragraph{Best interval}
+
+\emph{Best Interval}~\cite{mampaey2012efficient}
+
+Algorithm~\ref{al:csd:best-interval}
+
+Parameter: Beam width $w$
 
 \section{Constrained Subgroup Discovery}
 \label{sec:csd:approach}
@@ -143,13 +179,38 @@ However, one can reformulate the expression by multiplying its two factors, obta
 In this new expression, the denominators are constant and the factor~$m^+$ in the second enumerator is constant as well.
 Thus, the whole expression is linear in the variables~$m_b^+$ and~$m_b$, which themselves are linear in the binary decision variables~$b_i$, which denote whether a data object is in the box or not.
 
+\begin{equation}
+	\label{eq:csd:smt-unconstrained-complete}
+\end{equation}
+
 \subsection{Baselines}
 \label{sec:csd:approach:baselines}
+
+\begin{algorithm}[t]
+	\DontPrintSemicolon
+	\caption{\emph{MORB} for subgroup discovery.}
+	\label{al:csd:morb}
+\end{algorithm}
+
+\paragraph{MORB}
+
+Algorithm~\ref{al:csd:morb}
+
+\begin{algorithm}[t]
+	\DontPrintSemicolon
+	\caption{\emph{Random Search} for subgroup discovery.}
+	\label{al:csd:random-search}
+\end{algorithm}
+
+\paragraph{Random search}
+
+Algorithm~\ref{al:csd:random-search}
+Parameter $n\_iters$
 
 \subsection{Feature-Cardinality Constraints}
 \label{sec:csd:approach:cardinality}
 
-In this section, In this section, (cf.~Section~\ref{sec:csd:approach:cardinality:concept}) (cf.~Section~\ref{sec:csd:approach:cardinality:smt}) (cf.~Section~\ref{sec:csd:approach:cardinality:heuristics}) (cf.~Section~\ref{sec:csd:approach:cardinality:baselines}) (cf.~Section~\ref{sec:csd:approach:cardinality:complexity})
+In this section, (cf.~Section~\ref{sec:csd:approach:cardinality:concept}) (cf.~Section~\ref{sec:csd:approach:cardinality:smt}) (cf.~Section~\ref{sec:csd:approach:cardinality:heuristics}) (cf.~Section~\ref{sec:csd:approach:cardinality:baselines}) (cf.~Section~\ref{sec:csd:approach:cardinality:complexity})
 
 \cite{mosek2022modeling}
 \cite{sinz2005towards}
@@ -162,6 +223,11 @@ define term selected == restricted
 
 \subsubsection{SMT Formulation}
 \label{sec:csd:approach:cardinality:smt}
+
+\begin{equation}
+	\leq k
+	\label{eq:csd:cardinality-constraint}
+\end{equation}
 
 \subsubsection{Integration into Heuristic Search}
 \label{sec:csd:approach:cardinality:heuristics}
@@ -261,7 +327,7 @@ measures of subgroup complexity \cite{helal2016subgroup, herrera2011overview, ve
 \label{sec:csd:experimental-design}
 
 In this section, we introduce our experimental design.
-After a brief overview of its components (cf.~Section~\ref{sec:csd:experimental-design:overview}), we describe evaluation metrics (cf.~Section~\ref{sec:csd:experimental-design:metrics}), methods (cf.~Section~\ref{sec:csd:experimental-design:methods}), and datasets (cf.~Section~\ref{sec:csd:experimental-design:datasets}).
+After a brief overview of its components (cf.~Section~\ref{sec:csd:experimental-design:overview}), we describe evaluation metrics (cf.~Section~\ref{sec:csd:experimental-design:metrics}), subgroup-discovery methods (cf.~Section~\ref{sec:csd:experimental-design:methods}), experimental scenarios (cf.~Section~\ref{sec:csd:experimental-design:scenarios}), and datasets (cf.~Section~\ref{sec:csd:experimental-design:datasets}).
 Finally, we shortly outline our implementation (cf.~Section~\ref{sec:csd:experimental-design:implementation}).
 
 \subsection{Overview}
@@ -269,9 +335,11 @@ Finally, we shortly outline our implementation (cf.~Section~\ref{sec:csd:experim
 
 In our experiments, we evaluate six subgroup-discovery methods on 27 binary-classification datasets.
 We measure the subgroup quality in terms of WRAcc and also record the runtime of the methods.
-We compare all subgroup-discovery methods without constraints as well as with a constraint on the number of selected features~$k$, varying the latter parameter.
-For solver-based search, we additionally vary the solver timeout.
-Finally, we search for alternative subgroup descriptions with one solver-based and one heuristic search method.
+We analyze four \emph{experimental scenarios}:
+First, we compare all subgroup-discovery methods without constraints.
+Second, we vary the timeout in solver-based search.
+Third, we compare all subgroup-discovery methods with a constraint on the number of selected features~$k$, varying the latter parameter.
+Fourth, we search for alternative subgroup descriptions with one solver-based and one heuristic search method.
 We vary the number of alternatives~$a$ and the dissimilarity threshold~$\tau_{\text{abs}}$.
 
 \subsection{Evaluation Metrics}
@@ -297,46 +365,64 @@ In particular, we measure how long the search for each subgroup takes.
 In solver-based search for subgroups, we also register whether the solver timed or not.
 In the latter case, the found solution is optimal, at least on the training set; in the former case, it may be suboptimal.
 
-\subsection{Methods}
+\subsection{Subgroup-Discovery Methods}
 \label{sec:csd:experimental-design:methods}
 
-(cf.~Section~\ref{sec:csd:experimental-design:methods:subgroup-discovery}) (cf.~Section~\ref{sec:csd:experimental-design:methods:cardinality}) (cf.~Section~\ref{sec:csd:experimental-design:methods:alternatives})
-
-\subsubsection{Subgroup Discovery}
-\label{sec:csd:experimental-design:methods:subgroup-discovery}
-
-according to Vadim's Medium blog post, REDS article should say that pasting phase of PRIM has little effect on quality
-
-\cite{lemmerich2019pysubgroup}
-\cite{arzamasov2021reds}
-
-\paragraph{Heuristic search}
-
-Section~\ref{sec:csd:fundamentals:subgroup-discovery}
-
-\paragraph{Baselines}
-
-Section~\ref{sec:csd:approach:baselines}
+We employ six subgroup-discovery methods:
+Our solver-based one (cf.~Section~\ref{sec:csd:approach:smt}), our two baselines (cf.~Section~\ref{sec:csd:approach:baselines}), and three heuristic search methods from related work (cf.~Section~\ref{sec:csd:fundamentals:subgroup-discovery}).
 
 \paragraph{Solver-based search}
 
-Section~\ref{sec:csd:approach:smt}
+For solver-based search, we use an SMT optimizer to solve our \emph{SMT} formulation of subgroup discovery (cf.~Equation~\ref{eq:csd:smt-unconstrained-complete}).
+Unlike the other five subgroup-discovery methods in our experiments, this method is theoretically guaranteed to find the exact global optimum, though only if it is granted sufficient time.
+In practice, however, we set solver timeouts to keep the runtime under control (cf.~Section~\ref{sec:csd:experimental-design:scenarios}).
 
-\paragraph{Timeouts}
+\paragraph{Heuristic search}
 
-Section~\ref{sec:csd:evaluation:timeouts}
+We evaluate three heuristic search methods from related work:
+\emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Beam Search} (cf.~Algorithm~\ref{al:csd:beam-search}, subsequently called \emph{Beam}), and \emph{Best Interval} (cf.~Algorithm~\ref{al:csd:best-interval}, subsequently called \emph{BI}).
+We set the peeling fraction of PRIM to~$\alpha = 0.05$, consistent with other implementations of PRIM~\cite{arzamasov2021reds, kwakkel2017the}, and the support threshold to~$\beta_0 = 0$, so the shrinking of the box is solely limited by WRAcc improvement and not the box size.
+For \emph{Beam} and \emph{BI}, we choose a beam width of $w=10$, falling between default values used in other implementations~\cite{arzamasov2021reds, lemmerich2019pysubgroup}.
 
-\subsubsection{Feature-Cardinality Constraints}
-\label{sec:csd:experimental-design:methods:cardinality}
+\paragraph{Baselines}
 
-Section~\ref{sec:csd:approach:cardinality}
-Section~\ref{sec:csd:evaluation:cardinality}
+We also include baselines, which are even simpler than the heuristic search methods.
+In particular, we employ our own methods \emph{MORB} (cf.~Algorithm~\ref{al:csd:morb}) and \emph{Random Search} (cf.~Algorithm~\ref{al:csd:random-search}, subsequently called \emph{Random}).
+\emph{MORB} is parameter-free.
+\emph{Random} has one hyperparameter, i.e., the number of iterations, which we set to~$n\_iters = 1000$.
 
-\subsubsection{Alternative Subgroup Descriptions}
-\label{sec:csd:experimental-design:methods:alternatives}
+\subsection{Experimental Scenarios}
+\label{sec:csd:experimental-design:scenarios}
 
-Section~\ref{sec:csd:approach:alternatives}
-Section~\ref{sec:csd:evaluation:alternatives}
+We evaluate the subgroup-discovery methods in four experimental scenarios.
+Two of the scenarios do not involve all subgroup-discovery methods.
+
+\paragraph{Unconstrained subgroup discovery}
+
+Our first experimental scenario (cf. Section~\ref{sec:csd:evaluation:unconstrained} for results) compares all six subgroup-discovery methods without any constraints.
+This comparison allows us to assess the effectiveness of the solver-based search method \emph{SMT} for `conventional' subgroup discovery and serves as a reference point for subsequent experiment with constraints.
+
+\paragraph{Solver timeouts}
+
+Our second experimental scenario (cf.~Section~\ref{sec:csd:evaluation:timeouts} for results) takes a deeper dive into \emph{SMT} as subgroup-discovery method.
+In particular, we analyze whether setting solver timeouts enables finding solutions with reasonable quality in a shorter time frame.
+If the solver does not finish within a given timeout, we record the currently best solution at this time, which may be suboptimal.
+We evaluate twelve exponentially scaled timeout values, i.e., \{1~s, 2~s, 4~s, $\dots$, 2048~s\}.
+In the three other experimental scenarios, we employ the maximum timeout of 2048~s for \emph{SMT}.
+Since the heuristic search methods and baselines are significantly faster, we do not conduct a timeout analysis for them.
+
+\paragraph{Feature-cardinality constraints}
+
+Our third experimental scenario (cf.~Section~\ref{sec:csd:evaluation:cardinality} for results) analyzes feature-cardinality constraints (cf.~Section~\ref{sec:csd:approach:cardinality}) for all six subgroup-discovery methods.
+In particular, we evaluate $k \in \{1, 2, 3, 4, 5\}$ selected features.
+These values of~$k$ are upper bounds (cf.~Equation~\ref{eq:csd:cardinality-constraint}), i.e., the subgroup-discovery methods may select less features if selecting more does not improve subgroup quality.
+
+\paragraph{Alternative subgroup descriptions}
+
+Our fourth experimental scenario (cf. Section~\ref{sec:csd:evaluation:alternatives} for results) studies alternative subgroup descriptions (cf.~Section~\ref{sec:csd:approach:alternatives}) for \emph{SMT} and \emph{Beam}, i.e., one solver-based and one heuristic search method.
+We limit the number of selected features to~$k=3$, which yields reasonably high subgroup quality (cf.~Section~\ref{sec:csd:evaluation:cardinality}).
+We search for $a=5$ alternative subgroup descriptions with a dissimilarity threshold $\tau_{\text{abs}} \in \{1, 2, 3\}$.
+Since each dataset has $n \geq 20$ features (cf.~Section~\ref{sec:csd:experimental-design:datasets}), our choices of~$a$, $k$, and~$\tau$ ensure that there always is a valid alternative.
 
 \begin{table}[p]
 	\centering
@@ -480,7 +566,7 @@ Appendix~\ref{sec:csd:appendix:further-encodings} describes further encodings of
 \paragraph{MIP}
 
 Our published code contains a MIP implementation with the package \emph{OR-Tools}~\cite{perron2022or-tools}, using \emph{SCIP}~\cite{bestuzheva2021scip} as the optimizer.
-However, this formulation was (on average) slower than the SMT formulation in preliminary experiments, so we stuck to the latter for our main experiments (cf.~Section~\ref{sec:csd:experimental-design:methods:subgroup-discovery}).
+However, this formulation was (on average) slower than the SMT formulation in preliminary experiments, so we stuck to the latter for our main experiments (cf.~Section~\ref{sec:csd:experimental-design:methods}).
 
 \paragraph{MaxSAT}
 

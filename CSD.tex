@@ -64,11 +64,10 @@ Appendix~\ref{sec:csd:appendix} contains supplementary materials.
 \section{Fundamentals}
 \label{sec:csd:fundamentals}
 
-In this section, (cf.~Section~\ref{sec:csd:fundamentals:notation}) (cf.~Section~\ref{sec:csd:fundamentals:subgroup-discovery}) (cf.~Section~\ref{sec:csd:fundamentals:heuristics}) (cf.~Section~\ref{sec:csd:fundamentals:baselines})
-
-\cite{helal2016subgroup} \cite{herrera2011overview} \cite{atzmueller2015subgroup} \cite{ventura2018subgroup} \cite{meeng2021real}
-
-To harmonize evaluation, we only consider binary-classification datasets, though subgroup discovery also works for regression problems.
+In this section, we describe fundamentals for our work.
+First, we introduce notation (cf.~Section~\ref{sec:csd:fundamentals:notation}).
+Next, we describe the problem of subgroup discovery (cf.~Section~\ref{sec:csd:fundamentals:subgroup-discovery}) and common heuristic search methods to solve this problem (cf.~Section~\ref{sec:csd:fundamentals:heuristics}).
+Finally, we propose two baselines for subgroup discovery that we also use in our experiments. (cf.~Section~\ref{sec:csd:fundamentals:baselines}).
 
 \subsection{Notation}
 \label{sec:csd:fundamentals:notation}
@@ -80,7 +79,7 @@ We assume that categorical features have already been made numeric, e.g., via on
 There are also subgroup-discovery methods that focus on categorical data.
 $X_{\cdot{}j} \in \mathbb{R}^m$ denotes the vector representation of the $j$-th feature.
 $y \in Y^m$ represents the prediction target with domain $Y$, e.g., $Y=\{0,1\}$ for binary classification or $Y=\mathbb{R}$ for regression.
-In this paper, we only consider binary-classification datasets, though subgroup discovery also works for regression problems.
+To harmonize evaluation, we only consider binary-classification datasets, though subgroup discovery also works for regression problems.
 
 In subgroup discovery, one ... (goal, decision variables)
 Without loss of generality, we assume that the class with label~`1' is the class of interest, also called \emph{positive} class, which should be captured by subgroups.
@@ -90,7 +89,7 @@ Without loss of generality, we assume that this function should be maximized.
 \subsection{Subgroup Discovery}
 \label{sec:csd:fundamentals:subgroup-discovery}
 
-In this section,
+\cite{helal2016subgroup} \cite{herrera2011overview} \cite{atzmueller2015subgroup} \cite{ventura2018subgroup} \cite{meeng2021real}
 
 \paragraph{Problem}
 
@@ -212,7 +211,11 @@ Parameter $n\_iters$
 \section{Constrained Subgroup Discovery}
 \label{sec:csd:approach}
 
-In this section, (cf.~Section~\ref{sec:csd:approach:smt}) (cf.~Section~\ref{sec:csd:approach:constraint-types}) (cf.~Section~\ref{sec:csd:approach:cardinality}) (cf.~Section~\ref{sec:csd:approach:alternatives})
+In this section, we discuss subgroup discovery with constraints.
+First, we frame subgroup discovery as an SMT optimization problem (cf.~Section~\ref{sec:csd:approach:smt}).
+Second, we give a brief overview of potential constraint types (cf.~Section~\ref{sec:csd:approach:constraint-types}).
+Third, we formalize and analyze feature-cardinality constraints (cf.~Section~\ref{sec:csd:approach:cardinality}).
+Fourth, we formalize and analyze alternative subgroup descriptions (cf.~Section~\ref{sec:csd:approach:alternatives}).
 
 \subsection{SMT Encoding of Subgroup Discovery}
 \label{sec:csd:approach:smt}
@@ -252,16 +255,17 @@ existing methods need adaptation to support certain constraint types, white-box 
 \subsection{Feature-Cardinality Constraints}
 \label{sec:csd:approach:cardinality}
 
-In this section, (cf.~Section~\ref{sec:csd:approach:cardinality:concept}) (cf.~Section~\ref{sec:csd:approach:cardinality:smt}) (cf.~Section~\ref{sec:csd:approach:cardinality:heuristics}) (cf.~Section~\ref{sec:csd:approach:cardinality:baselines}) (cf.~Section~\ref{sec:csd:approach:cardinality:complexity})
-
-\cite{mosek2022modeling}
-\cite{sinz2005towards}
-\cite{ulrich2022selecting}
+In this section, we discuss feature-cardinality constraints for subgroup discovery.
+First, we motivate and formalize them (cf.~Section~\ref{sec:csd:approach:cardinality:concept}).
+Next, we describe how to integrate them into our SMT formulation of subgroup discovery (cf.~Section~\ref{sec:csd:approach:cardinality:smt}), heuristic search methods (cf.~Section~\ref{sec:csd:approach:cardinality:heuristics}), and baselines (cf.~Section~\ref{sec:csd:approach:cardinality:baselines}).
+Finally, we analyze the computational complexity of subgroup discovery with this constraint type (cf.~Section~\ref{sec:csd:approach:cardinality:complexity}).
 
 \subsubsection{Concept}
 \label{sec:csd:approach:cardinality:concept}
 
 define term selected == restricted
+
+note that only constraints added, rest of optimization problem (particularly objective) remains as-is
 
 \subsubsection{SMT Formulation}
 \label{sec:csd:approach:cardinality:smt}
@@ -307,7 +311,10 @@ define term selected == restricted
 \subsection{Alternative Subgroup Descriptions}
 \label{sec:csd:approach:alternatives}
 
-In this section, (cf.~Section~\ref{sec:csd:approach:alternatives:concept}) (cf.~Section~\ref{sec:csd:approach:alternatives:smt}) (cf.~Section~\ref{sec:csd:approach:alternatives:heuristics}) (cf.~Section~\ref{sec:csd:approach:alternatives:complexity})
+In this section, we propose the optimization problem of alternative subgroup descriptions.
+First, we motivate and formalize the problem (cf.~Section~\ref{sec:csd:approach:alternatives:concept}).
+Next, we describe how to tackle it with our SMT formulation of subgroup discovery (cf.~Section~\ref{sec:csd:approach:alternatives:smt}) and heuristic search methods (cf.~Section~\ref{sec:csd:approach:alternatives:heuristics}).
+Finally, we analyze the computational complexity of this problem (cf.~Section~\ref{sec:csd:approach:alternatives:complexity}).
 
 \subsubsection{Concept}
 \label{sec:csd:approach:alternatives:concept}
@@ -371,8 +378,8 @@ Beam only, no baselines.
 \section{Related Work}
 \label{sec:csd:related-work}
 
-In this section, (cf.~Section~\ref{sec:csd:related-work:subgroup-discovery}) (cf.~Section~\ref{sec:csd:related-work:feature-selection})
-(cf.~Section~\ref{sec:csd:related-work:other})
+In this section, we review related work.
+Next to literature on subgroup discovery (cf.~Section~\ref{sec:csd:related-work:subgroup-discovery}), we also discuss relevant work from the adjacent field of feature selection (cf.~Section~\ref{sec:csd:related-work:feature-selection}) and other related areas (cf.~Section~\ref{sec:csd:related-work:other}).
 
 \subsection{Subgroup Discovery}
 \label{sec:csd:related-work:subgroup-discovery}
@@ -582,7 +589,9 @@ With this hardware, the parallelized pipeline run took approximately 39~hours.
 \section{Evaluation}
 \label{sec:csd:evaluation}
 
-In this section, (cf.~Section~\ref{sec:csd:evaluation:unconstrained}) (cf.~Section~\ref{sec:csd:evaluation:timeouts}) (cf.~Section~\ref{sec:csd:evaluation:cardinality}) (cf.~Section~\ref{sec:csd:evaluation:alternatives}) (cf.~Section~\ref{sec:csd:evaluation:summary})
+In this section, we evaluate our experiments.
+In particular, we cove our four experimental scenarios, i.e., unconstrained subgroup discovery (cf.~Section~\ref{sec:csd:evaluation:unconstrained}), solver timeouts (cf.~Section~\ref{sec:csd:evaluation:timeouts}), feature-cardinality constraints (cf.~Section~\ref{sec:csd:evaluation:cardinality}), and alternative subgroup descriptions. (cf.~Section~\ref{sec:csd:evaluation:alternatives}).
+Finally, we summarize key experimental results (cf.~Section~\ref{sec:csd:evaluation:summary}).
 
 \subsection{Unconstrained Subgroup Discovery}
 \label{sec:csd:evaluation:unconstrained}
@@ -649,6 +658,10 @@ Appendix~\ref{sec:csd:appendix:proofs} contains proofs for propositions from Sec
 
 \subsection{Further Problem Encodings of Subgroup Discovery}
 \label{sec:csd:appendix:further-encodings}
+
+\cite{mosek2022modeling}
+\cite{sinz2005towards}
+\cite{ulrich2022selecting}
 
 \paragraph{MIP}
 

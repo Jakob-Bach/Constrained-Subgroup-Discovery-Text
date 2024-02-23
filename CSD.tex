@@ -55,7 +55,7 @@
 \paragraph{Outline}
 
 Section~\ref{sec:csd:fundamentals} introduces notation and fundamentals.
-Section~\ref{sec:csd:approach} describes and analyzes alternative feature selection.
+Section~\ref{sec:csd:approach} describes and analyzes constrained subgroup discovery.
 Section~\ref{sec:csd:related-work} reviews related work.
 Section~\ref{sec:csd:experimental-design} outlines our experimental design, while Section~\ref{sec:csd:evaluation} presents the experimental results.
 Section~\ref{sec:csd:conclusion} concludes.
@@ -64,7 +64,7 @@ Appendix~\ref{sec:csd:appendix} contains supplementary materials.
 \section{Fundamentals}
 \label{sec:csd:fundamentals}
 
-In this section, (cf.~Section~\ref{sec:csd:fundamentals:notation}) (cf.~Section~\ref{sec:csd:fundamentals:subgroup-discovery})
+In this section, (cf.~Section~\ref{sec:csd:fundamentals:notation}) (cf.~Section~\ref{sec:csd:fundamentals:subgroup-discovery}) (cf.~Section~\ref{sec:csd:fundamentals:heuristics}) (cf.~Section~\ref{sec:csd:fundamentals:baselines})
 
 \cite{helal2016subgroup} \cite{herrera2011overview} \cite{atzmueller2015subgroup} \cite{ventura2018subgroup} \cite{meeng2021real}
 
@@ -110,6 +110,11 @@ A popular evaluation metric for subgroup quality is Weighted Relative Accuracy (
 Besides the total number of data objects~$m$, this metric considers the number of positive data objects~$m^+$, the number of data objects in the box~$m_b$, and the number of positive data objects in the box~$m_b^+$.
 In particular, WRAcc is the product of the relative subgroup size~$m_b / m$ and the difference in share of the positive class between the box and all data.
 
+\subsection{Heuristic Search Methods for Subgroup Discovery}
+\label{sec:csd:fundamentals:heuristics}
+
+In this section,
+
 \begin{algorithm}[t]
 	\DontPrintSemicolon
 	\caption{\emph{PRIM} for subgroup discovery.}
@@ -154,12 +159,40 @@ Algorithm~\ref{al:csd:best-interval}
 
 Parameter: Beam width $w$
 
+\subsection{Baselines for Subgroup Discovery}
+\label{sec:csd:fundamentals:baselines}
+
+In this section,
+
+novel
+
+\begin{algorithm}[t]
+	\DontPrintSemicolon
+	\caption{\emph{MORB} for subgroup discovery.}
+	\label{al:csd:morb}
+\end{algorithm}
+
+\paragraph{MORB}
+
+Algorithm~\ref{al:csd:morb}
+
+\begin{algorithm}[t]
+	\DontPrintSemicolon
+	\caption{\emph{Random Search} for subgroup discovery.}
+	\label{al:csd:random-search}
+\end{algorithm}
+
+\paragraph{Random search}
+
+Algorithm~\ref{al:csd:random-search}
+Parameter $n\_iters$
+
 \section{Constrained Subgroup Discovery}
 \label{sec:csd:approach}
 
-In this section, (cf.~Section~\ref{sec:csd:approach:smt}) (cf.~Section~\ref{sec:csd:approach:baselines}) (cf.~Section~\ref{sec:csd:approach:cardinality}) (cf.~Section~\ref{sec:csd:approach:alternatives})
+In this section, (cf.~Section~\ref{sec:csd:approach:smt}) (cf.~Section~\ref{sec:csd:approach:constraint-types}) (cf.~Section~\ref{sec:csd:approach:cardinality}) (cf.~Section~\ref{sec:csd:approach:alternatives})
 
-\subsection{SMT}
+\subsection{SMT Encoding of Subgroup Discovery}
 \label{sec:csd:approach:smt}
 
 Appendix~\ref{sec:csd:appendix:further-encodings} describes encodings of subgroup discovery with mixed-integer programming (MIP) and maximum satisfiability (MaxSAT).
@@ -183,29 +216,15 @@ Thus, the whole expression is linear in the variables~$m_b^+$ and~$m_b$, which t
 	\label{eq:csd:smt-unconstrained-complete}
 \end{equation}
 
-\subsection{Baselines}
-\label{sec:csd:approach:baselines}
+\subsection{Overview of Constraints Types}
+\label{sec:csd:approach:constraint-types}
 
-\begin{algorithm}[t]
-	\DontPrintSemicolon
-	\caption{\emph{MORB} for subgroup discovery.}
-	\label{al:csd:morb}
-\end{algorithm}
+domain-knowledge
+secondary objectives
+regularization
+alternatives
 
-\paragraph{MORB}
-
-Algorithm~\ref{al:csd:morb}
-
-\begin{algorithm}[t]
-	\DontPrintSemicolon
-	\caption{\emph{Random Search} for subgroup discovery.}
-	\label{al:csd:random-search}
-\end{algorithm}
-
-\paragraph{Random search}
-
-Algorithm~\ref{al:csd:random-search}
-Parameter $n\_iters$
+existing methods need adaptation to support certain constraint types, white-box formulation like SMT is more general
 
 \subsection{Feature-Cardinality Constraints}
 \label{sec:csd:approach:cardinality}
@@ -229,7 +248,7 @@ define term selected == restricted
 	\label{eq:csd:cardinality-constraint}
 \end{equation}
 
-\subsubsection{Integration into Heuristic Search}
+\subsubsection{Integration into Heuristic Search Methods}
 \label{sec:csd:approach:cardinality:heuristics}
 
 \subsubsection{Integration into Baselines}
@@ -237,6 +256,30 @@ define term selected == restricted
 
 \subsubsection{Computational Complexity}
 \label{sec:csd:approach:cardinality:complexity}
+
+\paragraph{Hardness}
+
+(cf.~Appendix~\ref{sec:csd:appendix:proofs:cardinality} for the proof)
+
+\begin{proposition}[Complexity of]
+	\label{prop:csd:complexity-cardinality-perfect-box}
+\end{proposition}
+
+(cf.~Appendix~\ref{sec:csd:appendix:proofs:cardinality} for the proof)
+
+\begin{proposition}[Complexity of]
+	\label{prop:csd:complexity-cardinality-imperfect-box}
+\end{proposition}
+
+\paragraph{Parameterized complexity}
+
+\begin{proposition}[Parameterized complexity of]
+	\label{prop:csd:complexity-xp}
+\end{proposition}
+
+\begin{proposition}[Parameterized complexity of]
+	\label{prop:csd:complexity-cardinality-xp}
+\end{proposition}
 
 \subsection{Alternative Subgroup Descriptions}
 \label{sec:csd:approach:alternatives}
@@ -274,13 +317,33 @@ Another popular measure for the similarity between sets or binary vectors is the
 \subsubsection{SMT Formulation}
 \label{sec:csd:approach:alternatives:smt}
 
-\subsubsection{Integration into Heuristic Search}
+\subsubsection{Integration into Heuristic Search Methods}
 \label{sec:csd:approach:alternatives:heuristics}
 
 Beam only, no baselines.
 
 \subsubsection{Computational Complexity}
 \label{sec:csd:approach:alternatives:complexity}
+
+\paragraph{Hardness}
+
+(cf.~Appendix~\ref{sec:csd:appendix:proofs:alternatives} for the proof)
+
+\begin{proposition}[Complexity of]
+	\label{prop:csd:complexity-alternatives-perfect-box}
+\end{proposition}
+
+(cf.~Appendix~\ref{sec:csd:appendix:proofs:alternatives} for the proof)
+
+\begin{proposition}[Complexity of]
+	\label{prop:csd:complexity-alternatives-imperfect-box}
+\end{proposition}
+
+\paragraph{Parameterized complexity}
+
+\begin{proposition}[Parameterized complexity of]
+	\label{prop:csd:complexity-alternatives-xp}
+\end{proposition}
 
 \section{Related Work}
 \label{sec:csd:related-work}
@@ -369,7 +432,7 @@ In the latter case, the found solution is optimal, at least on the training set;
 \label{sec:csd:experimental-design:methods}
 
 We employ six subgroup-discovery methods:
-Our solver-based one (cf.~Section~\ref{sec:csd:approach:smt}), our two baselines (cf.~Section~\ref{sec:csd:approach:baselines}), and three heuristic search methods from related work (cf.~Section~\ref{sec:csd:fundamentals:subgroup-discovery}).
+Our solver-based one (cf.~Section~\ref{sec:csd:approach:smt}), three heuristic search methods from related work (cf.~Section~\ref{sec:csd:fundamentals:heuristics}), and our two baselines (cf.~Section~\ref{sec:csd:fundamentals:baselines}).
 
 \paragraph{Solver-based search}
 
@@ -559,6 +622,7 @@ In this section, we recap our article (cf.~Section~\ref{sec:csd:conclusion:concl
 
 In this section, we provide supplementary materials.
 Appendix~\ref{sec:csd:appendix:further-encodings} describes further encodings of the subgroup-discovery problem, complementing the SMT formulation from Section~\ref{sec:csd:approach:smt}.
+Appendix~\ref{sec:csd:appendix:proofs} contains proofs for propositions from Section~\ref{sec:csd:approach}.
 
 \subsection{Further Problem Encodings of Subgroup Discovery}
 \label{sec:csd:appendix:further-encodings}
@@ -571,6 +635,38 @@ However, this formulation was (on average) slower than the SMT formulation in pr
 \paragraph{MaxSAT}
 
 \cite{li2021maxsat} \cite{bacchus2021maximum}
+
+\subsection{Proofs}
+\label{sec:csd:appendix:proofs}
+
+In this section, we provide proofs for propositions from Section~\ref{sec:csd:approach}.
+Section~\ref{sec:csd:appendix:proofs:cardinality} proves complexity results for subgroup discovery with feature-cardinality constraints, while Section~\ref{sec:csd:appendix:proofs:alternatives} proves complexity results for searching alternative subgroup descriptions.
+
+\subsubsection{Feature-Cardinality Constraints}
+\label{sec:csd:appendix:proofs:cardinality}
+
+\paragraph{Proof of Proposition~\ref{prop:csd:complexity-cardinality-perfect-box}}
+%
+\begin{proof}
+\end{proof}
+
+\paragraph{Proof of Proposition~\ref{prop:csd:complexity-cardinality-imperfect-box}}
+%
+\begin{proof}
+\end{proof}
+
+\subsubsection{Feature-Cardinality Constraints}
+\label{sec:csd:appendix:proofs:alternatives}
+
+\paragraph{Proof of Proposition~\ref{prop:csd:complexity-alternatives-perfect-box}}
+%
+\begin{proof}
+\end{proof}
+
+\paragraph{Proof of Proposition~\ref{prop:csd:complexity-alternatives-imperfect-box}}
+%
+\begin{proof}
+\end{proof}
 
 \renewcommand*{\bibfont}{\small} % use a smaller font for bib than for main text
 \printbibliography

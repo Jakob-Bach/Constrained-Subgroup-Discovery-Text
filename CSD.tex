@@ -108,7 +108,29 @@ A popular evaluation metric for subgroup quality is Weighted Relative Accuracy (
 \end{equation}
 %
 Besides the total number of data objects~$m$, this metric considers the number of positive data objects~$m^+$, the number of data objects in the box~$m_b$, and the number of positive data objects in the box~$m_b^+$.
-In particular, WRAcc is the product of the relative subgroup size~$m_b / m$ and the difference in share of the positive class between the box and all data.
+In particular, WRAcc is the product of two factors:
+$m_b / m$ denotes the relative frequency of subgroup membership, i.e., the generality of the subgroup.
+The second factor measures the difference in relative frequency of the positive class between the box and the whole dataset, i.e., the relative accuracy of the subgroup.
+If the box contains the same fraction of positive data objects as the whole dataset, WRAcc is zero.
+The maximum and minimum of WRAcc depend on the class frequencies.
+In particular, the maximum WRAcc equals the product of the relative frequencies of positive and negative data objects in the dataset:
+%
+\begin{equation}
+	\text{WRACC}_{\text{max}} = \frac{m^+}{m} \cdot \left( 1 - \frac{m^+}{m} \right)
+	\label{eq:csd:wracc-max}
+\end{equation}
+%
+This maximum is reached if all positive data objects are in the box and all negative data objects are outside, i.e., $m_b^+ = m_b = m^+$.
+While the maximum is 0.25 if both classes occur with equal frequency, it becomes smaller the more imbalanced the classes are.
+Thus, it makes sense to normalize WRAcc when working with datasets with different relative class frequencies.
+One normalization, which we use in our experiments, is a max-normalization to the range $[-1, 1]$~\cite{mathonat2021anytime}:
+%
+\begin{equation}
+	\text{nWRACC} = \frac{\text{WRACC}}{\text{WRACC}_{\text{max}}} = \frac{m_b^+ \cdot m - m^+ \cdot m_b}{m^+ \cdot (m - m^+)}
+	\label{eq:csd:wracc-normalized}
+\end{equation}
+%
+Alternatively, one can also min-max normalize the range to~$[0, 1]$~\cite{carmona2018unifying}.
 
 \subsection{Heuristic Search Methods for Subgroup Discovery}
 \label{sec:csd:fundamentals:heuristics}
@@ -205,12 +227,13 @@ The previously provided formula seems to be non-linear in the decision variables
 However, one can reformulate the expression by multiplying its two factors, obtaining the following expression:
 %
 \begin{equation}
-	\text{WRACC} = \frac{m_b^+}{m} - \frac{m_b \cdot m^+}{m^2}
+	\text{WRACC} = \frac{m_b^+}{m} - \frac{m_b \cdot m^+}{m^2} = \frac{m_b^+ \cdot m - m_b \cdot m^+}{m^2}
 	\label{eq:csd:wracc-rearranged}
 \end{equation}
 %
 In this new expression, the denominators are constant and the factor~$m^+$ in the second enumerator is constant as well.
 Thus, the whole expression is linear in the variables~$m_b^+$ and~$m_b$, which themselves are linear in the binary decision variables~$b_i$, which denote whether a data object is in the box or not.
+The formula for nWRAcc (cf.~Equation~\ref{eq:csd:wracc-normalized}) is linear as well, having the same enumerator as Equation~\ref{eq:csd:wracc-rearranged} and a different normalization constant in the denominator.
 
 \begin{equation}
 	\label{eq:csd:smt-unconstrained-complete}
@@ -397,7 +420,7 @@ Finally, we shortly outline our implementation (cf.~Section~\ref{sec:csd:experim
 \label{sec:csd:experimental-design:overview}
 
 In our experiments, we evaluate six subgroup-discovery methods on 27 binary-classification datasets.
-We measure the subgroup quality in terms of WRAcc and also record the runtime of the methods.
+We measure the subgroup quality in terms of nWRAcc and also record the runtime of the methods.
 We analyze four \emph{experimental scenarios}:
 First, we compare all subgroup-discovery methods without constraints.
 Second, we vary the timeout in solver-based search.
@@ -410,11 +433,11 @@ We vary the number of alternatives~$a$ and the dissimilarity threshold~$\tau_{\t
 
 \paragraph{Subgroup quality}
 
-We use WRAcc (cf.~Equation~\ref{eq:csd:wracc-rearranged}) to quantify subgroup quality.
+We use \emph{nWRAcc} (cf.~Equation~\ref{eq:csd:wracc-normalized}) to quantify subgroup quality.
 To analyze how well the subgroup-discovery methods generalize, we conduct a stratified five-fold cross-validation.
 In particular, each run of a subgroup-discovery method only uses 80\% of the data objects of a dataset as training data, while the remaining data objects serve as test data.
 Based on the bounds of each found subgroup, we determine subgroup membership for data objects from training \emph{and} test data.
-Based on this membership information and the true class labels~$y$, we compute \emph{training-set WRAcc} and \emph{test-set WRAcc} on the corresponding part of the data separately.
+Based on this membership information and the true class labels~$y$, we compute \emph{training-set nWRAcc} and \emph{test-set nWRAcc} on the corresponding part of the data separately.
 
 \paragraph{Subgroup similarity}
 

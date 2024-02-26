@@ -134,7 +134,8 @@ Alternatively, one can also min-max normalize the range to~$[0, 1]$~\cite{carmon
 \subsection{Heuristic Search Methods for Subgroup Discovery}
 \label{sec:csd:fundamentals:heuristics}
 
-In this section,
+In this section, we discuss three heuristic search methods for subgroup discovery.
+All of them are well-established and originate from related work.
 
 \begin{algorithm}[t]
 	\DontPrintSemicolon
@@ -183,9 +184,9 @@ Parameter: Beam width $w$
 \subsection{Baselines for Subgroup Discovery}
 \label{sec:csd:fundamentals:baselines}
 
-In this section,
-
-novel
+In this section, we propose two baselines for subgroup discovery.
+They are conceptually simpler than the heuristic search methods (cf.~Section~\ref{sec:csd:fundamentals:heuristics}) and serve as further reference points in our experiments.
+While they are also heuristics in the literal sense, we use the term  \emph{baselines} throughout the rest of the paper to refer to these two methods.
 
 \begin{algorithm}[t]
 	\DontPrintSemicolon
@@ -202,6 +203,10 @@ Algorithm~\ref{al:csd:morb}
 	\caption{\emph{Random Search} for subgroup discovery.}
 	\label{al:csd:random-search}
 \end{algorithm}
+
+\begin{proposition}[Complexity of]
+	\label{prop:csd:complexity-unconstrained-perfect-box}
+\end{proposition}
 
 \paragraph{Random search}
 
@@ -242,13 +247,13 @@ The formula for nWRAcc (cf.~Equation~\ref{eq:csd:wracc-normalized}) is linear as
 	\label{eq:csd:smt-unconstrained-complete}
 \end{equation}
 
-\subsection{Overview of Constraints Types}
+\subsection{Overview of Constraint Types}
 \label{sec:csd:approach:constraint-types}
 
 domain-knowledge
 secondary objectives
 regularization
-alternatives
+alternatives (covering different data objects and covering same data objects differently)
 
 existing methods need adaptation to support certain constraint types, white-box formulation like SMT is more general
 
@@ -301,7 +306,7 @@ note that only constraints added, rest of optimization problem (particularly obj
 \paragraph{Parameterized complexity}
 
 \begin{proposition}[Parameterized complexity of]
-	\label{prop:csd:complexity-xp}
+	\label{prop:csd:complexity-unconstrained-xp}
 \end{proposition}
 
 \begin{proposition}[Parameterized complexity of]
@@ -323,6 +328,10 @@ $\tau_{\text{abs}}$
 The subscript \emph{abs} denotes that the dissimilarity threshold refers to an absolute number of features, i.e., the threshold is not normalized to $[0,1]$.
 
 dissimilarity between subgroup feature sets is not symmetric! (maybe indicate this by making reference subgroup a subscript)
+
+\begin{equation}
+	\label{eq:csd:dissimilarity}
+\end{equation}
 
 sequential search only; define \emph{original subgroup}
 
@@ -642,6 +651,46 @@ In this section, we recap our article (cf.~Section~\ref{sec:csd:conclusion:concl
 
 \subsection{Future Work}
 \label{sec:csd:conclusion:future-work}
+
+\paragraph{Datasets}
+
+Our evaluation employed over two dozen generic benchmark datasets (cf.~Section~\ref{sec:csd:experimental-design:datasets}).
+While such an evaluation shows general trends, the impact of constraints naturally depends on the dataset.
+Thus, our results may not transfer to each particular scenario.
+This caveat calls for domain-specific case studies.
+In such studies, one could also interpret alternative subgroup descriptions qualitatively, i.e., from the domain perspective.
+
+\paragraph{Constraint types}
+
+We formalized, analyzed, and evaluated two constraint types, i.e., feature-cardinality constraints (cf.~Sections~\ref{sec:csd:approach:cardinality} and~\ref{sec:csd:evaluation:cardinality}) and alternative subgroup descriptions (cf.~Sections~\ref{sec:csd:approach:alternatives} and~\ref{sec:csd:evaluation:alternatives}).
+As mentioned in Section~\ref{sec:csd:approach:constraint-types}, there are further constraint types one could investigate, e.g., domain-specific constraints, secondary objectives, or alternatives in the sense of covering different data objects rather than covering the same data objects differently.
+
+For our constraint type for alternative subgroup descriptions, one could analyze other dissimilarities, e.g., symmetric ones rather than the asymmetric one we used (cf.~Equation~\ref{eq:csd:dissimilarity}).
+While the SMT formulation of subgroup discovery is relatively flexible regarding dissimilarities, integrating them into heuristic search methods may be challenging, e.g., if they are not antimonotonic.
+
+\paragraph{Formalization}
+
+In solver-based search for subgroups, we used an SMT formulation (cf.~Section~\ref{sec:csd:approach:smt}) and one particular solver.
+Different white-box formulations or solvers may speed up the search and lead to less timeouts, potentially improving the subgroup quality.
+We already proposed MIP and MaxSAT encodings of subgroup discovery (cf.~Appendix~\ref{sec:csd:appendix:further-encodings}), though without evaluation.
+
+Two assumptions for subgroup discovery in our paper were numerical features and a binary target (cf.~Section~\ref{sec:csd:fundamentals:notation}).
+One could adapt the white-box formulation to multi-valued categorical features and continuous targets.
+
+\paragraph{Computational complexity}
+
+We established $\mathcal{NP}$-hardness for optimizing perfect and imperfect subgroups with feature-cardinality constraints (cf.~Propositions~\ref{prop:csd:complexity-cardinality-perfect-box} and~\ref{prop:csd:complexity-cardinality-imperfect-box}).
+While the problem admits a polynomial-time algorithm for perfect subgroups without such constraints (cf.~Proposition~\ref{prop:csd:complexity-unconstrained-perfect-box}), we did not analyze the general unconstrained problem, i.e., including imperfect subgroups.
+
+Further, we showed $\mathcal{NP}$-hardness for finding alternative subgroup descriptions for perfect and imperfect subgroups (cf.~Propositions~\ref{prop:csd:complexity-alternatives-perfect-box} and~\ref{prop:csd:complexity-alternatives-imperfect-box}).
+In both cases, our proofs tackle the decision problem whether perfect alternatives exist, i.e., alternative descriptions that entail exactly the same subgroup membership of data objects as the original subgroup.
+One could try to extend these proofs to imperfect alternatives, or generally speaking, optimizing alternatives.
+
+Regarding parameterized complexity for the unconstrained scenario, feature-cardinality constraints, and alternative subgroup descriptions, we proved membership in the relatively broad complexity class $\mathcal{XP}$ (cf.~Propositions~~\ref{prop:csd:complexity-unconstrained-xp}, \ref{prop:csd:complexity-cardinality-xp}, and~\ref{prop:csd:complexity-alternatives-xp}).
+One may attempt to tighten these results.
+
+Finally, while we described how one can integrate feature-cardinality constraints and alternative subgroup descriptions into heuristic search methods (cf.~Sections~\ref{sec:csd:approach:cardinality:heuristics} and~\ref{sec:csd:approach:alternatives:heuristics}), we did not provide quality guarantees relative to the exact optimum.
+In that regard, one could seek for an approximation complexity result, e.g., membership in the complexity class~$\mathcal{APX}$.
 
 %~\\
 %\noindent \textsc{Acknowledgments}\quad

@@ -225,11 +225,11 @@ Fourth, we formalize and analyze alternative subgroup descriptions (cf.~Section~
 \subsection{SMT Encoding of Subgroup Discovery}
 \label{sec:csd:approach:smt}
 
-To find optimal subgroups exactly, one can formulate subgroup discovery as a white-box optimization problem and employ a solver.
+To find optimal subgroups exactly, one can encode subgroup discovery as a white-box optimization problem and employ a solver.
 Here, we propose a Satisfiability Module Theories (SMT)~\cite{barrett2018satisfiability} encoding, which is straightforward given the problem definition (cf.~Section~\ref{sec:csd:fundamentals:subgroup-discovery}).
 SMT generally allows expressions in first-order logic with particular interpretations, e.g., arrays, arithmetic, or bit vectors~\cite{barrett2018satisfiability}.
-For our formulation of optimal subgroup discovery, we use linear real arithmetic (LRA).
-Complementing this SMT formulation, Appendix~\ref{sec:csd:appendix:further-encodings} describes encodings with mixed-integer programming (MIP) and maximum satisfiability (MaxSAT), which require more decision variables.
+For our encoding of optimal subgroup discovery, we use linear real arithmetic (LRA).
+Complementing this SMT encoding, Appendix~\ref{sec:csd:appendix:further-encodings} describes encodings with mixed-integer programming (MIP) and maximum satisfiability (MaxSAT), which require more decision variables.
 
 The optimization problems consists of an objective function and constraints, which we both describe in the following.
 
@@ -284,7 +284,7 @@ A data object is a member of the subgroup if all its feature values are containe
 	\label{eq:csd:constraint-subgroup-membership}
 \end{equation}
 %
-Instead of defining separate decision variables~$b_i$ and binding them to the bounds with a equivalence constraint, one could also insert the Boolean expression on the right-hand-side directly into Equation~\ref{eq:csd:constraint-m-as-sum}.
+Instead of defining separate decision variables~$b_i$ and binding them to the bounds with a equivalence constraint, one could also insert the Boolean expression on the right-hand-side into Equation~\ref{eq:csd:constraint-m-as-sum} directly.
 In particular, $\mathit{lb}_j$ and $\mathit{ub}_j$ are the only decision variables that are strictly necessary in the optimization problem.
 However, for formulating some constraint types on subgroups (cf.~Section~\ref{sec:csd:approach:constraint-types}), it is helpful to be able to refer to~$b_i$.
 
@@ -322,7 +322,7 @@ existing methods need adaptation to support certain constraint types, white-box 
 
 In this section, we discuss feature-cardinality constraints for subgroup discovery.
 First, we motivate and formalize them (cf.~Section~\ref{sec:csd:approach:cardinality:concept}).
-Next, we describe how to integrate them into our SMT formulation of subgroup discovery (cf.~Section~\ref{sec:csd:approach:cardinality:smt}), heuristic search methods (cf.~Section~\ref{sec:csd:approach:cardinality:heuristics}), and baselines (cf.~Section~\ref{sec:csd:approach:cardinality:baselines}).
+Next, we describe how to integrate them into our SMT encoding of subgroup discovery (cf.~Section~\ref{sec:csd:approach:cardinality:smt}), heuristic search methods (cf.~Section~\ref{sec:csd:approach:cardinality:heuristics}), and baselines (cf.~Section~\ref{sec:csd:approach:cardinality:baselines}).
 Finally, we analyze the computational complexity of subgroup discovery with this constraint type (cf.~Section~\ref{sec:csd:approach:cardinality:complexity}).
 
 \subsubsection{Concept}
@@ -332,13 +332,36 @@ define term selected == restricted
 
 note that only constraints added, rest of optimization problem (particularly objective) remains as-is
 
-\subsubsection{SMT Formulation}
+give reason why less than $k$ features may be selected
+
+\subsubsection{SMT Encoding}
 \label{sec:csd:approach:cardinality:smt}
 
+We first need to define whether a feature is selected or not.
+Thus, we introduce binary decision variables $s_j, s_j^{\text{lb}}, s_j^{\text{ub}} \in \{0, 1\}^n$.
+A feature is selected if its bounds exclude at least one data object from the subgroup, i.e., the lower bound is higher than the minimum feature value or the upper bound is lower than the maximum feature value:
+%
 \begin{equation}
-	\leq k
+	\begin{aligned}
+		s_j^{\text{lb}} &\leftrightarrow \left( \textit{lb}_j > \min_{i \in \{1, \dots, m\}} X_{ij} \right) \\
+		s_j^{\text{ub}} &\leftrightarrow \left( \textit{ub}_j < \max_{i \in \{1, \dots, m\}} X_{ij} \right) \\
+		s_j &\leftrightarrow \left( s_j^{\text{lb}} \lor s_j^{\text{ub}} \right) \\
+		j &\in \{1, \dots, n\}
+	\end{aligned}
+	\label{eq:csd:constraint-feature-selection}
+\end{equation}
+%
+Given the definition of~$s_j$, setting an upper bound on the number of selected features is straightforward:
+%
+\begin{equation}
+	\sum_{j=1}^n s_j \leq k
 	\label{eq:csd:cardinality-constraint}
 \end{equation}
+%
+Instead of defining decision variables $s_j$, $s_j^{\text{lb}}$, and $s_j^{\text{ub}}$, one could also insert the corresponding expressions into Equation~\ref{eq:csd:cardinality-constraint} directly.
+However, we will use~$s_j$ for alternative subgroup descriptions (cf.~Section~\ref{sec:csd:approach:alternatives:smt}) as well.
+
+The overall optimization problem of subgroup discovery with feature-cardinality constraints is the one of unconstrained subgroup discovery (cf.~Equation~\ref{eq:csd:smt-unconstrained-complete}) supplemented by the variables and constraints from Equations~\ref{eq:csd:constraint-feature-selection} and~\ref{eq:csd:cardinality-constraint}.
 
 \subsubsection{Integration into Heuristic Search Methods}
 \label{sec:csd:approach:cardinality:heuristics}
@@ -378,7 +401,7 @@ note that only constraints added, rest of optimization problem (particularly obj
 
 In this section, we propose the optimization problem of alternative subgroup descriptions.
 First, we motivate and formalize the problem (cf.~Section~\ref{sec:csd:approach:alternatives:concept}).
-Next, we describe how to tackle it with our SMT formulation of subgroup discovery (cf.~Section~\ref{sec:csd:approach:alternatives:smt}) and heuristic search methods (cf.~Section~\ref{sec:csd:approach:alternatives:heuristics}).
+Next, we describe how to phrase it within our SMT encoding of subgroup discovery (cf.~Section~\ref{sec:csd:approach:alternatives:smt}) and heuristic search methods (cf.~Section~\ref{sec:csd:approach:alternatives:heuristics}).
 Finally, we analyze the computational complexity of this problem (cf.~Section~\ref{sec:csd:approach:alternatives:complexity}).
 
 \subsubsection{Concept}
@@ -413,7 +436,7 @@ Another popular measure for the similarity between sets or binary vectors is the
 	\label{eq:csd:jaccard}
 \end{equation}
 
-\subsubsection{SMT Formulation}
+\subsubsection{SMT Encoding}
 \label{sec:csd:approach:alternatives:smt}
 
 \subsubsection{Integration into Heuristic Search Methods}
@@ -535,7 +558,7 @@ Our solver-based one (cf.~Section~\ref{sec:csd:approach:smt}), three heuristic s
 
 \paragraph{Solver-based search}
 
-For solver-based search, we use an SMT optimizer to solve our \emph{SMT} formulation of subgroup discovery (cf.~Equation~\ref{eq:csd:smt-unconstrained-complete}).
+For solver-based search, we use an SMT optimizer to solve our \emph{SMT} encoding of subgroup discovery (cf.~Equation~\ref{eq:csd:smt-unconstrained-complete}).
 Unlike the other five subgroup-discovery methods in our experiments, this method is theoretically guaranteed to find the exact global optimum, though only if it is granted sufficient time.
 In practice, however, we set solver timeouts to keep the runtime under control (cf.~Section~\ref{sec:csd:experimental-design:scenarios}).
 
@@ -726,16 +749,16 @@ We formalized, analyzed, and evaluated two constraint types, i.e., feature-cardi
 As mentioned in Section~\ref{sec:csd:approach:constraint-types}, there are further constraint types one could investigate, e.g., domain-specific constraints, secondary objectives, or alternatives in the sense of covering different data objects rather than covering the same data objects differently.
 
 For our constraint type for alternative subgroup descriptions, one could analyze other dissimilarities, e.g., symmetric ones rather than the asymmetric one we used (cf.~Equation~\ref{eq:csd:dissimilarity}).
-While the SMT formulation of subgroup discovery is relatively flexible regarding dissimilarities, integrating them into heuristic search methods may be challenging, e.g., if they are not antimonotonic.
+While the SMT encoding of subgroup discovery is relatively flexible regarding dissimilarities, integrating them into heuristic search methods may be challenging, e.g., if they are not antimonotonic.
 
 \paragraph{Formalization}
 
-In solver-based search for subgroups, we used an SMT formulation (cf.~Section~\ref{sec:csd:approach:smt}) and one particular solver.
-Different white-box formulations or solvers may speed up the search and lead to less timeouts, potentially improving the subgroup quality.
+In solver-based search for subgroups, we used an SMT encoding (cf.~Section~\ref{sec:csd:approach:smt}) and one particular solver.
+Different white-box encodings or solvers may speed up the search and lead to less timeouts, potentially improving the subgroup quality.
 We already proposed MIP and MaxSAT encodings of subgroup discovery (cf.~Appendix~\ref{sec:csd:appendix:further-encodings}), though without evaluation.
 
 Two assumptions for subgroup discovery in our paper were numerical features and a binary target (cf.~Section~\ref{sec:csd:fundamentals:notation}).
-One could adapt the white-box formulation to multi-valued categorical features and continuous targets.
+One could adapt the SMT encoding to multi-valued categorical features and continuous targets.
 
 \paragraph{Computational complexity}
 
@@ -762,7 +785,7 @@ In that regard, one could seek for an approximation complexity result, e.g., mem
 \label{sec:csd:appendix}
 
 In this section, we provide supplementary materials.
-Appendix~\ref{sec:csd:appendix:further-encodings} describes further encodings of the subgroup-discovery problem, complementing the SMT formulation from Section~\ref{sec:csd:approach:smt}.
+Appendix~\ref{sec:csd:appendix:further-encodings} describes further encodings of the subgroup-discovery problem, complementing the SMT encoding from Section~\ref{sec:csd:approach:smt}.
 Appendix~\ref{sec:csd:appendix:proofs} contains proofs for propositions from Section~\ref{sec:csd:approach}.
 
 \subsection{Further Problem Encodings of Subgroup Discovery}
@@ -775,7 +798,7 @@ Appendix~\ref{sec:csd:appendix:proofs} contains proofs for propositions from Sec
 \paragraph{MIP}
 
 Our published code contains a MIP implementation with the package \emph{OR-Tools}~\cite{perron2022or-tools}, using \emph{SCIP}~\cite{bestuzheva2021scip} as the optimizer.
-However, this formulation was (on average) slower than the SMT formulation in preliminary experiments, so we stuck to the latter for our main experiments (cf.~Section~\ref{sec:csd:experimental-design:methods}).
+However, this implementation was (on average) slower than the SMT implementation in preliminary experiments, so we stuck to the latter for our main experiments (cf.~Section~\ref{sec:csd:experimental-design:methods}).
 
 \paragraph{MaxSAT}
 

@@ -225,11 +225,17 @@ Fourth, we formalize and analyze alternative subgroup descriptions (cf.~Section~
 \subsection{SMT Encoding of Subgroup Discovery}
 \label{sec:csd:approach:smt}
 
-Appendix~\ref{sec:csd:appendix:further-encodings} describes encodings of subgroup discovery with mixed-integer programming (MIP) and maximum satisfiability (MaxSAT).
+To find optimal subgroups exactly, one can formulate subgroup discovery as a white-box optimization problem and employ a solver.
+Here, we propose a Satisfiability Module Theories (SMT)~\cite{barrett2018satisfiability} encoding, which is straightforward given the problem definition (cf.~Section~\ref{sec:csd:fundamentals:subgroup-discovery}).
+SMT generally allows expressions in first-order logic with particular interpretations, e.g., arrays, arithmetic, or bit vectors~\cite{barrett2018satisfiability}.
+For our formulation of optimal subgroup discovery, we use linear real arithmetic (LRA).
+Complementing this SMT formulation, Appendix~\ref{sec:csd:appendix:further-encodings} describes encodings with mixed-integer programming (MIP) and maximum satisfiability (MaxSAT), which require more decision variables.
 
-Variables: $b_i$, $s_j$, $s_j^{\text{lb}}$, $s_j^{\text{ub}}$, $lb_j$, $ub_j$
-coin term \emph{subgroup membership}
+The optimization problems consists of an objective function and constraints, which we both describe in the following.
 
+\paragraph{Objective function}
+
+As objective function, we use WRAcc, which should be maximized.
 In the formula for WRACC (cf.~Equation~\ref{eq:csd:wracc}), $m$ and $m^+$ are constants, while $m_b$ and $m_b^+$ depend on the decision variables.
 The previously provided formula seems to be non-linear in the decision variables since $m_b$ appears in enumerator and denominator.
 However, one can reformulate the expression by multiplying its two factors, obtaining the following expression:
@@ -239,13 +245,67 @@ However, one can reformulate the expression by multiplying its two factors, obta
 	\label{eq:csd:wracc-rearranged}
 \end{equation}
 %
-In this new expression, the denominators are constant and the factor~$m^+$ in the second enumerator is constant as well.
-Thus, the whole expression is linear in the variables~$m_b^+$ and~$m_b$, which themselves are linear in the binary decision variables~$b_i$, which denote whether a data object is in the box or not.
-The formula for nWRAcc (cf.~Equation~\ref{eq:csd:wracc-normalized}) is linear as well, having the same enumerator as Equation~\ref{eq:csd:wracc-rearranged} and a different normalization constant in the denominator.
+In this new expression, the denominators are constant and the factor~$m^+$ in the enumerator is constant as well.
+Thus, the whole expression is linear in~$m_b^+$ and~$m_b$.
+We define these two quantities as linear expressions from binary decision variables~$b \in \{0, 1\}^m$ that denote \emph{subgroup membership}.
+I.e., $b_i$~expresses whether the $i$-th data object is in the subgroup or not:
+%
+\begin{equation}
+	\begin{aligned}
+		 m_b &:= \sum_{i=1}^{m} b_i \\
+		 m_b^+ &:= \sum_{\substack{i \in \{1, \dots, m\} \\ y_i = 1 }} b_i \\
+	\end{aligned}
+	\label{eq:csd:constraint-m-as-sum}
+\end{equation}
+%
+Since one know the values of the target variable~$y$ a priori, one only needs to sum over the affected, i.e.. positive, data objects in the expression for~$m_b^+$.
+Further, defining $m_b^+$ and~$m_b$ as separate integer variables is optional.
+One can also directly insert their expressions into Equation~\ref{eq:csd:wracc-rearranged}.
+We choose this formulation in our implementation and therefore wrote $:=$ instead of using a proper propositional operator like $\leftrightarrow$ in Equation~\ref{eq:csd:constraint-m-as-sum}.
+
+The formula for nWRAcc (cf.~Equation~\ref{eq:csd:wracc-normalized}) is linear as well, having the same enumerator as Equation~\ref{eq:csd:wracc-rearranged} and a different constant in the denominator.
+
+\paragraph{Constraints}
+
+The subgroup membership~$b_i$ of a data object depends on the bounds of the subgroup.
+Thus, we define real-valued decision variables $\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$ for the latter.
+In particular, there is one lower bound and one upper bound for each of the $n$~features.
+The upper bounds naturally need to be at least as high as the lower bounds:
+%
+\begin{equation}
+	\forall j \in \{1, \dots, n\}:~ \mathit{lb}_j\leq \mathit{ub}_j
+	\label{eq:csd:constraint-bounds-monotonic}
+\end{equation}
+%
+A data object is a member of the subgroup if all its feature values are contained within the bounds:
+%
+\begin{equation}
+	\forall i \in \{1, \dots, m\}:~ b_i\leftrightarrow \bigwedge_{j \in \{1, \dots, n\}} \left( \left( X_{ij} \geq \mathit{lb}_j \right) \land \left( X_{ij} \leq \mathit{ub}_j \right) \right)
+	\label{eq:csd:constraint-subgroup-membership}
+\end{equation}
+%
+Instead of defining separate decision variables~$b_i$ and binding them to the bounds with a equivalence constraint, one could also insert the Boolean expression on the right-hand-side directly into Equation~\ref{eq:csd:constraint-m-as-sum}.
+In particular, $\mathit{lb}_j$ and $\mathit{ub}_j$ are the only decision variables that are strictly necessary in the optimization problem.
+However, for formulating some constraint types on subgroups (cf.~Section~\ref{sec:csd:approach:constraint-types}), it is helpful to be able to refer to~$b_i$.
+
+\paragraph{Complete optimization problem}
+
+Combining all prior definitions of decision variables, constraints, and the objective function, we obtain the following SMT optimization problem:
 
 \begin{equation}
+	\begin{aligned}
+		\max &\quad & Q_{\text{WRAcc}} &= \frac{m_b^+}{m} - \frac{m_b \cdot m^+}{m^2} \\
+		\text{s.t.:} &\quad & m_b &:= \sum_{i=1}^{m} b_i \\
+		&\quad & m_b^+ &:= \sum_{\substack{i \in \{1, \dots, m\} \\ y_i = 1 }} b_i \\
+		&\quad \forall i \in \{1, \dots, m\} & b_i &\leftrightarrow \bigwedge_{j \in \{1, \dots, n\}} \left( \left( X_{ij} \geq \mathit{lb}_j \right) \land \left( X_{ij} \leq \mathit{ub}_j \right) \right) \\
+		&\quad \forall j \in \{1, \dots, n\} & \mathit{lb}_j &\leq \mathit{ub}_j \\
+		&\quad & b &\in \{0, 1\}^m \\
+		&\quad & \mathit{lb}, \mathit{ub} &\in \mathbb{R}^n
+	\end{aligned}
 	\label{eq:csd:smt-unconstrained-complete}
 \end{equation}
+
+We refer to this optimization problem as \emph{unconstrained subgroup discovery} in the following since it only contains constraints that are technically necessary to define subgroup discovery properly but no additional user constraints.
 
 \subsection{Overview of Constraint Types}
 \label{sec:csd:approach:constraint-types}

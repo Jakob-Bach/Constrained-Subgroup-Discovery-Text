@@ -129,7 +129,7 @@ One normalization, which we use in our experiments, is a max-normalization to th
 	\label{eq:csd:wracc-normalized}
 \end{equation}
 %
-Alternatively, one can also min-max normalize the range to~$[0, 1]$~\cite{carmona2018unifying}.
+Alternatively, one can also min-max normalize the range to~$[0, 1]$~\cite{carmona2018unifying, ventura2018subgroup}.
 
 \subsection{Heuristic Search Methods for Subgroup Discovery}
 \label{sec:csd:fundamentals:heuristics}
@@ -317,6 +317,11 @@ alternatives (covering different data objects and covering same data objects dif
 
 existing methods need adaptation to support certain constraint types, white-box formulation like SMT is more general
 
+according to \cite{meeng2021real}, lower bounds on data objects and subgroup quality are common constraints in SD algorithms
+\cite{lavravc2006relevancy} mentions feature-cardinality constraints, recall constraints
+\cite{helal2016subgroup, herrera2011overview, ventura2018subgroup} mention number of features (and number os subgroups) as complexity measure
+(non-user) quality constraints are also used within SD algorithms for refinement/pruning \cite{atzmueller2015subgroup, grosskreutz2009subgroup}
+
 \subsection{Feature-Cardinality Constraints}
 \label{sec:csd:approach:cardinality}
 
@@ -474,7 +479,7 @@ However, our deselection dissimilarity has two advantages:
 First, if $s^{\text{old}}$ is constant, the dissimilarity is \emph{linear} in $s^{\text{new}}$, as it amounts to a simple sum, even if the exact number of newly selected features is unknown yet.
 This property is useful in solver-based search (cf.~Section~\ref{sec:csd:approach:alternatives:smt}).
 In contrast, Jaccard distance and Dice dissimilarity involve a fraction and are therefore non-linear.
-Second, the constraint from Equation~\ref{eq:csd:constraint-dissimilarity-special} is \emph{antimonotonic} in the new feature selection:
+Second, the constraint from Equation~\ref{eq:csd:constraint-dissimilarity-special} is \emph{antimonotonic}~\cite{ng1998exploratory} in the new feature selection:
 If a feature set satisfies the constraint, all its subsets also satisfy the constraint.
 Vice versa, if a feature set violates the constraint, all its supersets also violate the constraint.
 This property is useful in heuristic search (cf.~Section~\ref{sec:csd:approach:alternatives:heuristics}).
@@ -545,13 +550,18 @@ Next to literature on subgroup discovery (cf.~Section~\ref{sec:csd:related-work:
 
 PRIM~\cite{friedman1999bump}, BI~\cite{mampaey2012efficient}
 depth-first~\cite{millot2020optimal}
-exhaustive~\cite{atzmueller2006sd, atzmueller2009fast, grosskreutz2009subgroup, lemmerich2016fast}
+exhaustive~\cite{atzmueller2006sd, atzmueller2009fast, grosskreutz2009subgroup, lemmerich2016fast} -- but may use pruning, e.g., \cite{grosskreutz2009subgroup} defines quality constraints for refinement
 exhaustive with diversity~\cite{bosc2018anytime, lemmerich2010fast}
 heuristics with diversity \cite{leeuwen2012diverse, lucas2018ssdp+, proencca2022robust}
+kind of diversity (term not directly used) by downweighting (instead of removing) positive data objects covered by previous subgroups \cite{lavrac2004subgroup}
+\cite{atzmueller2015subgroup} discusses different from of subgroup set selection
+post-processing set of subgroups (four criteria based on data object overlap or prediction performance) \cite{knobbe2006pattern}
+relevance/dominance for filtering subgroups \cite{grosskreutz2012enhanced}
 analyze Pareto front for diversity (exact and greedy) \cite{leeuwen2013discovering}
 diverse subgroup lists \cite{lopez2023discovering, lopez2023novel}
 diverse rule sets \cite{zhang2020diverse}
-heuristic with constraints \cite{lavravc2006relevancy}
+heuristic (beam search) with constraints \cite{lavravc2006relevancy} -- has feature-cardinality constraints, but does not vary them; also, rather specific dataset (gene expression)
+min and max num of data objects in beam search \cite{meeng2021real}
 contrasting SD \cite{langohr2013contrasting}
 involve domain experts/knowledge \cite{dzyuba2013interactive, gamberger2002expert, lemmerich2011local}
 background knowledge \cite{atzmueller2005exploiting, atzmueller2006methodological}

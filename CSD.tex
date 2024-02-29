@@ -885,6 +885,19 @@ In this section, we recap our article (cf.~Section~\ref{sec:csd:conclusion:concl
 \subsection{Conclusions}
 \label{sec:csd:conclusion:conclusion}
 
+Subgroup-discovery methods constitute an important category of interpretable machine-learning models.
+However, they often lack the support of user-defined or user-parameterized constraints.
+In this article, we analyzed constrained subgroup discovery.
+First, we formalized subgroup discovery as an SMT optimization problem.
+This formulation gives way to a variety of user constraints and enables solver-based search for subgroups.
+In particular, we studied two constraint types, i.e., limiting the number of features used in subgroups and searching for alternative subgroup descriptions.
+For the latter constraint type, we let users control the number of alternatives and a dissimilarity threshold.
+We showed how to integrate these constraint types into our SMT formulation as well as existing heuristic search methods for subgroup discovery.
+Further, we proved $\mathcal{NP}$-hardness of the optimization problem with constraints.
+Finally, we evaluated heuristic and solver-based search with 27 binary-classification datasets.
+In particular, we analyzed four experimental scenarios:
+unconstrained subgroup discovery, our two constraint types, and timeouts for solver-based search.
+
 \subsection{Future Work}
 \label{sec:csd:conclusion:future-work}
 

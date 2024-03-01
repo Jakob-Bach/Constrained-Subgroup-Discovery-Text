@@ -303,7 +303,8 @@ To find optimal subgroups exactly, one can encode subgroup discovery as a white-
 Here, we propose a Satisfiability Module Theories (SMT)~\cite{barrett2018satisfiability} encoding, which is straightforward given the problem definition (cf.~Section~\ref{sec:csd:fundamentals:subgroup-discovery}).
 SMT generally allows expressions in first-order logic with particular interpretations, e.g., arrays, arithmetic, or bit vectors~\cite{barrett2018satisfiability}.
 For our encoding of optimal subgroup discovery, we use linear real arithmetic (LRA).
-Complementing this SMT encoding, Appendix~\ref{sec:csd:appendix:further-encodings} describes encodings with mixed-integer programming (MIP) and maximum satisfiability (MaxSAT), which require more decision variables.
+Complementing this SMT encoding, Appendix~\ref{sec:csd:appendix:further-encodings} describes further encodings:
+categorical variables in SMT (cf.~Section~\ref{sec:csd:appendix:further-encodings:smt-categorical}), mixed-integer linear programming (cf.~Section~\ref{sec:csd:appendix:further-encodings:milp}) and maximum satisfiability (cf.~Section~\ref{sec:csd:appendix:further-encodings:max-sat}).
 
 The optimization problems consists of an objective function and constraints, which we both describe in the following.
 
@@ -316,7 +317,7 @@ However, one can reformulate the expression by multiplying its two factors, obta
 %
 \begin{equation}
 	\text{WRACC} = \frac{m_b^+}{m} - \frac{m_b \cdot m^+}{m^2} = \frac{m_b^+ \cdot m - m_b \cdot m^+}{m^2}
-	\label{eq:csd:wracc-rearranged}
+	\label{eq:csd:smt-wracc}
 \end{equation}
 %
 In this new expression, the denominators are constant and the factor~$m^+$ in the enumerator is constant as well.
@@ -329,15 +330,15 @@ I.e., $b_i$~expresses whether the $i$-th data object is in the subgroup or not:
 		 m_b &:= \sum_{i=1}^{m} b_i \\
 		 m_b^+ &:= \sum_{\substack{i \in \{1, \dots, m\} \\ y_i = 1 }} b_i \\
 	\end{aligned}
-	\label{eq:csd:constraint-m-as-sum}
+	\label{eq:csd:smt-constraint-m-as-sum}
 \end{equation}
 %
 Since one know the values of the target variable~$y$ a priori, one only needs to sum over the affected, i.e.. positive, data objects in the expression for~$m_b^+$.
 Further, defining $m_b^+$ and~$m_b$ as separate integer variables is optional.
-One can also directly insert their expressions into Equation~\ref{eq:csd:wracc-rearranged}.
-We choose this formulation in our implementation and therefore wrote $:=$ instead of using a proper propositional operator like $\leftrightarrow$ in Equation~\ref{eq:csd:constraint-m-as-sum}.
+One can also directly insert their expressions into Equation~\ref{eq:csd:smt-wracc}.
+We choose this formulation in our implementation and therefore wrote $:=$ instead of using a proper propositional operator like $\leftrightarrow$ in Equation~\ref{eq:csd:smt-constraint-m-as-sum}.
 
-The formula for nWRAcc (cf.~Equation~\ref{eq:csd:wracc-normalized}) is linear as well, having the same enumerator as Equation~\ref{eq:csd:wracc-rearranged} and a different constant in the denominator.
+The formula for nWRAcc (cf.~Equation~\ref{eq:csd:wracc-normalized}) is linear as well, having the same enumerator as Equation~\ref{eq:csd:smt-wracc} and a different constant in the denominator.
 
 \paragraph{Constraints}
 
@@ -348,17 +349,17 @@ The upper bounds naturally need to be at least as high as the lower bounds:
 %
 \begin{equation}
 	\forall j \in \{1, \dots, n\}:~ \mathit{lb}_j\leq \mathit{ub}_j
-	\label{eq:csd:constraint-bounds-monotonic}
+	\label{eq:csd:smt-constraint-bounds-monotonic}
 \end{equation}
 %
 A data object is a member of the subgroup if all its feature values are contained within the bounds:
 %
 \begin{equation}
 	\forall i \in \{1, \dots, m\}:~ b_i\leftrightarrow \bigwedge_{j \in \{1, \dots, n\}} \left( \left( X_{ij} \geq \mathit{lb}_j \right) \land \left( X_{ij} \leq \mathit{ub}_j \right) \right)
-	\label{eq:csd:constraint-subgroup-membership}
+	\label{eq:csd:smt-constraint-subgroup-membership}
 \end{equation}
 %
-Instead of defining separate decision variables~$b_i$ and binding them to the bounds with a equivalence constraint, one could also insert the Boolean expression on the right-hand-side into Equation~\ref{eq:csd:constraint-m-as-sum} directly.
+Instead of defining separate decision variables~$b_i$ and binding them to the bounds with a equivalence constraint, one could also insert the Boolean expression on the right-hand-side into Equation~\ref{eq:csd:smt-constraint-m-as-sum} directly.
 In particular, $\mathit{lb}_j$ and $\mathit{ub}_j$ are the only decision variables that are strictly necessary in the optimization problem.
 However, for formulating some constraint types on subgroups (cf.~Section~\ref{sec:csd:approach:constraint-types}), it is helpful to be able to refer to~$b_i$.
 
@@ -376,7 +377,7 @@ Combining all prior definitions of decision variables, constraints, and the obje
 		&\quad & b &\in \{0, 1\}^m \\
 		&\quad & \mathit{lb}, \mathit{ub} &\in \mathbb{R}^n
 	\end{aligned}
-	\label{eq:csd:smt-unconstrained-complete}
+	\label{eq:csd:smt-problem-unconstrained-complete}
 \end{equation}
 
 We refer to this optimization problem as \emph{unconstrained subgroup discovery} in the following since it only contains constraints that are technically necessary to define subgroup discovery properly but no additional user constraints.
@@ -417,30 +418,30 @@ give reason why less than $k$ features may be selected
 \label{sec:csd:approach:cardinality:smt}
 
 We first need to define whether a feature is selected or not.
-Thus, we introduce binary decision variables $s_j, s_j^{\text{lb}}, s_j^{\text{ub}} \in \{0, 1\}^n$.
+Thus, we introduce binary decision variables $s, s^{\text{lb}}, s^{\text{ub}} \in \{0, 1\}^n$.
 A feature is selected if its bounds exclude at least one data object from the subgroup, i.e., the lower bound is higher than the minimum feature value or the upper bound is lower than the maximum feature value:
 %
 \begin{equation}
 	\begin{aligned}
-		s_j^{\text{lb}} &\leftrightarrow \left( \textit{lb}_j > \min_{i \in \{1, \dots, m\}} X_{ij} \right) \\
-		s_j^{\text{ub}} &\leftrightarrow \left( \textit{ub}_j < \max_{i \in \{1, \dots, m\}} X_{ij} \right) \\
-		s_j &\leftrightarrow \left( s_j^{\text{lb}} \lor s_j^{\text{ub}} \right) \\
-		j &\in \{1, \dots, n\}
+		\forall j: & & s^{\text{lb}}_j &\leftrightarrow \left( \mathit{lb}_j > \min_{i \in \{1, \dots, m\}} X_{ij} \right) \\
+		\forall j: & &s^{\text{ub}}_j &\leftrightarrow \left( \mathit{ub}_j < \max_{i \in \{1, \dots, m\}} X_{ij} \right) \\
+		\forall j: & & s_j &\leftrightarrow \left( s^{\text{lb}}_j \lor s^{\text{ub}}_j \right) \\
+		\text{with index:} & & j &\in \{1, \dots, n\}
 	\end{aligned}
-	\label{eq:csd:constraint-feature-selection}
+	\label{eq:csd:smt-constraint-feature-selection}
 \end{equation}
 %
 Given the definition of~$s_j$, setting an upper bound on the number of selected features is straightforward:
 %
 \begin{equation}
 	\sum_{j=1}^n s_j \leq k
-	\label{eq:csd:constraint-cardinality}
+	\label{eq:csd:smt-constraint-feature-cardinalty}
 \end{equation}
 %
-Instead of defining decision variables $s_j$, $s_j^{\text{lb}}$, and $s_j^{\text{ub}}$, one could also insert the corresponding expressions into Equation~\ref{eq:csd:constraint-cardinality} directly.
+Instead of defining decision variables $s_j$, $s^{\text{lb}}_j$, and $s^{\text{ub}}_j$, one could also insert the corresponding expressions into Equation~\ref{eq:csd:smt-constraint-feature-cardinalty} directly.
 However, we will use~$s_j$ for alternative subgroup descriptions (cf.~Section~\ref{sec:csd:approach:alternatives:smt}) as well.
 
-The overall optimization problem of subgroup discovery with feature-cardinality constraints is the one of unconstrained subgroup discovery (cf.~Equation~\ref{eq:csd:smt-unconstrained-complete}) supplemented by the variables and constraints from Equations~\ref{eq:csd:constraint-feature-selection} and~\ref{eq:csd:constraint-cardinality}.
+The overall optimization problem of subgroup discovery with feature-cardinality constraints is the one of unconstrained subgroup discovery (cf.~Equation~\ref{eq:csd:smt-problem-unconstrained-complete}) supplemented by the variables and constraints from Equations~\ref{eq:csd:smt-constraint-feature-selection} and~\ref{eq:csd:smt-constraint-feature-cardinalty}.
 
 \subsubsection{Integration into Heuristic Search Methods}
 \label{sec:csd:approach:cardinality:heuristics}
@@ -537,13 +538,13 @@ Again, there are various options to quantify the dissimilarity~$\text{dis}(\cdot
 We employ the following \emph{deselection dissimilarity} in combination with an adapted dissimilarity threshold:
 %
 \begin{equation}
-	\text{dis}_{\text{des}}(s^{\text{new}}, s^{\text{old}}) = \sum_{j=1}^n [\lnot s^{\text{new}}_j \land s^{\text{old}}_j] \geq \min \left( \tau_{\text{abs}},~\sum_{j=1}^n s^{\text{old}}_j \right)
+	\text{dis}_{\text{des}}(s^{\text{new}}, s^{\text{old}}) = \sum_{j=1}^n [\lnot s^{\text{new}}_j \land s^{\text{old}}_j] \geq \min \left( \tau_{\text{abs}},~k^{\text{old}} \right)
 	\label{eq:csd:constraint-dissimilarity-special}
 \end{equation}
 %
 This dissimilarity counts how many of the previously selected features are \emph{not} selected in the new subgroup description.
 These features may either be replaced by other features or the total number of selected features may be reduced.
-The constraints ensures that at least $\tau_{\text{abs}} \in \mathbb{N}$ features are deselected but never more than there were selected before, which would be infeasible.
+The constraints ensures that at least $\tau_{\text{abs}} \in \mathbb{N}$ features are deselected but never more than there were selected before ($k^{\text{old}}$), which would be infeasible.
 For maximum dissimilarity, none of the previously selected features may be selected again.
 Note that the dissimilarity measure is asymmetric, i.e., $\text{dis}_{\text{des}}(s^{\text{new}}, s^{\text{old}}) \neq \text{dis}_{\text{des}}(s^{\text{old}}, s^{\text{new}})$.
 While this property would be an issue in a simultaneous search for multiple alternatives, i.e., without clear ordering, it is acceptable for sequential search, where `old' and `new' are well-defined.
@@ -568,22 +569,22 @@ We only need to slightly reformulate Equation~\ref{eq:csd:hamming-general} to ob
 %
 \begin{equation}
 	\text{sim}_{\text{nHamm}}(b^{(a)}, b^{(0)}) = \frac{\sum_{i=1}^m \left( b_i^{(a)} \leftrightarrow b_i^{(0)} \right) }{m} = \frac{\sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 1}} b_j^{(a)} + \sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 0}} \lnot b_j^{(a)}}{m}
-	\label{eq:csd:hamming-smt}
+	\label{eq:csd:smt-hamming}
 \end{equation}
 %
 In particular, since $b^{(0)}$~is known and therefore constant, we employ the expression on the right-hand side, i.e., do not need the logical equivalence operator.
 Instead, we compute two sums, one for data objects that are members of the original subgroup and one for non-members.
 
-To formulate the dissimilarity constraints, we leverage that the feature-selection vector~$s^{(l)}$ is known for all existing subgroups as well.
+To formulate the dissimilarity constraints, we leverage that the feature-selection vector~$s^{(l)}$ and the corresponding number of selected features~$k^{(l)}$ are known for all existing subgroups as well.
 Thus, we adapt Equation~\ref{eq:csd:constraint-dissimilarity-special} as follows:
 %
 \begin{equation}
-	\forall l \in \{0, \dots, a-1\}:~ \text{dis}_{\text{des}}(s^{(a)}, s^{(l)}) = \sum_{\substack{j \in \{1, \dots, n\} \\ s^{(l)}_j = 1}} \lnot s^{(a)}_j \geq \min \left( \tau_{\text{abs}},~\sum_{j=1}^n s^{(l)}_j \right)
-	\label{eq:csd:constraint-dissimilarity-smt}
+	\forall l \in \{0, \dots, a-1\}:~ \text{dis}_{\text{des}}(s^{(a)}, s^{(l)}) = \sum_{\substack{j \in \{1, \dots, n\} \\ s^{(l)}_j = 1}} \lnot s^{(a)}_j \geq \min \left( \tau_{\text{abs}},~k^{(l)} \right)
+	\label{eq:csd:smt-constraint-dissimilarity}
 \end{equation}
 %
 In particular, we only sum over features that were selected in the existing subgroup and check whether they are deselected.
-To tie the variable~$s^{(a)}$ to the subgroup's bounds, we use Equation~\ref{eq:csd:constraint-feature-selection}, which we already employed for feature cardinality constraints.
+To tie the variables~$s^{(a)}_j$ to the subgroup's bounds, we use Equation~\ref{eq:csd:smt-constraint-feature-selection}, which we already employed for feature cardinality constraints.
 
 \subsubsection{Integration into Heuristic Search Methods}
 \label{sec:csd:approach:alternatives:heuristics}
@@ -711,7 +712,7 @@ Our solver-based one (cf.~Section~\ref{sec:csd:approach:smt}), three heuristic s
 
 \paragraph{Solver-based search}
 
-For solver-based search, we use an SMT optimizer to solve our \emph{SMT} encoding of subgroup discovery (cf.~Equation~\ref{eq:csd:smt-unconstrained-complete}).
+For solver-based search, we use an SMT optimizer to solve our \emph{SMT} encoding of subgroup discovery (cf.~Equation~\ref{eq:csd:smt-problem-unconstrained-complete}).
 Unlike the other five subgroup-discovery methods in our experiments, this method is theoretically guaranteed to find the exact global optimum, though only if it is granted sufficient time.
 In practice, however, we set solver timeouts to keep the runtime under control (cf.~Section~\ref{sec:csd:experimental-design:scenarios}).
 
@@ -753,7 +754,7 @@ Since the heuristic search methods and baselines are significantly faster, we do
 
 Our third experimental scenario (cf.~Section~\ref{sec:csd:evaluation:cardinality} for results) analyzes feature-cardinality constraints (cf.~Section~\ref{sec:csd:approach:cardinality}) for all six subgroup-discovery methods.
 In particular, we evaluate $k \in \{1, 2, 3, 4, 5\}$ selected features.
-These values of~$k$ are upper bounds (cf.~Equation~\ref{eq:csd:constraint-cardinality}), i.e., the subgroup-discovery methods may select less features if selecting more does not improve subgroup quality.
+These values of~$k$ are upper bounds (cf.~Equation~\ref{eq:csd:smt-constraint-feature-cardinalty}), i.e., the subgroup-discovery methods may select less features if selecting more does not improve subgroup quality.
 
 \paragraph{Alternative subgroup descriptions}
 
@@ -921,10 +922,10 @@ While the SMT encoding of subgroup discovery is relatively flexible regarding di
 
 In solver-based search for subgroups, we used an SMT encoding (cf.~Section~\ref{sec:csd:approach:smt}) and one particular solver.
 Different white-box encodings or solvers may speed up the search and lead to less timeouts, potentially improving the subgroup quality.
-We already proposed MIP and MaxSAT encodings of subgroup discovery (cf.~Appendix~\ref{sec:csd:appendix:further-encodings}), though without evaluation.
+We already proposed MILP and MaxSAT encodings of subgroup discovery (cf.~Appendix~\ref{sec:csd:appendix:further-encodings}), though without evaluation.
 
 Two assumptions for subgroup discovery in our paper were numerical features and a binary target (cf.~Section~\ref{sec:csd:fundamentals:notation}).
-One could adapt the SMT encoding to multi-valued categorical features and continuous targets.
+One could adapt the SMT encoding to multi-valued categorical features (cf.~Appendix~\ref{sec:csd:appendix:further-encodings}) and continuous targets.
 
 \paragraph{Computational complexity}
 
@@ -957,18 +958,130 @@ Appendix~\ref{sec:csd:appendix:proofs} contains proofs for propositions from Sec
 \subsection{Further Problem Encodings of Subgroup Discovery}
 \label{sec:csd:appendix:further-encodings}
 
-\cite{mosek2022modeling}
-\cite{sinz2005towards}
-\cite{ulrich2022selecting}
+In this section, we provide additional encodings of subgroup-discovery as a white-box optimization problem.
+First, we describe how to encode categorical features within the SMT formulation (cf.~Section~\ref{sec:csd:appendix:further-encodings:smt-categorical}).
+Next, we discuss encodings as a mixed-integer linear program (cf.~Section~\ref{sec:csd:appendix:further-encodings:milp}) and a maximum-satisfiability problem (cf.~Section~\ref{sec:csd:appendix:further-encodings:max-sat}).
 
-\paragraph{MIP}
+\subsubsection{Handling Categorical Features in SMT Encoding}
+\label{sec:csd:appendix:further-encodings:smt-categorical}
 
-Our published code contains a MIP implementation with the package \emph{OR-Tools}~\cite{perron2022or-tools}, using \emph{SCIP}~\cite{bestuzheva2021scip} as the optimizer.
+\subsubsection{Mixed-Integer Linear Programming (MILP)}
+\label{sec:csd:appendix:further-encodings:milp}
+
+The MILP formulation extends the SMT formulation.
+Additional variables and constraints are necessary to linearize certain logical expressions and operators.
+
+\paragraph{Unconstrained Subgroup Discovery}
+
+From the corresponding SMT formulation (cf.~Equation~\ref{eq:csd:smt-problem-unconstrained-complete}), we can keep all decision variables:
+the binary variables~$b_i$ for subgroup membership and the real-valued bound variables~$\mathit{lb}_j$ and~$\mathit{ub}_j$.
+The bound constraints (cf.~Equation~\ref{eq:csd:smt-constraint-bounds-monotonic}) remain unchanged as well.
+Further, we retain the optimization objective, which already is linear in~$b_i$ (cf.~Equations~\ref{eq:csd:smt-wracc} and~\ref{eq:csd:smt-constraint-m-as-sum}).
+However, we need to linearize the logical AND operators ($\land$) in the definition of subgroup membership~$b_i$ (cf.~Equation~\ref{eq:csd:smt-constraint-subgroup-membership}) by introducing auxiliary variables and further constraints.
+In particular, we supplement the variables~$b \in \{0, 1\}^n$ by $b^{\text{lb}} \in \{0, 1\}^{n \times m}$ and $b^{\text{ub}} \in \{0, 1\}^{n \times m}$.
+These new binary variables indicate whether a particular data object satisfies the lower respectively upper bound for a particular feature.
+Using linearization techniques for constraint satisfaction and AND operators from~\cite{mosek2022modeling}, we obtain the following set of constraints to replace Equation~\ref{eq:csd:smt-constraint-subgroup-membership}:
+%
+\begin{equation}
+	\begin{aligned}
+		\forall i~\forall j: & & X_{ij} + m_j \cdot b^{\text{lb}}_{ij} &\leq \mathit{lb}_j - \varepsilon_j \\
+	 	\forall i~\forall j: & & \mathit{lb}_j &\leq X_{ij} + M_j \cdot \left(1 - b^{\text{lb}}_{ij} \right) \\
+	 	\forall i~\forall j: & & \mathit{ub}_j + m_j \cdot b^{\text{ub}}_{ij} &\leq X_{ij} - \varepsilon_j \\
+	 	\forall i~\forall j: & & X_{ij} &\leq \mathit{ub}_j + M_j \cdot \left(1 - b^{\text{ub}}_{ij} \right) \\
+	 	\forall i~\forall j: & & b_i &\leq b^{\text{lb}}_{ij} \\
+	 	\forall i~\forall j: & & b_i &\leq b^{\text{ub}}_{ij} \\
+	 	\forall i: & & \sum_{j=1}^{n} \left( b^{\text{lb}}_{ij} + b^{\text{ub}}_{ij} \right) &\leq b_i + 2n - 1 \\
+		\text{with indices:} & & i &\in \{1, \dots, m\} \\
+		& & j &\in \{1, \dots, n\}
+	\end{aligned}
+	\label{eq:csd:milp-constraint-subgroup-membership}
+\end{equation}
+%
+The first two inequalities ensure that $b^{\text{lb}}_{ij} = 1$ if and only if $\mathit{lb}_j \leq X_{ij}$.
+The next two inequalities perform a corresponding check for~$b^{\text{ub}}_{ij}$.
+The values~$\varepsilon_j \in \mathbb{R}_{> 0}$ are small constants that turn strict inequalities into non-strict inequalities since a MILP solver may only be able to handle the latter.
+One possible choice, which we used in a demo implementation, is sorting all unique feature values and taking the minimum difference between two consecutive values in that order.
+
+The values~$M_j \in \mathbb{R}_{> 0}$ and $m_j \in \mathbb{R}_{< 0}$ are large positive and negative constants, respectively.
+They allow us to express logical implications between real-valued and binary-valued expressions, compensating for the fact that the latter may have a considerably smaller range.
+One potential choice for~$M_j$ is taking a value larger than the difference between the feature's minimum and maximum, which can be pre-computed before optimization:
+%
+\begin{equation}
+	\begin{aligned}
+		\forall j \in \{1, \dots, n\} & & M_j &:= 2 \cdot \left( \max_{i \in \{1, \dots, m\}} X_{ij} - \min_{i \in \{1, \dots, m\}} X_{ij} \right) \\
+		\forall j \in \{1, \dots, n\} & & m_j &:= 2 \cdot \left( \min_{i \in \{1, \dots, m\}} X_{ij} - \max_{i \in \{1, \dots, m\}} X_{ij} \right) \\
+	\end{aligned}
+	\label{eq:csd:milp-big-m}
+\end{equation}
+%
+In particular, the difference between the subgroup's bounds and arbitrary feature values must be smaller than $M_j$ and larger than $m_j$, unless the bounds are placed outside the feature's value range.
+Since the latter does not improve the subgroup's quality in any case, we prevent it with additional constraints on the bound variables~$\mathit{lb}_j$ and~$\mathit{ub}_j$:
+%
+\begin{equation}
+	\begin{aligned}
+		\forall j \in \{1, \dots, n\} & & \min_{i \in \{1, \dots, m\}} X_{ij} &\leq \mathit{lb}_j &\leq \max_{i \in \{1, \dots, m\}} X_{ij} \\
+		\forall j \in \{1, \dots, n\} & & \min_{i \in \{1, \dots, m\}} X_{ij} &\leq \mathit{ub}_j &\leq \max_{i \in \{1, \dots, m\}} X_{ij} \\
+	\end{aligned}
+	\label{eq:csd:milp-constraint-bounds-in-range}
+\end{equation}
+%
+Finally, the last three inequalities in Equation~\ref{eq:csd:milp-constraint-subgroup-membership} tie $b^{\text{lb}}_{ij}$ and $b^{\text{ub}}_{ij}$ to $b_i$ and linearize the logical AND operators ($\land$) from Equation~\ref{eq:csd:smt-constraint-subgroup-membership}.
+In particular, these constraints ensure that a object is a member of the subgroup, i.e., $b_i = 1$, if and only if all feature values of the data object observe the lower and upper bounds, i.e., all corresponding $b^{\text{lb}}_{ij} = 1$ and $b^{\text{ub}}_{ij} = 1$.
+
+\paragraph{Feature-Cardinality Constraints}
+
+The feature-cardinality constraint from the SMT formulation (cf.~Equation~\ref{eq:csd:smt-constraint-feature-cardinalty}) already is a linear expression in the feature-selection variables~$s_j$, so we can keep it as-is.
+However, the constraints defining~$s_j$ (cf.~Equation~\ref{eq:csd:smt-constraint-feature-selection}) contain a logical OR operator ($\lor$) and comparison ($<$) expressions.
+We linearize these constraints as follows:
+%
+\begin{equation}
+	\begin{aligned}
+		\forall i~\forall j: & & 1 - b^{\text{lb}}_{ij} &\leq s^{\text{lb}}_j \\
+		\forall i~\forall j: & & 1 - b^{\text{ub}}_{ij} &\leq s^{\text{ub}}_j \\
+		\forall j: & & s^{\text{lb}}_j &\leq s_j \\
+		\forall j: & & s^{\text{ub}}_j &\leq s_j \\
+		\forall j: & & s_j &\leq 2n - \sum_{j=1}^{n} \left( b^{\text{lb}}_{ij} + b^{\text{ub}}_{ij} \right) \\
+		\text{with indices:} & & i &\in \{1, \dots, m\} \\
+		& & j &\in \{1, \dots, n\}
+	\end{aligned}
+	\label{eq:csd:milp-constraint-feature-selection}
+\end{equation}
+%
+The first four inequalities ensure that a feature is selected, i.e., $s_j = 1$, if any data object's feature value lies outside the subgroup's bounds, i.e., any $b^{\text{lb}}_{ij} = 0$ or $b^{\text{ub}}_{ij} = 0$.
+The last inequality covers the other direction of the logical equivalence, i.e., if a feature is selected, then at least one data object's feature value lies outside the subgroup's bounds.
+
+\paragraph{Alternative Subgroup Descriptions}
+
+The objective function for alternative subgroup descriptions in the SMT formulation (cf.~Equation~\ref{eq:csd:smt-hamming}) already is linear.
+We only need to replace the logical negation operators ($\lnot$):
+%
+\begin{equation}
+	\text{sim}_{\text{nHamm}}(b^{(a)}, b^{(0)}) = \frac{\sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 1}} b_j^{(a)} + \sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 0}} \left( 1 - b_j^{(a)} \right)}{m}
+	\label{eq:csd:mip-hamming}
+\end{equation}
+%
+The same replacement also applies to the dissimilarity constraints (cf.~Equation~\ref{eq:csd:smt-constraint-dissimilarity}), which now look as follows:
+%
+\begin{equation}
+	\forall l \in \{0, \dots, a-1\}:~ \text{dis}_{\text{des}}(s^{(a)}, s^{(l)}) = \sum_{\substack{j \in \{1, \dots, n\} \\ s^{(l)}_j = 1}} \left(1 - s^{(a)}_j \right) \geq \min \left( \tau_{\text{abs}},~k^{(l)} \right)
+	\label{eq:csd:mip-constraint-dissimilarity}
+\end{equation}
+%
+Otherwise, this expression is linear as well, so no further auxiliary variables or constraints are necessary.
+
+\paragraph{Implementation}
+
+Our published code contains a MILP implementation for unconstrained and feature-cardinality-constrained subgroup discovery.
+We use the package \emph{OR-Tools}~\cite{perron2022or-tools} with \emph{SCIP}~\cite{bestuzheva2021scip} as the optimizer.
 However, this implementation was (on average) slower than the SMT implementation in preliminary experiments, so we stuck to the latter for our main experiments (cf.~Section~\ref{sec:csd:experimental-design:methods}).
 
-\paragraph{MaxSAT}
+\subsubsection{Maximum Satisfiability (MaxSAT)}
+\label{sec:csd:appendix:further-encodings:max-sat}
 
 \cite{li2021maxsat} \cite{bacchus2021maximum}
+
+\cite{sinz2005towards}
+\cite{ulrich2022selecting}
 
 \subsection{Proofs}
 \label{sec:csd:appendix:proofs}

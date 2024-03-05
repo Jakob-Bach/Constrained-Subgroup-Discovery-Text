@@ -965,6 +965,83 @@ Next, we discuss encodings as a mixed-integer linear program (cf.~Section~\ref{s
 \subsubsection{Handling Categorical Features in SMT Encoding}
 \label{sec:csd:appendix:further-encodings:smt-categorical}
 
+There are different options to consider categorical features in the SMT optimization problem.
+We present three of them in the following.
+
+\paragraph{Two variables per categorical feature}
+
+As a straightforward option, one may map all categories, i.e., unique values, of each categorical feature to distinct integers before instantiating the optimization problem.
+This so-called ordinal encoding allows us to directly apply our existing SMT formulation (cf.~Equation~\ref{eq:csd:smt-problem-unconstrained-complete}) to the dataset, at least technically.
+Consequently, there are two integer-valued bound variables for each encoded categorical feature.
+However, the ordering of categories should be semantically meaningful since it influences which categories may jointly be included in the subgroup.
+In particular, only sets of categories that form contiguous integer ranges in the ordinal encoding may define subgroup membership.
+I.e., the subgroup may comprise the encoded categories~$\{3,4,5\}$, but not only~$\{3,5 \}$ since it needs to include all values between a lower and an upper bound.
+If there is no meaningful ordering of categories, one should choose a different encoding.
+
+\paragraph{Two variables per categorical feature value}
+
+One can achieve more flexibility by introducing separate bound variables for each category of a feature rather than only for each feature.
+This approach corresponds to a one-hot encoding of the dataset, which creates one new binary feature for each category.
+Thus, the bound variables effectively are binary as well.
+By default in our SMT encoding, there is a logical AND ($\land$) over the binary features, i.e., categories.
+The interpretation of bound values for one binary Feature~$j$ is as follows:
+
+(Case 1) $\mathit{lb}_j = \mathit{ub}_j = 1$ means that data objects that assume the corresponding category for Feature~$j$ are members of the subgroup.
+This case should apply to at most one category of each feature.
+Otherwise, the AND operator would require each data object to assume multiple categories for one feature, which is unsatisfiable.
+Thus, this encoding cannot directly express that a set of categories is included the subgroup.
+
+(Case 2) $\mathit{lb}_j = \mathit{ub}_j = 0$ means that data objects that do \emph{not} assume the corresponding category for Feature~$j$ are members of the subgroup.
+I.e., data objects assuming the corresponding category are not members of the subgroup.
+Other than Case~1, this case can apply to multiple categories of each feature, i.e. the subgroup may directly exclude multiple categories.
+Further, if one category is actively included in the subgroup, i.e., falls into Case~1, then Case-2 bounds on other categories are redundant since they are implied by the former.
+
+(Case 3) $\mathit{lb}_j = 0,~\mathit{ub}_j = 1$ explicitly deselects a binary feature, i.e., both binary values do not exclude subgroup membership.
+
+(Case 4) $\mathit{lb}_j = 1,~\mathit{ub}_j = 0$ cannot occur since it violates the bound constraints (cf.~Equation~\ref{eq:csd:smt-constraint-bounds-monotonic}).
+
+Finally, note that binary features allow us to slightly simplify the subgroup-membership expression (cf.~Equation~\ref{eq:csd:smt-constraint-subgroup-membership}).
+In general, we need to check lower bound and upper bound for a feature.
+However, if a binary feature assumes the value~0 for a data object, checking the upper bound is unnecessary since it is always satisfied.
+Similarly, if a binary feature assumes the value~1 for a data object, checking the lower bound is unnecessary since it is always satisfied.
+Both these simplifications assume that the bounds are explicitly defined as binary or at least in $[0, 1]$, which can be enforced with straightforward constraints.
+Otherwise, the bounds may theoretically be placed outside the feature's range and exclude all data objects, producing an empty subgroup.
+
+\paragraph{One variable per categorical feature value}
+
+In some scenario, it does not make sense to include the absence of a category in the subgroup, i.e., to permit $\mathit{lb}_j = \mathit{ub}_j = 0$.
+In particular, some existing subgroup-discovery methods for categorical data assume that only the presence of categories is interesting~\cite{atzmueller2015subgroup}.
+In this case, introducing one instead of two bound variable(s) for each category suffices.
+Assume the categorical Feature~$j$ has $|c| \in \mathbb{N}$ different categories~$\{c_1, \dots, c_{|c|}\}$.
+Let $\mathit{cb}_j \in \{0, 1\}^{|c|}$ denote the corresponding bound variables, which denote whether a category is included in the subgroup.
+The ordering of categories in this vector is arbitrary but fixed.
+
+As a difference to previously described encodings, the subgroup-membership expression (cf.~Equation~\ref{eq:csd:smt-constraint-subgroup-membership}) should still use a logical AND ($\land$) over features but not over categories belonging to the same feature.
+Otherwise, the expression would be unsatisfiable, since each data object only assumes one category for each feature.
+Instead, we replace the numeric bound check~$\left( X_{ij} \geq \mathit{lb}_j \right) \land \left( X_{ij} \leq \mathit{ub}_j \right)$ for Feature~$j$ with the following OR ($\lor$) expression:
+%
+\begin{equation}
+	\bigvee_{l \in \{1, \dots, |c|\}} \left( \mathit{cb}^l_j \land \left(  X_{ij} = c_l \right) \right)
+\end{equation}
+%
+Since the equality holds for exactly one category, all conjunctions except one are false and the expression simplifies to one variable~$\mathit{cb}^{l'}_j$, where $l'$ is the index of the category~$X_{ij}$.
+I.e., for each categorical feature, a data object can only be member of the subgroup if the variable belonging to its category is~1.
+
+In general, multiple $\mathit{cb}^l_j$ for Feature~$j$ may be~1, representing multiple categories included in the subgroup, which is an advantage over the previous encoding.
+If all categories are in the subgroup, the feature becomes deselected.
+Thus, for a categorical Feature~$j$, Equation~\ref{eq:csd:smt-constraint-feature-selection} for feature selection becomes:
+%
+\begin{equation}
+	s_j \leftrightarrow \lnot \bigwedge_{l \in \{1, \dots, |c|\}} \mathit{cb}^l_j
+\end{equation}
+%
+One can also constrain the number of categories in the subgroup, e.g., to either include one category of Feature~$j$ in the subgroup or deselect the feature altogether by including all categories:
+%
+\begin{equation}
+	 \left( \left( \sum_{l=1}^{|c|} \mathit{cb}^l_j \right) = 1 \right) \lor \left( \left( \sum_{l=1}^{|c|} \mathit{cb}^l_j \right) = |c| \right)
+	\label{eq:csd:constraint:category-cardinality}
+\end{equation}
+
 \subsubsection{Mixed-Integer Linear Programming (MILP)}
 \label{sec:csd:appendix:further-encodings:milp}
 

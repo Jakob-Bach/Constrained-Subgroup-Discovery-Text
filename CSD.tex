@@ -996,7 +996,7 @@ I.e., data objects assuming the corresponding category are not members of the su
 Other than Case~1, this case can apply to multiple categories of each feature, i.e. the subgroup may directly exclude multiple categories.
 Further, if one category is actively included in the subgroup, i.e., falls into Case~1, then Case-2 bounds on other categories are redundant since they are implied by the former.
 
-(Case 3) $\mathit{lb}_j = 0,~\mathit{ub}_j = 1$ explicitly deselects a binary feature, i.e., both binary values do not exclude subgroup membership.
+(Case 3) $\mathit{lb}_j = 0,~\mathit{ub}_j = 1$ explicitly deselects a binary feature, i.e., both binary values do not restrict subgroup membership.
 
 (Case 4) $\mathit{lb}_j = 1,~\mathit{ub}_j = 0$ cannot occur since it violates the bound constraints (cf.~Equation~\ref{eq:csd:smt-constraint-bounds-monotonic}).
 
@@ -1012,8 +1012,8 @@ Otherwise, the bounds may theoretically be placed outside the feature's range an
 In some scenario, it does not make sense to include the absence of a category in the subgroup, i.e., to permit $\mathit{lb}_j = \mathit{ub}_j = 0$.
 In particular, some existing subgroup-discovery methods for categorical data assume that only the presence of categories is interesting~\cite{atzmueller2015subgroup}.
 In this case, introducing one instead of two bound variable(s) for each category suffices.
-Assume the categorical Feature~$j$ has $|c| \in \mathbb{N}$ different categories~$\{c_1, \dots, c_{|c|}\}$.
-Let $\mathit{cb}_j \in \{0, 1\}^{|c|}$ denote the corresponding bound variables, which denote whether a category is included in the subgroup.
+Assume the categorical Feature~$j$ has $|c_j| \in \mathbb{N}$ different categories~$\{c^1_j, \dots, c^{|c_j|}_j\}$.
+Let $\mathit{cb}_j \in \{0, 1\}^{|c_j|}$ denote the corresponding bound variables, which denote whether a category is included in the subgroup.
 The ordering of categories in this vector is arbitrary but fixed.
 
 As a difference to previously described encodings, the subgroup-membership expression (cf.~Equation~\ref{eq:csd:smt-constraint-subgroup-membership}) should still use a logical AND ($\land$) over features but not over categories belonging to the same feature.
@@ -1021,7 +1021,8 @@ Otherwise, the expression would be unsatisfiable, since each data object only as
 Instead, we replace the numeric bound check~$\left( X_{ij} \geq \mathit{lb}_j \right) \land \left( X_{ij} \leq \mathit{ub}_j \right)$ for Feature~$j$ with the following OR ($\lor$) expression:
 %
 \begin{equation}
-	\bigvee_{l \in \{1, \dots, |c|\}} \left( \mathit{cb}^l_j \land \left(  X_{ij} = c_l \right) \right)
+	\bigvee_{l \in \{1, \dots, |c_j|\}} \left( \mathit{cb}^l_j \land \left(  X_{ij} = c^l_j \right) \right)
+	\label{eq:csd:category-constraint:or}
 \end{equation}
 %
 Since the equality holds for exactly one category, all conjunctions except one are false and the expression simplifies to one variable~$\mathit{cb}^{l'}_j$, where $l'$ is the index of the category~$X_{ij}$.
@@ -1032,14 +1033,15 @@ If all categories are in the subgroup, the feature becomes deselected.
 Thus, for a categorical Feature~$j$, Equation~\ref{eq:csd:smt-constraint-feature-selection} for feature selection becomes:
 %
 \begin{equation}
-	s_j \leftrightarrow \lnot \bigwedge_{l \in \{1, \dots, |c|\}} \mathit{cb}^l_j
+	s_j \leftrightarrow \lnot \bigwedge_{l \in \{1, \dots, |c_j|\}} \mathit{cb}^l_j
+	\label{eq:csd:category-constraint:feature-selection}
 \end{equation}
 %
 One can also constrain the number of categories in the subgroup, e.g., to either include one category of Feature~$j$ in the subgroup or deselect the feature altogether by including all categories:
 %
 \begin{equation}
-	 \left( \left( \sum_{l=1}^{|c|} \mathit{cb}^l_j \right) = 1 \right) \lor \left( \left( \sum_{l=1}^{|c|} \mathit{cb}^l_j \right) = |c| \right)
-	\label{eq:csd:constraint:category-cardinality}
+	 \left( \left( \sum_{l=1}^{|c_j|} \mathit{cb}^l_j \right) = 1 \right) \lor \left( \left( \sum_{l=1}^{|c_j|} \mathit{cb}^l_j \right) = |c_j| \right)
+	\label{eq:csd:category-constraint:cardinality}
 \end{equation}
 
 \subsubsection{Mixed-Integer Linear Programming (MILP)}
@@ -1048,7 +1050,7 @@ One can also constrain the number of categories in the subgroup, e.g., to either
 The MILP formulation extends the SMT formulation.
 Additional variables and constraints are necessary to linearize certain logical expressions and operators.
 
-\paragraph{Unconstrained Subgroup Discovery}
+\paragraph{Unconstrained subgroup discovery}
 
 From the corresponding SMT formulation (cf.~Equation~\ref{eq:csd:smt-problem-unconstrained-complete}), we can keep all decision variables:
 the binary variables~$b_i$ for subgroup membership and the real-valued bound variables~$\mathit{lb}_j$ and~$\mathit{ub}_j$.
@@ -1105,7 +1107,7 @@ Since the latter does not improve the subgroup's quality in any case, we prevent
 Finally, the last three inequalities in Equation~\ref{eq:csd:milp-constraint-subgroup-membership} tie $b^{\text{lb}}_{ij}$ and $b^{\text{ub}}_{ij}$ to $b_i$ and linearize the logical AND operators ($\land$) from Equation~\ref{eq:csd:smt-constraint-subgroup-membership}.
 In particular, these constraints ensure that a object is a member of the subgroup, i.e., $b_i = 1$, if and only if all feature values of the data object observe the lower and upper bounds, i.e., all corresponding $b^{\text{lb}}_{ij} = 1$ and $b^{\text{ub}}_{ij} = 1$.
 
-\paragraph{Feature-Cardinality Constraints}
+\paragraph{Feature-cardinality constraints}
 
 The feature-cardinality constraint from the SMT formulation (cf.~Equation~\ref{eq:csd:smt-constraint-feature-cardinalty}) already is a linear expression in the feature-selection variables~$s_j$, so we can keep it as-is.
 However, the constraints defining~$s_j$ (cf.~Equation~\ref{eq:csd:smt-constraint-feature-selection}) contain a logical OR operator ($\lor$) and comparison ($<$) expressions.
@@ -1127,7 +1129,7 @@ We linearize these constraints as follows:
 The first four inequalities ensure that a feature is selected, i.e., $s_j = 1$, if any data object's feature value lies outside the subgroup's bounds, i.e., any $b^{\text{lb}}_{ij} = 0$ or $b^{\text{ub}}_{ij} = 0$.
 The last inequality covers the other direction of the logical equivalence, i.e., if a feature is selected, then at least one data object's feature value lies outside the subgroup's bounds.
 
-\paragraph{Alternative Subgroup Descriptions}
+\paragraph{Alternative subgroup descriptions}
 
 The objective function for alternative subgroup descriptions in the SMT formulation (cf.~Equation~\ref{eq:csd:smt-hamming}) already is linear.
 We only need to replace the logical negation operators ($\lnot$):
@@ -1155,10 +1157,145 @@ However, this implementation was (on average) slower than the SMT implementation
 \subsubsection{Maximum Satisfiability (MaxSAT)}
 \label{sec:csd:appendix:further-encodings:max-sat}
 
-\cite{li2021maxsat} \cite{bacchus2021maximum}
+Our SMT formulation of subgroup discovery with and without constraints uses a combination of propositional logic and linear arithmetic.
+However, if all feature values are binary, i.e., $X \in \{0, 1\}^{m \times n}$, we can also define a partial weighted MaxSAT problem \cite{bacchus2021maximum, li2021maxsat}.
+This formulation involves hard constraints in propositional logic and an objective function containing weighted clauses, i.e., OR terms.
+In our case, it even is a \textsc{Max One}~\cite{khanna1997complete} problem since the `clauses' in the objective are plain binary variables.
 
-\cite{sinz2005towards}
-\cite{ulrich2022selecting}
+\paragraph{Unconstrained subgroup discovery}
+
+For binary feature values, the bound variables $\mathit{lb}_j$ and $\mathit{ub}_j$ become binary rather than real-valued as well.
+The subgroup membership variables~$b_i$ were binary already (cf.~Equation~\ref{eq:csd:smt-problem-unconstrained-complete}).
+In the hard constraints, all less-or-equal inequalities ($\leq$) become logical implications ($\rightarrow$).
+Thus, the bound constraints (cf.~Equation~\ref{eq:csd:smt-constraint-bounds-monotonic}) become:
+%
+\begin{equation}
+	\forall j \in \{1, \dots, n\}:~ \mathit{lb}_j \rightarrow \mathit{ub}_j
+	\label{eq:csd:maxsat-constraint-bounds-monotonic}
+\end{equation}
+%
+I.e., if the lower bound is~1, then the upper bound also needs to be~1; otherwise, the upper bound may be~0 or~1.
+
+The subgroup-membership expressions (cf.~Equation~\ref{eq:csd:smt-constraint-subgroup-membership}) turn into:
+%
+\begin{equation}
+	\forall i \in \{1, \dots, m\}:~ b_i\leftrightarrow \bigwedge_{j \in \{1, \dots, n\}} \left( \left( \mathit{lb}_j \rightarrow X_{ij} \right) \land \left( X_{ij} \rightarrow \mathit{ub}_j \right) \right)
+	\label{eq:csd:maxsat-constraint-subgroup-membership}
+\end{equation}
+%
+Since all values~$X_{ij}$ are known, we can remove and simplify terms in the definition of~$b_i$.
+In particular, if $X_{ij} = 1$, then $\mathit{lb}_j \rightarrow X_{ij}$ is a tautology, which we can remove, and $X_{ij} \rightarrow \mathit{ub}_j$ becomes $\mathit{ub}_j$.
+Vice, versa, if $X_{ij} = 0$, then $X_{ij} \rightarrow \mathit{ub}_j$ is a tautology and $\mathit{lb}_j \rightarrow X_{ij}$ becomes $\lnot \mathit{lb}_j$.
+
+Further, having determined the bound values, the final subgroup description can be expressed as a plain conjunction of propositional literals, e.g., $b_i \leftrightarrow \left( X_{i2} \land \lnot X_{i5} \land X_{i6} \right)$.
+In particular, there are four cases:
+(1)~If $\mathit{lb}_j = 0$ and $\mathit{ub}_j = 1$, then the feature's value does not restrict subgroup membership and therefore does not need to be checked in the final subgroup description.
+(2)~If $\mathit{lb}_j = \mathit{ub}_j = 0$, then only $X_{ij} = 0$ is in the subgroup, i.e., a negative literal becomes part of the final subgroup description.
+(3)~If $\mathit{lb}_j = \mathit{ub}_j = 1$, then only $X_{ij} = 1$ is in the subgroup, i.e., a positive literal becomes part of the final subgroup description.
+(4)~The combination $\mathit{lb}_j = 1$ and $\mathit{ub}_j = 0$ violates the bound constraints and will therefore not appear in a valid solution.
+
+Finally, the objective function already is a weighted sum of the subgroup-membership variables~$b_i$, which form the soft constraints for the problem.
+In particular, we can re-formulate Equation~\ref{eq:csd:smt-wracc} as follows:
+%
+\begin{equation}
+	\text{WRACC} = \frac{1}{m} \cdot \sum_{\substack{i \in \{1, \dots, m\} \\ y_i = 1 }} b_i - \frac{m^+}{m^2} \cdot \sum_{i=1}^{m} b_i
+	\label{eq:csd:maxsat-wracc}
+\end{equation}
+%
+Thus, for negative data objects, i.e., with $y_i = 0$, the weight is $-m^+ / m^2$.
+For positive data objects, i.e., with $y_i = 1$, the weight is $(m - m^+) / m^2$.
+Since~$m$ is a constant, we can also multiply with~$m^2$ to obtain integer-valued weights.
+
+\paragraph{Feature-cardinality constraints}
+
+For binary features, the definition of the feature selection variables~$s_j$ (cf.~Equation~\ref{eq:csd:smt-constraint-feature-selection}), which are binary by default, amounts to:
+%
+\begin{equation}
+	\begin{aligned}
+		\forall j: & & s^{\text{lb}}_j &\leftrightarrow \left( \mathit{lb}_j \land \lnot \left( \bigwedge_{i \in \{1, \dots, m\}} X_{ij} \right) \right) \\
+		\forall j: & &s^{\text{ub}}_j &\leftrightarrow \left( \lnot \mathit{ub}_j \land \left( \bigvee_{i \in \{1, \dots, m\}} X_{ij} \right) \right) \\
+		\forall j: & & s_j &\leftrightarrow \left( s^{\text{lb}}_j \lor s^{\text{ub}}_j \right) \\
+		\text{with index:} & & j &\in \{1, \dots, n\}
+	\end{aligned}
+	\label{eq:csd:maxsat-constraint-feature-selection}
+\end{equation}
+%
+I.e., a feature is selected regarding its lower bound if the lower bound is set to~1 and and at least one feature value is~0, i.e., at least one feature value is excluded from the subgroup.
+Vice versa, a feature is selected regarding its upper bound if the upper bound is set to~0 and and at least one feature value is~1, i.e., at least one feature value is excluded from the subgroup.
+Since all values~$X_{ij}$ are known, we can evaluate the corresponding AND and OR term before optimization.
+If a feature is~0 and~1 for at least one data object each, which should usually be the case, Equation~\ref{eq:csd:maxsat-constraint-feature-selection} becomes a much simpler expression:
+%
+\begin{equation}
+		s_j \leftrightarrow \left( \mathit{lb}_j\lor \lnot \mathit{ub}_j \right)
+	\label{eq:csd:maxsat-constraint-feature-selections-simplified}
+\end{equation}
+%
+
+To transform the actual feature-cardinality constraint (cf.~Equation~\ref{eq:csd:smt-constraint-feature-cardinalty}), which sums up the variables~$s_j$ and compares them to a user-defined~$k$, into propositional logic, we can use a cardinality encoding from the literature~\cite{sinz2005towards}.
+
+\paragraph{Alternative subgroup descriptions}
+
+The objective function for alternative subgroup descriptions (cf.~Equation~\ref{eq:csd:smt-hamming}) already is a weighted sum of the subgroup-membership variables~$b_j^{(a)}$.
+In particular, for negative data objects, i.e., with $y_i = 0$, the weight of $\lnot b_j^{(a)}$ is~$1 / m$.
+For positive data objects, i.e., with $y_i = 1$, the weight of $b_j^{(a)}$ is~$1 / m$.
+Since~$m$ is a constant, we can also use~1 as the weight.
+
+We can encode the dissimilarity constraint on the feature selection (cf.~Equation~\ref{eq:csd:smt-constraint-dissimilarity}) with a cardinality encoding from the literature~\cite{sinz2005towards}.
+
+\paragraph{Non-binary features}
+
+While we discussed binary features up to now, we can also encode multi-valued features in a way suitable for a MaxSAT formulation.
+In Section~\ref{sec:csd:appendix:further-encodings:smt-categorical}, we already addressed how categorical features may be represented binarily.
+For numeric features, we can introduce two binary variables for each numeric value:
+Let the numeric Feature~$j$ have $|v_j| \in \mathbb{N}$ distinct values~$\{v^1_j, \dots, v^{|v_j|}_j\}$, with higher superscripts denoting higher values.
+Next, let $\mathit{lb}_j \in \{0, 1\}^{|v_j|}$ and $\mathit{ub}_j \in \{0, 1\}^{|v_j|}$ denote the corresponding binary bound variables.
+I.e., instead of two bound variables per feature, there are two bound variables for each unique feature value now.
+$\mathit{lb}^l_j$ indicates whether the $l$-th unique value of Feature~$j$ is the lower bound.
+Vice versa, $\mathit{ub}^l_j$ indicates whether the $l$-th unique value of Feature~$j$ is the upper bound.
+In case this encoding generates too many variables, we may discretize the feature first, e.g., by binning its values, and representing each bin by one value, e.g., the bin's mean.
+
+The bound constraints (cf.~Equations~\ref{eq:csd:smt-constraint-bounds-monotonic} and~\ref{eq:csd:maxsat-constraint-bounds-monotonic}) take the following form:
+%
+\begin{equation}
+	\begin{aligned}
+		\forall j: & & \sum_{l=1}^{|v_j|} \mathit{lb}^l_j &= 1 \\
+		\forall j: & & \sum_{l=1}^{|v_j|} \mathit{ub}^l_j &= 1 \\
+		\forall j~ \forall l_1 \in \{1, \dots, |v_j|\}: & & \mathit{ub}^{l_1}_j &\rightarrow \bigvee_{l_2 \in \{1, \dots, l_1\}} \mathit{lb}^{l_2}_j \\
+		\text{with index:} & & j &\in \{1, \dots, n\}
+	\end{aligned}
+	\label{eq:csd:maxsat-numeric-constraint-bounds-monotonic}
+\end{equation}
+%
+The first two constraints ensure that exactly one value of Feature~$j$ is chosen as lower bound and upper bound respectively.
+These constraints can be encoded into propositional logic with a cardinality encoding from the literature~\cite{sinz2005towards}.
+The third constraint enforces that the value chosen as the lower bound is less than or equal to the value chosen as the upper bound.
+Alternatively, one could also formulate that the value chosen as the upper bound is greater than or equal to the value chosen as the lower bound.
+
+We formulate the subgroup-membership expressions (cf.~Equations~\ref{eq:csd:smt-constraint-subgroup-membership} and~\ref{eq:csd:maxsat-constraint-subgroup-membership}) as follows:
+%
+\begin{equation}
+	\forall i \in \{1, \dots, m\}:~ b_i\leftrightarrow \bigwedge_{j \in \{1, \dots, n\}} \left( \left( \bigvee_{\substack{l \in \{1, \dots, \bar{l}\} \\ X_{ij} = v_{\bar{l}} }} \mathit{lb}^l_j \right) \land \left( \bigvee_{\substack{l \in \{\bar{l}, \dots, |v_j|\} \\ X_{ij} = v_{\bar{l}} }} \mathit{ub}^l_j \right) \right)
+	\label{eq:csd:maxsat-numeric-constraint-subgroup-membership}
+\end{equation}
+%
+In particular, for a data object to be a member of the subgroup, each feature's lower bound needs to be lower or equal to the actual value~$X_{ij}$, while the upper bound needs to be higher or equal.
+For the binary lower-bound variables $\mathit{lb}^l_j$, this means that any of the bound variables representing values lower or equal to $X_{ij}$ needs to be~1; vice versa for the upper bounds.
+
+Finally, for feature-cardinality constraints, we express the definitions of the feature-selection variables~$s_j$ (cf.~Equations~\ref{eq:csd:smt-constraint-feature-selection} and~\ref{eq:csd:maxsat-constraint-feature-selection}) as follows:
+%
+\begin{equation}
+	\begin{aligned}
+		\forall j, \text{ with } \max_{i \in \{1, \dots, m\}} X_{ij} = v_{l^{\text{min}}}: & & s^{\text{lb}}_j &\leftrightarrow \left( \bigvee_{l \in \{l^{\text{min}} + 1, \dots, |v_j|\}} \mathit{lb}^l_j \right) \\
+		\forall j, \text{ with } \min_{i \in \{1, \dots, m\}} X_{ij} = v_{l^{\text{max}}}: & & s^{\text{ub}}_j &\leftrightarrow \left( \bigvee_{l \in \{ 1, \dots, l^{\text{max}} - 1\}} \mathit{ub}^l_j \right) \\
+		\forall j: & & s_j &\leftrightarrow \left( s^{\text{lb}}_j \lor s^{\text{ub}}_j \right) \\
+		\text{with index:} & & j &\in \{1, \dots, n\}
+	\end{aligned}
+	\label{eq:csd:maxsat-numeric-constraint-feature-selection}
+\end{equation}
+%
+In particular, we check whether the bounds correspond to a feature value that is larger than the minimum or smaller than the maximum value of that feature, which indicates whether the bounds exclude at least one data object from the subgroup or not.
+The actual feature-cardinality constraint (cf.~Equation~\ref{eq:csd:smt-constraint-feature-cardinalty}) does not need to be specifically adapted for non-binary features in MaxSAT.
+The same goes for the definition of alternative subgroup descriptions (cf.~Equations~\ref{eq:csd:smt-hamming} and Equation~\ref{eq:csd:smt-constraint-dissimilarity}).
 
 \subsection{Proofs}
 \label{sec:csd:appendix:proofs}

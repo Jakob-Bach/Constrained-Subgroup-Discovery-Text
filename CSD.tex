@@ -154,11 +154,26 @@ We assume that categorical features have already been made numeric, e.g., via on
 There are also subgroup-discovery methods that focus on categorical data.
 $X_{\cdot{}j} \in \mathbb{R}^m$ denotes the vector representation of the $j$-th feature.
 $y \in Y^m$ represents the prediction target with domain $Y$, e.g., $Y=\{0,1\}$ for binary classification or $Y=\mathbb{R}$ for regression.
-To harmonize evaluation, we only consider binary-classification datasets, though subgroup discovery also works for regression problems.
+In this paper, we focus on binary-classification tasks in our formalization and evaluation.
+In principle, subgroup discovery also works for regression problems.
 
+$\mathit{lb}, \mathit{ub}$
 In subgroup discovery, one ... (goal, decision variables)
+--either definition or equation
+-- first general (interesting region, then for binary classification)
+
+\begin{definition}[Subgroup]
+	\emph{subgroup}
+	\label{def:csd:subgroup}
+\end{definition}
+
+\begin{definition}[Subgroup discovery]
+	\emph{subgroup discovery}
+	\label{def:csd:subgroup-discovery}
+\end{definition}
+
 Without loss of generality, we assume that the class with label~`1' is the class of interest, also called \emph{positive} class, which should be captured by subgroups.
-The function $Q(...,X,y)$ returns the quality of such a subgroup.
+The function $Q(\mathit{lb}, \mathit{ub}, X, y)$ returns the quality of such a subgroup.
 Without loss of generality, we assume that this function should be maximized.
 
 \subsection{Subgroup Discovery}
@@ -181,11 +196,11 @@ A popular evaluation metric for subgroup quality is Weighted Relative Accuracy (
 	\label{eq:csd:wracc}
 \end{equation}
 %
-Besides the total number of data objects~$m$, this metric considers the number of positive data objects~$m^+$, the number of data objects in the box~$m_b$, and the number of positive data objects in the box~$m_b^+$.
+Besides the total number of data objects~$m$, this metric considers the number of positive data objects~$m^+$, the number of data objects in the subgroup~$m_b$, and the number of positive data objects in the subgroup~$m_b^+$.
 In particular, WRAcc is the product of two factors:
 $m_b / m$ denotes the relative frequency of subgroup membership, i.e., the generality of the subgroup.
-The second factor measures the difference in relative frequency of the positive class between the box and the whole dataset, i.e., the relative accuracy of the subgroup.
-If the box contains the same fraction of positive data objects as the whole dataset, WRAcc is zero.
+The second factor measures the difference in relative frequency of the positive class between the subgroup and the whole dataset, i.e., the relative accuracy of the subgroup.
+If the subgroup contains the same fraction of positive data objects as the whole dataset, WRAcc is zero.
 The maximum and minimum of WRAcc depend on the class frequencies.
 In particular, the maximum WRAcc equals the product of the relative frequencies of positive and negative data objects in the dataset:
 %
@@ -194,7 +209,7 @@ In particular, the maximum WRAcc equals the product of the relative frequencies 
 	\label{eq:csd:wracc-max}
 \end{equation}
 %
-This maximum is reached if all positive data objects are in the box and all negative data objects are outside, i.e., $m_b^+ = m_b = m^+$.
+This maximum is reached if all positive data objects are in the subgroup and all negative data objects are outside, i.e., $m_b^+ = m_b = m^+$.
 While the maximum is 0.25 if both classes occur with equal frequency, it becomes smaller the more imbalanced the classes are.
 Thus, it makes sense to normalize WRAcc when working with datasets with different relative class frequencies.
 One normalization, which we use in our experiments, is a max-normalization to the range $[-1, 1]$~\cite{mathonat2021anytime}:
@@ -214,6 +229,14 @@ All of them are well-established and originate from related work.
 
 \begin{algorithm}[t]
 	\DontPrintSemicolon
+	\KwIn{Dataset~$X \in \mathbb{R}^{m \times n}$, \newline
+		Prediction target~$y \in \{0, 1\}^n$, \newline
+		Subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$, \newline
+		Peeling fraction~$\alpha \in (0, 1)$, \newline
+		Support threshold~$\beta_0 \in [0, 1]$
+	}
+	\KwOut{Subgroup bounds~$\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$}
+	\BlankLine
 	\caption{\emph{PRIM} for subgroup discovery.}
 	\label{al:csd:prim}
 \end{algorithm}
@@ -224,14 +247,19 @@ All of them are well-established and originate from related work.
 
 Algorithm~\ref{al:csd:prim}
 
-Parameters: peeling fraction $\alpha$, support threshold $\beta_0$
-
 according to Vadim's Medium blog post, REDS article should say that pasting phase of PRIM has little effect on quality
 
 Idea: in pseudocode, already use function getPermissibleFeatureIdxs(), so that part can be plugged in later (when introducing cardinality constraint) without having to repeat whole algorithm
 
 \begin{algorithm}[t]
 	\DontPrintSemicolon
+	\KwIn{Dataset~$X \in \mathbb{R}^{m \times n}$, \newline
+		Prediction target~$y \in \{0, 1\}^n$, \newline
+		Subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$, \newline
+		Beam width~$w \in \mathbb{N}$
+	}
+	\KwOut{Subgroup bounds~$\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$}
+	\BlankLine
 	\caption{\emph{Beam Search} for subgroup discovery.}
 	\label{al:csd:beam-search}
 \end{algorithm}
@@ -240,10 +268,15 @@ Idea: in pseudocode, already use function getPermissibleFeatureIdxs(), so that p
 
 Algorithm~\ref{al:csd:beam-search}
 
-Parameter: Beam width $w$
-
 \begin{algorithm}[t]
 	\DontPrintSemicolon
+	\KwIn{Dataset~$X \in \mathbb{R}^{m \times n}$, \newline
+		Prediction target~$y \in \{0, 1\}^n$, \newline
+		Subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$, \newline
+		Beam width~$w \in \mathbb{N}$
+	}
+	\KwOut{Subgroup bounds~$\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$}
+	\BlankLine
 	\caption{\emph{Best Interval} for subgroup discovery.}
 	\label{al:csd:best-interval}
 \end{algorithm}
@@ -254,39 +287,98 @@ Parameter: Beam width $w$
 
 Algorithm~\ref{al:csd:best-interval}
 
-Parameter: Beam width $w$
-
 \subsection{Baselines for Subgroup Discovery}
 \label{sec:csd:fundamentals:baselines}
 
-In this section, we propose two baselines for subgroup discovery.
+In this section, we propose two baselines for subgroup discovery, \emph{MORB} (cf.~Section~\ref{sec:csd:fundamentals:baselines:morb}) and \emph{Random Search} (cf.~Section~\ref{sec:csd:fundamentals:baselines:random-search}).
 They are conceptually simpler than the heuristic search methods (cf.~Section~\ref{sec:csd:fundamentals:heuristics}) and serve as further reference points in our experiments.
-While they are also heuristics in the literal sense, we use the term  \emph{baselines} throughout the rest of the paper to refer to these two methods.
+While they technically also are heuristics, we use the term \emph{baselines} to refer to these two methods specifically.
 
 \begin{algorithm}[t]
 	\DontPrintSemicolon
+	\KwIn{Dataset~$X \in \mathbb{R}^{m \times n}$, \newline
+		Prediction target~$y \in \{0, 1\}^n$
+	}
+	\KwOut{Subgroup bounds~$\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$}
+	\BlankLine
+	\For{$j \leftarrow 1$ \KwTo $n$}{
+		$\mathit{lb}_j \leftarrow \min\limits_{\substack{i \in \{1, \dots, m\} \\ y_i = 1}} X_{ij}$\;
+		\lIf{$\mathit{lb}_j = \min_{i \in \{1, \dots, m\}} X_{ij}$}{$\mathit{lb}_j \leftarrow -\infty$}
+		$\mathit{ub}_j \leftarrow \max\limits_{\substack{i \in \{1, \dots, m\} \\ y_i = 1}} X_{ij}$\;
+		\lIf{$\mathit{ub}_j = \max_{i \in \{1, \dots, m\}} X_{ij}$}{$\mathit{ub}_j \leftarrow \infty$}
+	}
+	\Return{$\mathit{lb}, \mathit{ub}$}
 	\caption{\emph{MORB} for subgroup discovery.}
 	\label{al:csd:morb}
 \end{algorithm}
 
-\paragraph{MORB}
+\subsubsection{MORB}
+\label{sec:csd:fundamentals:baselines:morb}
 
-Algorithm~\ref{al:csd:morb}
+This baseline builds on the following definition:
+%
+\begin{definition}[Minimal Optimal Recall Box (MORB)]
+	The \emph{Minimal Optimal Recall Box (MORB)} is the subgroup (cf.~Definition~\ref{def:csd:subgroup}) whose lower/upper bounds of each feature correspond to the minimum/maximum value of that feature for all positive data objects in the dataset.
+	\label{def:csd:morb}
+\end{definition}
+%
+This criterion ensures that all positive data objects are contained in the subgroup.
+Thus, the evaluation metric `recall', i.e., fraction of positive data objects in the subgroup, is~1, i.e., optimal.
+At the same time, moving the lower bounds higher or moving the upper bounds lower would exclude positive data objects from the subgroup.
+In this sense, the bounds are minimal.
+The corresponding subgroup is unique.
+
+Algorithm~\ref{al:csd:morb} outlines the procedure to determine these bounds.
+Slightly deviating from the previously described criterion, we set bounds to infinity if the minimum/maximum feature value of positive data objects equals the minimum/maximum feature value of all data objects.
+I.e., if a bound does not exclude any negative data object from the subgroup on the given data, we ensure that this property also holds for any new data, where global feature minima/maxima may differ.
+
+Since \emph{MORB} only needs to iterate over all data objects and features once to determine the minima and maxima, the computational complexity of this heuristic is~$O(n \cdot m)$.
+Further, the heuristic is not only fast, but also optimal in certain scenarios.
+To describe these scenarios, we introduce the following term:
+%
+\begin{definition}[Perfect subgroup]
+	Given a dataset~$X \in \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^n$,
+	a \emph{perfect subgroup} is a subgroup (cf.~Definition~\ref{def:csd:subgroup}) that contains all positive data objects (i.e., with $y_i = 1$) but zero negative data objects (i.e., with $y_i = 0$) from the dataset.
+	\label{def:csd:perfect-subgroup}
+\end{definition}
+%
+Next, we define a corresponding optimization problem:
+%
+\begin{definition}[Perfect-subgroup discovery]
+	\emph{Perfect-subgroup discovery} is the problem of finding a perfect subgroup (cf.~Definition~\ref{def:csd:perfect-subgroup}) if it exists or determining that it does not exist.
+	\label{def:csd:perfect-subgroup-discovery}
+\end{definition}
+%
+\emph{MORB} solves this problem in~$O(n \cdot m)$.
+In particular, after \emph{MORB} has found a subgroup, we only need to check whether the subgroup contains any negative data objects.
+If the found subgroup does not contain negative data objects, then it is perfect.
+If it does, then no perfect subgroup exists.
+In particular, the bounds found by \emph{MORB} cannot be made tighter to exclude negative data objects from the subgroup without also excluding positive data objects, thereby violating perfection.
+
+Having \emph{MORB} as an efficient algorithm for perfect-subgroup discovery, we obtain the following complexity result:
+%
+\begin{proposition}[Complexity of perfect-subgroup discovery]
+	Perfect-subgroup discovery (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) can be solved in polynomial runtime regarding the dataset size~$m \cdot n$.
+	\label{prop:csd:complexity-unconstrained-perfect-subgroup}
+\end{proposition}
 
 \begin{algorithm}[t]
 	\DontPrintSemicolon
+	\KwIn{Dataset~$X \in \mathbb{R}^{m \times n}$, \newline
+		Prediction target~$y \in \{0, 1\}^n$, \newline
+		Subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$, \newline
+		Number of iterations~$n\_iters \in \mathbb{N}$
+	}
+	\KwOut{Subgroup bounds~$\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$}
+	\BlankLine
 	\caption{\emph{Random Search} for subgroup discovery.}
 	\label{al:csd:random-search}
 \end{algorithm}
 
-\begin{proposition}[Complexity of]
-	\label{prop:csd:complexity-unconstrained-perfect-box}
-\end{proposition}
-
-\paragraph{Random search}
+\subsubsection{Random Search}
+\label{sec:csd:fundamentals:baselines:random-search}
 
 Algorithm~\ref{al:csd:random-search}
-Parameter $n\_iters$
 
 \section{Constrained Subgroup Discovery}
 \label{sec:csd:approach}
@@ -415,6 +507,11 @@ note that only constraints added, rest of optimization problem (particularly obj
 
 give reason why less than $k$ features may be selected
 
+\begin{definition}[Feature-cardinality constraint]
+	\emph{feature-cardinality constraint}
+	\label{def:csd:feature-cardinality-constraint}
+\end{definition}
+
 \subsubsection{SMT Encoding}
 \label{sec:csd:approach:cardinality:smt}
 
@@ -460,13 +557,13 @@ maybe mention antimonotonicity (see definition below)
 (cf.~Appendix~\ref{sec:csd:appendix:proofs:cardinality} for the proof)
 
 \begin{proposition}[Complexity of]
-	\label{prop:csd:complexity-cardinality-perfect-box}
+	\label{prop:csd:complexity-cardinality-perfect-subgroup}
 \end{proposition}
 
 (cf.~Appendix~\ref{sec:csd:appendix:proofs:cardinality} for the proof)
 
 \begin{proposition}[Complexity of]
-	\label{prop:csd:complexity-cardinality-imperfect-box}
+	\label{prop:csd:complexity-cardinality-imperfect-subgroup}
 \end{proposition}
 
 \paragraph{Parameterized complexity}
@@ -618,13 +715,13 @@ Explain antimonotonic, state that SMT is more flexible
 (cf.~Appendix~\ref{sec:csd:appendix:proofs:alternatives} for the proof)
 
 \begin{proposition}[Complexity of]
-	\label{prop:csd:complexity-alternatives-perfect-box}
+	\label{prop:csd:complexity-alternatives-perfect-subgroup}
 \end{proposition}
 
 (cf.~Appendix~\ref{sec:csd:appendix:proofs:alternatives} for the proof)
 
 \begin{proposition}[Complexity of]
-	\label{prop:csd:complexity-alternatives-imperfect-box}
+	\label{prop:csd:complexity-alternatives-imperfect-subgroup}
 \end{proposition}
 
 \paragraph{Parameterized complexity}
@@ -738,7 +835,8 @@ In practice, however, we set solver timeouts to keep the runtime under control (
 
 We evaluate three heuristic search methods from related work:
 \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Beam Search} (cf.~Algorithm~\ref{al:csd:beam-search}, subsequently called \emph{Beam}), and \emph{Best Interval} (cf.~Algorithm~\ref{al:csd:best-interval}, subsequently called \emph{BI}).
-We set the peeling fraction of PRIM to~$\alpha = 0.05$, consistent with other implementations of PRIM~\cite{arzamasov2021reds, kwakkel2017the}, and the support threshold to~$\beta_0 = 0$, so the shrinking of the box is solely limited by WRAcc improvement and not the box size.
+For all three methods, we use WRAcc (cf.~Equation~\ref{eq:csd:wracc}) as the subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$.
+We set the peeling fraction of PRIM to~$\alpha = 0.05$, consistent with other implementations of PRIM~\cite{arzamasov2021reds, kwakkel2017the}, and the support threshold to~$\beta_0 = 0$, so the shrinking of the subgroup is solely limited by WRAcc improvement and not the subgroup size.
 For \emph{Beam} and \emph{BI}, we choose a beam width of $w=10$, falling between default values used in other implementations~\cite{arzamasov2021reds, lemmerich2019pysubgroup}.
 
 \paragraph{Baselines}
@@ -746,7 +844,7 @@ For \emph{Beam} and \emph{BI}, we choose a beam width of $w=10$, falling between
 We also include baselines, which are even simpler than the heuristic search methods.
 In particular, we employ our own methods \emph{MORB} (cf.~Algorithm~\ref{al:csd:morb}) and \emph{Random Search} (cf.~Algorithm~\ref{al:csd:random-search}, subsequently called \emph{Random}).
 \emph{MORB} is parameter-free.
-\emph{Random} has one hyperparameter, i.e., the number of iterations, which we set to~$n\_iters = 1000$.
+For \emph{Random}, we set the number of iterations to~$n\_iters = 1000$ and use WRAcc (cf.~Equation~\ref{eq:csd:wracc}) as the subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$.
 
 \subsection{Experimental Scenarios}
 \label{sec:csd:experimental-design:scenarios}
@@ -947,10 +1045,10 @@ One could adapt the SMT encoding to multi-valued categorical features (cf.~Appen
 
 \paragraph{Computational complexity}
 
-We established $\mathcal{NP}$-hardness for optimizing perfect and imperfect subgroups with feature-cardinality constraints (cf.~Propositions~\ref{prop:csd:complexity-cardinality-perfect-box} and~\ref{prop:csd:complexity-cardinality-imperfect-box}).
-While the problem admits a polynomial-time algorithm for perfect subgroups without such constraints (cf.~Proposition~\ref{prop:csd:complexity-unconstrained-perfect-box}), we did not analyze the general unconstrained problem, i.e., including imperfect subgroups.
+We established $\mathcal{NP}$-hardness for optimizing perfect and imperfect subgroups with feature-cardinality constraints (cf.~Propositions~\ref{prop:csd:complexity-cardinality-perfect-subgroup} and~\ref{prop:csd:complexity-cardinality-imperfect-subgroup}).
+While the problem admits a polynomial-time algorithm for perfect subgroups without such constraints (cf.~Proposition~\ref{prop:csd:complexity-unconstrained-perfect-subgroup}), we did not analyze the general unconstrained problem, i.e., including imperfect subgroups.
 
-Further, we showed $\mathcal{NP}$-hardness for finding alternative subgroup descriptions for perfect and imperfect subgroups (cf.~Propositions~\ref{prop:csd:complexity-alternatives-perfect-box} and~\ref{prop:csd:complexity-alternatives-imperfect-box}).
+Further, we showed $\mathcal{NP}$-hardness for finding alternative subgroup descriptions for perfect and imperfect subgroups (cf.~Propositions~\ref{prop:csd:complexity-alternatives-perfect-subgroup} and~\ref{prop:csd:complexity-alternatives-imperfect-subgroup}).
 In both cases, our proofs tackle the decision problem whether perfect alternatives exist, i.e., alternative descriptions that entail exactly the same subgroup membership of data objects as the original subgroup.
 One could try to extend these proofs to imperfect alternatives, or generally speaking, optimizing alternatives.
 
@@ -1137,7 +1235,7 @@ We linearize these constraints as follows:
 		\forall i~\forall j: & & 1 - b^{\text{ub}}_{ij} &\leq s^{\text{ub}}_j \\
 		\forall j: & & s^{\text{lb}}_j &\leq s_j \\
 		\forall j: & & s^{\text{ub}}_j &\leq s_j \\
-		\forall j: & & s_j &\leq 2n - \sum_{j=1}^{n} \left( b^{\text{lb}}_{ij} + b^{\text{ub}}_{ij} \right) \\
+		\forall j: & & s_j &\leq 2m - \sum_{i=1}^{m} \left( b^{\text{lb}}_{ij} + b^{\text{ub}}_{ij} \right) \\
 		\text{with indices:} & & i &\in \{1, \dots, m\} \\
 		& & j &\in \{1, \dots, n\}
 	\end{aligned}
@@ -1324,12 +1422,12 @@ Section~\ref{sec:csd:appendix:proofs:cardinality} proves complexity results for 
 \subsubsection{Feature-Cardinality Constraints}
 \label{sec:csd:appendix:proofs:cardinality}
 
-\paragraph{Proof of Proposition~\ref{prop:csd:complexity-cardinality-perfect-box}}
+\paragraph{Proof of Proposition~\ref{prop:csd:complexity-cardinality-perfect-subgroup}}
 %
 \begin{proof}
 \end{proof}
 
-\paragraph{Proof of Proposition~\ref{prop:csd:complexity-cardinality-imperfect-box}}
+\paragraph{Proof of Proposition~\ref{prop:csd:complexity-cardinality-imperfect-subgroup}}
 %
 \begin{proof}
 \end{proof}
@@ -1337,12 +1435,12 @@ Section~\ref{sec:csd:appendix:proofs:cardinality} proves complexity results for 
 \subsubsection{Feature-Cardinality Constraints}
 \label{sec:csd:appendix:proofs:alternatives}
 
-\paragraph{Proof of Proposition~\ref{prop:csd:complexity-alternatives-perfect-box}}
+\paragraph{Proof of Proposition~\ref{prop:csd:complexity-alternatives-perfect-subgroup}}
 %
 \begin{proof}
 \end{proof}
 
-\paragraph{Proof of Proposition~\ref{prop:csd:complexity-alternatives-imperfect-box}}
+\paragraph{Proof of Proposition~\ref{prop:csd:complexity-alternatives-imperfect-subgroup}}
 %
 \begin{proof}
 \end{proof}

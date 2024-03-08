@@ -16,6 +16,7 @@
 \usepackage{amssymb} % mathematical symbols
 \usepackage{amsthm} % theorems, definitions etc.
 \usepackage{booktabs} % nicely formatted tables (with top, mid, and bottom rule)
+\usepackage{enumitem} % customized enumerations
 \usepackage{graphicx} % plots
 \usepackage{multirow} % cells spanning multiple rows in tables
 \usepackage{orcidlink} % ORCID icon
@@ -492,12 +493,39 @@ Finally, we analyze the computational complexity of this problem (cf.~Section~\r
 For alternative subgroup descriptions, we assume to have an \emph{original subgroup} given, with subgroup membership~$b^{(0)} \in \{0, 1\}^m$ of data objects and with feature selection~$s^{(0)} \in \{0, 1\}^n$.
 When searching alternatives, we do not optimize subgroup quality but the similarity to the original subgroup. 
 We express this similarity in terms of subgroup membership.
-Also, we introduce constraints to ensure that the new subgroup descriptions are alternative enough.
+If this similarity is very high, then the subgroup quality should also be similar.
+
+Also, we constrain the new subgroup descriptions to be alternative enough.
 We express this dissimilarity in terms of the subgroups' feature selection.
-Thus, we recommend to employ a feature-cardinality constraint as well.
+The user chooses a dissimilarity threshold~$\tau \in \mathbb{R}_{\geq 0}$ and can thereby control alternatives.
+We recommend to employ a feature-cardinality constraint as well, so there are sufficiently many features left for selection in the alternative descriptions.
+
 In a nutshell, alternative subgroup descriptions should produce similar predictions as the original subgroup but use different features.
 
-\paragraph{Objective function}
+\paragraph{Sequential search}
+
+One can search for multiple alternative subgroup descriptions sequentially.
+After determining the original subgroup, each iteration yields one further alternative.
+The user may prescribe a number of alternatives~$a \in \mathbb{N}$ a priori or interrupt the procedure whenever the alternatives are not interesting anymore, e.g., too dissimilar to the original subgroup.
+Each alternative should have similar subgroup membership as the original subgroup but a dissimilar feature selection compared to all \emph{existing subgroups}, i.e., subgroups found in prior iterations.
+The following definition captures this optimization problem:
+%
+\begin{definition}[Alternative-Subgroup-Description Discovery]
+	Given
+	\begin{itemize}[noitemsep]
+		\item a dataset $X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^n$,
+		\item $a-1 \in \mathbb{N}$ existing subgroups with subgroup membership~$b^{(l)} \in \{0, 1\}^m$ and feature selection~$s^{(l)} \in \{0, 1\}^n$ for $l \in \{0, \dots, a - 1\}$,
+		\item a similarity measure $\text{sim}(\cdot)$ for subgroup-membership vectors,
+		\item a dissimilarity measure $\text{dis}(\cdot)$ for feature-selection vectors of subgroups,
+		\item and a dissimilarity threshold~$\tau \in \mathbb{R}_{\geq 0}$,
+	\end{itemize}
+	\emph{alternative-subgroup-description discovery} is the problem of finding a subgroup (cf.~Definition~\ref{def:csd:subgroup}) with membership~$b^{(a)} \in \{0, 1\}^m$ and feature selection~$s^{(a)}$ that maximizes the subgroup-membership similarity $\text{sim}(b^{(a)}, b^{(0)})$ to the original subgroup while being dissimilar to all existing subgroups regarding the feature selection, i.e. $\forall l \in \{0, \dots, a-1\}:~\text{dis}(s^{(a)}, s^{(l)}) \geq \tau$.
+	\label{def:csd:alternative-subgroup-description-discovery}
+\end{definition}
+%
+In the following, we discuss our choice of $\text{sim}(\cdot)$ and $\text{dis}(\cdot)$.
+
+\paragraph{Similarity in objective function}
 
 There are various options to quantify the similarity between subgroup-membership vectors.
 For example, the Hamming distance counts how many vector entries differ~\cite{choi2010survey}.
@@ -522,24 +550,14 @@ Another popular similarity measure for sets or binary vectors is the Jaccard ind
 However, this similarity measure is not linear in~$b'$ and~$b''$, which prevents its use in certain white-box solvers.
 Thus, we use the normalized Hamming similarity as the objective function.
 
-\paragraph{Constraints}
+\paragraph{Dissimilarity in constraints}
 
-Given the original subgroup, we search for alternative subgroup descriptions sequentially, with one alternative per iteration.
-Let $a \in \mathbb{N}$ denote the number of alternatives and $\tau \in \mathbb{R}_{\geq 0}$ be a dissimilarity threshold.
-These two user parameters allow to control the search for alternatives.
-We require each new, $a$-th subgroup description to have a sufficiently different feature selection compared to all {existing subgroups}, including the original one:
-%
-\begin{equation}
-	\forall l \in \{0, \dots, a-1\}:~ \text{dis}(s^{(a)}, s^{(l)}) \geq \tau
-	\label{eq:csd:constraint-dissimilarity-general}
-\end{equation}
-%
-Again, there are various options to quantify the dissimilarity~$\text{dis}(\cdot)$ between feature-selection vectors.
+There are various options to quantify the dissimilarity between feature-selection vectors.
 We employ the following \emph{deselection dissimilarity} in combination with an adapted dissimilarity threshold:
 %
 \begin{equation}
 	\text{dis}_{\text{des}}(s^{\text{new}}, s^{\text{old}}) = \sum_{j=1}^n [\lnot s^{\text{new}}_j \land s^{\text{old}}_j] \geq \min \left( \tau_{\text{abs}},~k^{\text{old}} \right)
-	\label{eq:csd:constraint-dissimilarity-special}
+	\label{eq:csd:constraint-dissimilarity}
 \end{equation}
 %
 This dissimilarity counts how many of the previously selected features are \emph{not} selected in the new subgroup description.
@@ -555,7 +573,7 @@ However, our deselection dissimilarity has two advantages:
 First, if $s^{\text{old}}$ is constant, the dissimilarity is \emph{linear} in $s^{\text{new}}$, as it amounts to a simple sum, even if the exact number of newly selected features is unknown yet.
 This property is useful in solver-based search (cf.~Section~\ref{sec:csd:approach:alternatives:smt}).
 In contrast, Jaccard distance and Dice dissimilarity involve a fraction and are therefore non-linear.
-Second, the constraint from Equation~\ref{eq:csd:constraint-dissimilarity-special} is \emph{antimonotonic}~\cite{ng1998exploratory} in the new feature selection:
+Second, the constraint from Equation~\ref{eq:csd:constraint-dissimilarity} is \emph{antimonotonic}~\cite{ng1998exploratory} in the new feature selection:
 If a feature set satisfies the constraint, all its subsets also satisfy the constraint.
 Vice versa, if a feature set violates the constraint, all its supersets also violate the constraint.
 This property is useful in heuristic search (cf.~Section~\ref{sec:csd:approach:alternatives:heuristics}).
@@ -576,7 +594,7 @@ In particular, since $b^{(0)}$~is known and therefore constant, we employ the ex
 Instead, we compute two sums, one for data objects that are members of the original subgroup and one for non-members.
 
 To formulate the dissimilarity constraints, we leverage that the feature-selection vector~$s^{(l)}$ and the corresponding number of selected features~$k^{(l)}$ are known for all existing subgroups as well.
-Thus, we adapt Equation~\ref{eq:csd:constraint-dissimilarity-special} as follows:
+Thus, we adapt Equation~\ref{eq:csd:constraint-dissimilarity} as follows:
 %
 \begin{equation}
 	\forall l \in \{0, \dots, a-1\}:~ \text{dis}_{\text{des}}(s^{(a)}, s^{(l)}) = \sum_{\substack{j \in \{1, \dots, n\} \\ s^{(l)}_j = 1}} \lnot s^{(a)}_j \geq \min \left( \tau_{\text{abs}},~k^{(l)} \right)
@@ -915,7 +933,7 @@ In such studies, one could also interpret alternative subgroup descriptions qual
 We formalized, analyzed, and evaluated two constraint types, i.e., feature-cardinality constraints (cf.~Sections~\ref{sec:csd:approach:cardinality} and~\ref{sec:csd:evaluation:cardinality}) and alternative subgroup descriptions (cf.~Sections~\ref{sec:csd:approach:alternatives} and~\ref{sec:csd:evaluation:alternatives}).
 As mentioned in Section~\ref{sec:csd:approach:constraint-types}, there are further constraint types one could investigate, e.g., domain-specific constraints, secondary objectives, or alternatives in the sense of covering different data objects rather than covering the same data objects differently.
 
-For our constraint type for alternative subgroup descriptions, one could analyze other dissimilarities, e.g., symmetric ones rather than the asymmetric one we used (cf.~Equation~\ref{eq:csd:constraint-dissimilarity-general}).
+For our constraint type for alternative subgroup descriptions, one could analyze other dissimilarities, e.g., symmetric ones rather than the asymmetric one we used (cf.~Equation~\ref{eq:csd:constraint-dissimilarity}).
 While the SMT encoding of subgroup discovery is relatively flexible regarding dissimilarities, integrating them into heuristic search methods may be challenging, e.g., if they are not antimonotonic.
 
 \paragraph{Formalization}

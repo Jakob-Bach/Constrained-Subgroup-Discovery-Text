@@ -249,7 +249,7 @@ Algorithm~\ref{al:csd:prim}
 
 according to Vadim's Medium blog post, REDS article should say that pasting phase of PRIM has little effect on quality
 
-Idea: in pseudocode, already use function getPermissibleFeatureIdxs(), so that part can be plugged in later (when introducing cardinality constraint) without having to repeat whole algorithm
+Coin term \emph{permissible features} for function \emph{get\_permissible\_feature\_idxs(\dots)}
 
 \begin{algorithm}[t]
 	\DontPrintSemicolon
@@ -303,9 +303,13 @@ While they technically also are heuristics, we use the term \emph{baselines} to 
 	\BlankLine
 	\For{$j \leftarrow 1$ \KwTo $n$}{
 		$\mathit{lb}_j \leftarrow \min\limits_{\substack{i \in \{1, \dots, m\} \\ y_i = 1}} X_{ij}$\;
-		\lIf{$\mathit{lb}_j = \min_{i \in \{1, \dots, m\}} X_{ij}$}{$\mathit{lb}_j \leftarrow -\infty$}
 		$\mathit{ub}_j \leftarrow \max\limits_{\substack{i \in \{1, \dots, m\} \\ y_i = 1}} X_{ij}$\;
-		\lIf{$\mathit{ub}_j = \max_{i \in \{1, \dots, m\}} X_{ij}$}{$\mathit{ub}_j \leftarrow \infty$}
+		\lIf{$\mathit{lb}_j = \min_{i \in \{1, \dots, m\}} X_{ij}$}{$\mathit{lb}_j \leftarrow -\infty$} \label{al:csd:morb:line:bounds-infty-start}
+		\lIf{$\mathit{ub}_j = \max_{i \in \{1, \dots, m\}} X_{ij}$}{$\mathit{ub}_j \leftarrow + \infty$} \label{al:csd:morb:line:bounds-infty-end}
+	}
+	\For{$j \notin \text{get\_permissible\_feature\_idxs(\dots)}$}{ \label{al:csd:morb:line:reset-start}
+		$\mathit{lb}_j \rightarrow -\infty$\;
+		$\mathit{ub}_j \rightarrow +\infty$\; \label{al:csd:morb:line:reset-end}
 	}
 	\Return{$\mathit{lb}, \mathit{ub}$}
 	\caption{\emph{MORB} for subgroup discovery.}
@@ -329,8 +333,9 @@ In this sense, the bounds are minimal.
 The corresponding subgroup is unique.
 
 Algorithm~\ref{al:csd:morb} outlines the procedure to determine these bounds.
-Slightly deviating from the previously described criterion, we set bounds to infinity if the minimum/maximum feature value of positive data objects equals the minimum/maximum feature value of all data objects.
+Slightly deviating from the previously described criterion, we set bounds to infinity if the minimum/maximum feature value of positive data objects equals the minimum/maximum feature value of all data objects (Lines~\ref{al:csd:morb:line:bounds-infty-start}-\ref{al:csd:morb:line:bounds-infty-end}).
 I.e., if a bound does not exclude any negative data object from the subgroup on the given data, we ensure that this property also holds for any new data, where global feature minima/maxima may differ.
+Further, if only certain features are permissible, we reset the bounds of the remaining features (Line~\ref{al:csd:morb:line:reset-start}-\ref{al:csd:morb:line:reset-end}).
 
 Since \emph{MORB} only needs to iterate over all data objects and features once to determine the minima and maxima, the computational complexity of this heuristic is~$O(n \cdot m)$.
 Further, the heuristic is not only fast, but also optimal in certain scenarios.
@@ -367,10 +372,30 @@ Having \emph{MORB} as an efficient algorithm for perfect-subgroup discovery, we 
 	\KwIn{Dataset~$X \in \mathbb{R}^{m \times n}$, \newline
 		Prediction target~$y \in \{0, 1\}^n$, \newline
 		Subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$, \newline
-		Number of iterations~$n\_iters \in \mathbb{N}$
+		Number of iterations~$\mathit{n\_iters} \in \mathbb{N}$
 	}
 	\KwOut{Subgroup bounds~$\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$}
 	\BlankLine
+	$Q^{\text{opt}} \leftarrow - \infty$\;
+	\For{$iters \leftarrow 1$ \KwTo $\mathit{n\_iters}$}{
+		\For{$j \leftarrow 1$ \KwTo $n$}{ \label{al:csd:random-search:line:sampling-start}
+			$\mathit{lb}_j \leftarrow -\infty$\;
+			$\mathit{ub}_j \leftarrow +\infty$\;
+		}
+		\For{$j \in$ get\_permissible\_feature\_idxs(\dots)}{
+			$(\mathit{lb}_j,~\mathit{ub}_j) \leftarrow$ sample\_uniformly(unique($X_{\cdot j}$)) \label{al:csd:random-search:line:sampling-end}
+		}
+		\If{$Q(\mathit{lb}, \mathit{ub}, X, y) > Q^{\text{opt}}$}{ \label{al:csd:random-search:line:optimum-update-start}
+			$Q^{\text{opt}} \leftarrow Q(\mathit{lb}, \mathit{ub}, X, y)$\;
+			$\mathit{lb}^{\text{opt}} \leftarrow \mathit{lb}$\;
+			$\mathit{ub}^{\text{opt}} \leftarrow \mathit{ub}$\; \label{al:csd:random-search:line:optimum-update-end}
+		}
+	}
+	\For{$j \leftarrow 1$ \KwTo $n$}{ \label{al:csd:random-search:line:bounds-infty-start}
+		\lIf{$\mathit{lb}_j = \min_{i \in \{1, \dots, m\}} X_{ij}$}{$\mathit{lb}_j \leftarrow -\infty$} 
+		\lIf{$\mathit{ub}_j = \max_{i \in \{1, \dots, m\}} X_{ij}$}{$\mathit{ub}_j \leftarrow +\infty$} \label{al:csd:random-search:line:bounds-infty-end}
+	}
+	\Return{$\mathit{lb}, \mathit{ub}$}
 	\caption{\emph{Random Search} for subgroup discovery.}
 	\label{al:csd:random-search}
 \end{algorithm}
@@ -378,7 +403,11 @@ Having \emph{MORB} as an efficient algorithm for perfect-subgroup discovery, we 
 \subsubsection{Random Search}
 \label{sec:csd:fundamentals:baselines:random-search}
 
-Algorithm~\ref{al:csd:random-search}
+Algorithm~\ref{al:csd:random-search} outlines the randomized search procedure that constitutes the second baseline.
+It generates and evaluates subgroups for a fixed number of iterations, which the user conrols with the parameter~$\mathit{n\_iters}$.
+Hereby, subgroup generation samples a pair of lower and upper bound uniformly random from the unique values for each permissible feature, leaving the remaining features unrestricted (Lines~\ref{al:csd:random-search:line:sampling-start}-\ref{al:csd:random-search:line:sampling-end}).
+The algorithm tracks the best generated subgroup so far over the iterations (Lines~\ref{al:csd:random-search:line:optimum-update-start}-\ref{al:csd:random-search:line:optimum-update-end}) and finally returns the subgroup with the highest quality.
+As for \emph{MORB} (cf.~Algorithm~\ref{al:csd:morb}), we replace all non-excluding bounds with infinity (Lines~\ref{al:csd:random-search:line:bounds-infty-start}-\ref{al:csd:random-search:line:bounds-infty-end}).
 
 \section{Constrained Subgroup Discovery}
 \label{sec:csd:approach}
@@ -844,7 +873,7 @@ For \emph{Beam} and \emph{BI}, we choose a beam width of $w=10$, falling between
 We also include baselines, which are even simpler than the heuristic search methods.
 In particular, we employ our own methods \emph{MORB} (cf.~Algorithm~\ref{al:csd:morb}) and \emph{Random Search} (cf.~Algorithm~\ref{al:csd:random-search}, subsequently called \emph{Random}).
 \emph{MORB} is parameter-free.
-For \emph{Random}, we set the number of iterations to~$n\_iters = 1000$ and use WRAcc (cf.~Equation~\ref{eq:csd:wracc}) as the subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$.
+For \emph{Random}, we set the number of iterations to~$\mathit{n\_iters} = 1000$ and use WRAcc (cf.~Equation~\ref{eq:csd:wracc}) as the subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$.
 
 \subsection{Experimental Scenarios}
 \label{sec:csd:experimental-design:scenarios}

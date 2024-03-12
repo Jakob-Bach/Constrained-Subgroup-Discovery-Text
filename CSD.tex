@@ -251,7 +251,11 @@ according to Vadim's Medium blog post, REDS article should say that pasting phas
 
 Coin term \emph{permissible features} for function \emph{get\_permissible\_feature\_idxs(\dots)}
 
-\begin{algorithm}[t]
+\emph{non-excluding bounds}
+we set bounds to infinity if the minimum/maximum feature value of positive data objects equals the minimum/maximum feature value of all data objects (Lines~\ref{al:csd:morb:line:bounds-infty-start}-\ref{al:csd:morb:line:bounds-infty-end}).
+I.e., if a bound does not exclude any negative data object from the subgroup on the given data, we ensure that this property also holds for any new data, where global feature minima/maxima may differ.
+
+\begin{algorithm}[p]
 	\DontPrintSemicolon
 	\KwIn{Dataset~$X \in \mathbb{R}^{m \times n}$, \newline
 		Prediction target~$y \in \{0, 1\}^n$, \newline
@@ -260,32 +264,101 @@ Coin term \emph{permissible features} for function \emph{get\_permissible\_featu
 	}
 	\KwOut{Subgroup bounds~$\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$}
 	\BlankLine
-	\caption{\emph{Beam Search} for subgroup discovery.}
-	\label{al:csd:beam-search}
+	\For(\tcp*[f]{Initialize beam}){$l \leftarrow 1$ \KwTo $w$}{ \label{al:csd:generic-beam-search:line:initialization-start}
+		\For{$j \leftarrow 1$ \KwTo $n$}{
+			$(\mathit{lb}^{(\text{beam, } l)}_j,~ \mathit{ub}^{(\text{beam, } l)}_j) \leftarrow (-\infty, +\infty)$\;
+		}
+		$\mathit{cand\_has\_changed}^{(l)} \leftarrow$ \textbf{true}\;
+		$Q^{(l)} \leftarrow Q(\mathit{lb}^{(\text{beam, } l)}, \mathit{ub}^{(\text{beam, } l)}, X, y)$\; \label{al:csd:generic-beam-search:line:initialization-end}
+	}
+	\While(\tcp*[f]{Beam has changed}){$\left( \sum_{l=1}^w \mathit{cand\_has\_changed}^{(l)} \right) > 0$}{ \label{al:csd:generic-beam-search:line:iteration-start}
+		$\mathit{prev\_cand\_changed\_idxs} \leftarrow \{l \mid \mathit{cand\_has\_changed}^{(l)} \}$\;
+		\For(\tcp*[f]{Create temporary solution candidates}){$l \leftarrow 1$ \KwTo $w$}{
+			$(\mathit{lb}^{(\text{cand, } l)},~ \mathit{ub}^{(\text{cand, } l)}) \leftarrow$ $(\mathit{lb}^{(\text{beam, } l)},~ \mathit{ub}^{(\text{beam, } l)})$\;
+			$\mathit{cand\_has\_changed}^{(l)} \leftarrow$ \textbf{false}\;
+		}
+		\For(\tcp*[f]{Prepare beam updates}){$l \in \mathit{prev\_cand\_changed\_idxs}$}{ \label{al:csd:generic-beam-search:line:update-start}
+			\For{$j \in$ get\_permissible\_feature\_idxs(\dots)}{
+				evaluate\_subgroup\_updates(\dots) \tcp*{Algorithm~\ref{al:csd:beam-search-subgroup-update} or~\ref{al:csd:best-interval-subgroup-update}} \label{al:csd:generic-beam-search:line:update-end}
+			}
+		}
+		\For(\tcp*[f]{Update beam}){$l \leftarrow 1$ \KwTo $w$}{
+			$(\mathit{lb}^{(\text{beam, } l)},~ \mathit{ub}^{(\text{beam, } l)}) \leftarrow$ $(\mathit{lb}^{(\text{cand, } l)},~ \mathit{ub}^{(\text{cand, } l)})$\; \label{al:csd:generic-beam-search:line:iteration-end}
+		}
+	}
+	$l \leftarrow \arg\max_{l \in \{1, \dots, w\}} Q^{(l)}$ \tcp*{Select best subgroup from beam} \label{al:csd:generic-beam-search:line:finalization-start}
+	$(\mathit{lb},~ \mathit{ub}) \leftarrow (\mathit{lb}^{(\text{beam, } l)},~ \mathit{ub}^{(\text{beam, } l)})$\;
+	\For{$j \leftarrow 1$ \KwTo $n$}{ \label{al:csd:generic-beam-search:line:bounds-infty-start}
+		\lIf{$\mathit{lb}_j = \min_{i \in \{1, \dots, m\}} X_{ij}$}{$\mathit{lb}_j \leftarrow -\infty$}
+		\lIf{$\mathit{ub}_j = \max_{i \in \{1, \dots, m\}} X_{ij}$}{$\mathit{ub}_j \leftarrow +\infty$} \label{al:csd:generic-beam-search:line:bounds-infty-end}
+	}
+	\Return{$\mathit{lb}, \mathit{ub}$}  \label{al:csd:generic-beam-search:line:finalization-end}
+	\caption{Generic beam search for subgroup discovery.}
+	\label{al:csd:generic-beam-search}
+\end{algorithm}
+
+\begin{algorithm}[t]
+	\DontPrintSemicolon
+	\KwIn{Parameters and variables from Algorithm~\ref{al:csd:generic-beam-search}}
+	\KwOut{None; modifies variables from Algorithm~\ref{al:csd:generic-beam-search} in-place}
+	$(\mathit{lb},~ \mathit{ub}) \leftarrow (\mathit{lb}^{(\text{beam, } l)},~ \mathit{lb}^{(\text{beam, } l)})$ \tcp*{Next, update lower bound} \label{al:csd:beam-search-subgroup-update:line:lb-start}
+	\For{$b \in $ sort(unique(get\_feature\_values($X_{\cdot j}$, $\mathit{lb}^{(\text{beam, } l)}$, $\mathit{ub}^{(\text{beam, } l)}$)))}{
+		$\mathit{lb}_j \leftarrow b$\;
+		\If{$\left( Q(\mathit{lb}, \mathit{ub}, X, y) > \min_{l \in \{1, ..., w\}} Q^{(l)} \right)$ \textbf{and} $(\mathit{lb},~ \mathit{ub}) \notin \{(\mathit{lb}^{(\text{cand, } l)},~ \mathit{ub}^{(\text{cand, } l)}) \mid l \in \{1, \dots, w\}\}$ }{ \label{al:csd:beam-search-subgroup-update:line:lb-replace-start}
+			$l \leftarrow \arg\min_{l \in \{1, \dots, w\}} Q^{(l)}$ \tcp*{Replace worst candidate}
+			$(\mathit{lb}^{(\text{cand, } l)},~ \mathit{ub}^{(\text{cand, } l)}) \leftarrow (\mathit{lb}, \mathit{ub})$\;
+			$\mathit{cand\_has\_changed}^{(l)} \leftarrow$ \textbf{true}\;
+			$Q^{(l)} \leftarrow Q(\mathit{lb}, \mathit{ub}, X, y)$\; \label{al:csd:beam-search-subgroup-update:line:lb-replace-end} \label{al:csd:beam-search-subgroup-update:line:lb-end}
+		}
+	}
+	$(\mathit{lb},~ \mathit{ub}) \leftarrow (\mathit{lb}^{(\text{beam, } l)},~ \mathit{lb}^{(\text{beam, } l)})$ \tcp*{Next, update upper bound} \label{al:csd:beam-search-subgroup-update:line:ub-start}
+	\For{$b \in $ sort(unique(get\_feature\_values($X_{\cdot j}$, $\mathit{lb}^{(\text{beam, } l)}$, $\mathit{ub}^{(\text{beam, } l)}$)))}{
+		$\mathit{ub}_j \leftarrow b$\;
+		\If{$\left( Q(\mathit{lb}, \mathit{ub}, X, y) > \min_{l \in \{1, ..., w\}} Q^{(l)} \right)$ \textbf{and} $(\mathit{lb},~ \mathit{ub}) \notin \{(\mathit{lb}^{(\text{cand, } l)},~ \mathit{ub}^{(\text{cand, } l)}) \mid l \in \{1, \dots, w\}\}$ }{ \label{al:csd:beam-search-subgroup-update:line:ub-replace-start}
+			$l \leftarrow \arg\min_{l \in \{1, \dots, w\}} Q^{(l)}$ \tcp*{Replace worst candidate}
+			$(\mathit{lb}^{(\text{cand, } l)},~ \mathit{ub}^{(\text{cand, } l)}) \leftarrow (\mathit{lb}, \mathit{ub})$\;
+			$\mathit{cand\_has\_changed}^{(l)} \leftarrow$ \textbf{true}\;
+			$Q^{(l)} \leftarrow Q(\mathit{lb}, \mathit{ub}, X, y)$\; \label{al:csd:beam-search-subgroup-update:line:ub-replace-end} \label{al:csd:beam-search-subgroup-update:line:ub-end}
+		}
+	}
+	\caption{evaluate\_subgroup\_updates(\dots) for \emph{Beam Search}}
+	\label{al:csd:beam-search-subgroup-update}
 \end{algorithm}
 
 \paragraph{Beam search}
 
-Algorithm~\ref{al:csd:beam-search}
+Beam search is a generic search strategy that maintains a set of currently best solution candidates, i.e., the beam, and iteratively updates them.
+For subgroup discovery, one way to implement this strategy is outlined in Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}, which we refer to as \emph{Beam Search} in the following.
+It is an adapted version of the beam-search implementation in the Python package \emph{pysubgroup}~\cite{lemmerich2019pysubgroup}.
+The number of solution candidates, i.e., subgroups, in the beam is a user parameter, i.e., the beam width~$w$.
+
+First, the algorithm initializes the beam by creating $w$ unrestricted subgroups, characterized by their bounds $\mathit{lb}^{(\text{beam, } l)}$ and $\mathit{ub}^{(\text{beam, } l)}$ (Lines~\ref{al:csd:generic-beam-search:line:initialization-start}-\ref{al:csd:generic-beam-search:line:initialization-end}).
+Further, it stores the quality $Q^{(l)}$ of each subgroup in the beam.
+Additionally, it records which subgroups changed in the previous iteration (Lines~\ref{al:csd:generic-beam-search:line:iteration-start}-\ref{al:csd:generic-beam-search:line:iteration-end}) of the search.
+In particular, it stops once all subgroups in the beam remain unchanged.
+Subsequently, it returns the best subgroup from the beam (Lines~\ref{al:csd:generic-beam-search:line:finalization-start}-\ref{al:csd:generic-beam-search:line:finalization-end}).
+As for \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), we replace all non-excluding bounds with infinity.
+
+In the main loop (Lines~\ref{al:csd:generic-beam-search:line:iteration-start}-\ref{al:csd:generic-beam-search:line:iteration-end}), the algorithm updates the beam.
+In particular, for each subgroup that changed in the previous iteration, the algorithm creates new solution candidates by attempting to update the bounds of each feature separately (Lines~\ref{al:csd:generic-beam-search:line:update-start}-\ref{al:csd:generic-beam-search:line:update-end}).
+There are different options for this update.
+Algorithm~\ref{al:csd:beam-search-subgroup-update} outlines the update strategy for \emph{Beam Search}, while \emph{Best Interval} uses a slightly different one (cf.~Algorithm~\ref{al:csd:best-interval-subgroup-update}).
+For \emph{Beam Search}, the strategy separately tries to refine the lower bound (Lines~\ref{al:csd:beam-search-subgroup-update:line:lb-start}-\ref{al:csd:beam-search-subgroup-update:line:lb-end}) and the upper bound (Lines~\ref{al:csd:beam-search-subgroup-update:line:ub-start}-\ref{al:csd:beam-search-subgroup-update:line:ub-end}) for a given Feature~$j$ by replacing it with another feature value from data objects in the subgroup.
+In particular, it iterates over all these unique feature values.
+Each solution candidate that improves upon the minimum subgroup quality from the beam replaces the corresponding subgroup, unless it already is part of them beam due to another update action (Lines~\ref{al:csd:beam-search-subgroup-update:line:lb-replace-start}-\ref{al:csd:beam-search-subgroup-update:line:lb-replace-end} and~\ref{al:csd:beam-search-subgroup-update:line:ub-replace-start}-\ref{al:csd:beam-search-subgroup-update:line:ub-replace-end}).
 
 \begin{algorithm}[t]
 	\DontPrintSemicolon
-	\KwIn{Dataset~$X \in \mathbb{R}^{m \times n}$, \newline
-		Prediction target~$y \in \{0, 1\}^n$, \newline
-		Subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$, \newline
-		Beam width~$w \in \mathbb{N}$
-	}
-	\KwOut{Subgroup bounds~$\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$}
-	\BlankLine
-	\caption{\emph{Best Interval} for subgroup discovery.}
-	\label{al:csd:best-interval}
+	\KwIn{Parameters and variables from Algorithm~\ref{al:csd:generic-beam-search}}
+	\KwOut{None; modifies variables from Algorithm~\ref{al:csd:generic-beam-search} in-place}
+	\caption{evaluate\_subgroup\_updates(\dots) for \emph{Best Interval}}
+	\label{al:csd:best-interval-subgroup-update}
 \end{algorithm}
 
 \paragraph{Best interval}
 
 \emph{Best Interval}~\cite{mampaey2012efficient}
 
-Algorithm~\ref{al:csd:best-interval}
 
 \subsection{Baselines for Subgroup Discovery}
 \label{sec:csd:fundamentals:baselines}
@@ -333,8 +406,7 @@ In this sense, the bounds are minimal.
 The corresponding subgroup is unique.
 
 Algorithm~\ref{al:csd:morb} outlines the procedure to determine these bounds.
-Slightly deviating from the previously described criterion, we set bounds to infinity if the minimum/maximum feature value of positive data objects equals the minimum/maximum feature value of all data objects (Lines~\ref{al:csd:morb:line:bounds-infty-start}-\ref{al:csd:morb:line:bounds-infty-end}).
-I.e., if a bound does not exclude any negative data object from the subgroup on the given data, we ensure that this property also holds for any new data, where global feature minima/maxima may differ.
+Slightly deviating from the previously described criterion, but consistent to \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), we replace all non-excluding bounds with infinity (Lines~\ref{al:csd:random-search:line:bounds-infty-start}-\ref{al:csd:random-search:line:bounds-infty-end}).
 Further, if only certain features are permissible, we reset the bounds of the remaining features (Line~\ref{al:csd:morb:line:reset-start}-\ref{al:csd:morb:line:reset-end}).
 
 Since \emph{MORB} only needs to iterate over all data objects and features once to determine the minima and maxima, the computational complexity of this heuristic is~$O(n \cdot m)$.
@@ -404,10 +476,10 @@ Having \emph{MORB} as an efficient algorithm for perfect-subgroup discovery, we 
 \label{sec:csd:fundamentals:baselines:random-search}
 
 Algorithm~\ref{al:csd:random-search} outlines the randomized search procedure that constitutes the second baseline.
-It generates and evaluates subgroups for a fixed number of iterations, which the user conrols with the parameter~$\mathit{n\_iters}$.
+It generates and evaluates subgroups for a fixed number of iterations, which the user controls with the parameter~$\mathit{n\_iters}$.
 Hereby, subgroup generation samples a pair of lower and upper bound uniformly random from the unique values for each permissible feature, leaving the remaining features unrestricted (Lines~\ref{al:csd:random-search:line:sampling-start}-\ref{al:csd:random-search:line:sampling-end}).
 The algorithm tracks the best generated subgroup so far over the iterations (Lines~\ref{al:csd:random-search:line:optimum-update-start}-\ref{al:csd:random-search:line:optimum-update-end}) and finally returns the subgroup with the highest quality.
-As for \emph{MORB} (cf.~Algorithm~\ref{al:csd:morb}), we replace all non-excluding bounds with infinity (Lines~\ref{al:csd:random-search:line:bounds-infty-start}-\ref{al:csd:random-search:line:bounds-infty-end}).
+As for \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), we replace all non-excluding bounds with infinity (Lines~\ref{al:csd:random-search:line:bounds-infty-start}-\ref{al:csd:random-search:line:bounds-infty-end}).
 
 \section{Constrained Subgroup Discovery}
 \label{sec:csd:approach}
@@ -863,7 +935,7 @@ In practice, however, we set solver timeouts to keep the runtime under control (
 \paragraph{Heuristic search}
 
 We evaluate three heuristic search methods from related work:
-\emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Beam Search} (cf.~Algorithm~\ref{al:csd:beam-search}, subsequently called \emph{Beam}), and \emph{Best Interval} (cf.~Algorithm~\ref{al:csd:best-interval}, subsequently called \emph{BI}).
+\emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Beam Search} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}), subsequently called \emph{Beam}), and \emph{Best Interval} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:best-interval-subgroup-update}), subsequently called \emph{BI}).
 For all three methods, we use WRAcc (cf.~Equation~\ref{eq:csd:wracc}) as the subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$.
 We set the peeling fraction of PRIM to~$\alpha = 0.05$, consistent with other implementations of PRIM~\cite{arzamasov2021reds, kwakkel2017the}, and the support threshold to~$\beta_0 = 0$, so the shrinking of the subgroup is solely limited by WRAcc improvement and not the subgroup size.
 For \emph{Beam} and \emph{BI}, we choose a beam width of $w=10$, falling between default values used in other implementations~\cite{arzamasov2021reds, lemmerich2019pysubgroup}.

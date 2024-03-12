@@ -325,7 +325,7 @@ I.e., if a bound does not exclude any negative data object from the subgroup on 
 	\label{al:csd:beam-search-subgroup-update}
 \end{algorithm}
 
-\paragraph{Beam search}
+\paragraph{Beam Search}
 
 Beam search is a generic search strategy that maintains a set of currently best solution candidates, i.e., the beam, and iteratively updates them.
 For subgroup discovery, one way to implement this strategy is outlined in Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}, which we refer to as \emph{Beam Search} in the following.
@@ -342,8 +342,8 @@ As for \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), we replace all non-excludi
 In the main loop (Lines~\ref{al:csd:generic-beam-search:line:iteration-start}-\ref{al:csd:generic-beam-search:line:iteration-end}), the algorithm updates the beam.
 In particular, for each subgroup that changed in the previous iteration, the algorithm creates new solution candidates by attempting to update the bounds of each feature separately (Lines~\ref{al:csd:generic-beam-search:line:update-start}-\ref{al:csd:generic-beam-search:line:update-end}).
 There are different options for this update.
-Algorithm~\ref{al:csd:beam-search-subgroup-update} outlines the update strategy for \emph{Beam Search}, while \emph{Best Interval} uses a slightly different one (cf.~Algorithm~\ref{al:csd:best-interval-subgroup-update}).
-For \emph{Beam Search}, the strategy separately tries to refine the lower bound (Lines~\ref{al:csd:beam-search-subgroup-update:line:lb-start}-\ref{al:csd:beam-search-subgroup-update:line:lb-end}) and the upper bound (Lines~\ref{al:csd:beam-search-subgroup-update:line:ub-start}-\ref{al:csd:beam-search-subgroup-update:line:ub-end}) for a given Feature~$j$ by replacing it with another feature value from data objects in the subgroup.
+Algorithm~\ref{al:csd:beam-search-subgroup-update} outlines the update procedure for \emph{Beam Search}, while \emph{Best Interval} uses a slightly different one (cf.~Algorithm~\ref{al:csd:best-interval-subgroup-update}).
+For \emph{Beam Search}, the procedure separately tries to refine the lower bound (Lines~\ref{al:csd:beam-search-subgroup-update:line:lb-start}-\ref{al:csd:beam-search-subgroup-update:line:lb-end}) and the upper bound (Lines~\ref{al:csd:beam-search-subgroup-update:line:ub-start}-\ref{al:csd:beam-search-subgroup-update:line:ub-end}) for a given Feature~$j$ by replacing it with another feature value from data objects in the subgroup.
 In particular, it iterates over all these unique feature values.
 Each solution candidate that improves upon the minimum subgroup quality from the beam replaces the corresponding subgroup, unless it already is part of them beam due to another update action (Lines~\ref{al:csd:beam-search-subgroup-update:line:lb-replace-start}-\ref{al:csd:beam-search-subgroup-update:line:lb-replace-end} and~\ref{al:csd:beam-search-subgroup-update:line:ub-replace-start}-\ref{al:csd:beam-search-subgroup-update:line:ub-replace-end}).
 
@@ -351,14 +351,45 @@ Each solution candidate that improves upon the minimum subgroup quality from the
 	\DontPrintSemicolon
 	\KwIn{Parameters and variables from Algorithm~\ref{al:csd:generic-beam-search}}
 	\KwOut{None; modifies variables from Algorithm~\ref{al:csd:generic-beam-search} in-place}
+	$(\mathit{lb},~ \mathit{ub}) \leftarrow (\mathit{lb}^{(\text{beam, } l)},~ \mathit{lb}^{(\text{beam, } l)})$ \tcp*{Value at index~$j$ will change}  \label{al:csd:best-interval-subgroup-update:line:main-start}
+	$(\mathit{lb}^{\text{opt}},~ \mathit{ub}^{\text{opt}}) \leftarrow (\mathit{lb}^{(\text{beam, } l)},~ \mathit{lb}^{(\text{beam, } l)})$ \tcp*{$(l, r)$ in~\cite{mampaey2012efficient}}
+	$Q^{\text{opt}} \leftarrow Q(\mathit{lb}^{\text{opt}}, \mathit{ub}^{\text{opt}}, X, y)$ \tcp*{$\textit{WRAcc}_{\text{max}}$ in~\cite{mampaey2012efficient}}
+	$Q^{\text{temp}} \leftarrow -\infty$ \tcp*{$h_{\text{max}}$ in~\cite{mampaey2012efficient}}
+	$\mathit{lb}^{\text{temp}}_j \leftarrow -\infty$ \tcp*{$t_{\text{max}}$ in~\cite{mampaey2012efficient}}
+	\For{$b \in $ sort(unique(get\_feature\_values($X_{\cdot j}$, $\mathit{lb}^{(\text{beam, } l)}$, $\mathit{ub}^{(\text{beam, } l)}$)))}{
+		$\mathit{lb}_j \leftarrow b$\;
+		$\mathit{ub}_j \leftarrow \mathit{ub}^{(\text{beam, } l)}_j$\;
+		\If{$Q(\mathit{lb}, \mathit{ub}, X, y) > Q^{\text{temp}}$}{
+			$\mathit{lb}^{\text{temp}}_j \leftarrow b$\;
+			$Q^{\text{temp}} \leftarrow Q(\mathit{lb}, \mathit{ub}, X, y)$\;
+		}
+		$\mathit{lb}_j \leftarrow \mathit{lb}^{\text{temp}}_j$\;
+		$\mathit{ub}_j \leftarrow b$\;
+		\If{$Q(\mathit{lb}, \mathit{ub}, X, y) > Q^{\text{opt}}$}{
+			$(\mathit{lb}^{\text{opt}},~ \mathit{ub}^{\text{opt}}) \leftarrow (\mathit{lb},~ \mathit{ub})$\;
+			$Q^{\text{opt}} \leftarrow Q(\mathit{lb}, \mathit{ub}, X, y)$\; \label{al:csd:best-interval-subgroup-update:line:main-end}
+		}
+	}
+	\If{$\left( Q(\mathit{lb}^{\text{opt}}, \mathit{ub}^{\text{opt}}, X, y) > \min_{l \in \{1, ..., w\}} Q^{(l)} \right)$ \textbf{and} $(\mathit{lb}^{\text{opt}},~ \mathit{ub}^{\text{opt}}) \notin \{(\mathit{lb}^{(\text{cand, } l)},~ \mathit{ub}^{(\text{cand, } l)}) \mid l \in \{1, \dots, w\}\}$ }{ \label{al:csd:best-interval-subgroup-update:line:replace-start}
+		$l \leftarrow \arg\min_{l \in \{1, \dots, w\}} Q^{(l)}$ \tcp*{Replace worst candidate}
+		$(\mathit{lb}^{(\text{cand, } l)},~ \mathit{ub}^{(\text{cand, } l)}) \leftarrow (\mathit{lb}^{\text{opt}}, \mathit{ub}^{\text{opt}})$\;
+		$\mathit{cand\_has\_changed}^{(l)} \leftarrow$ \textbf{true}\;
+		$Q^{(l)} \leftarrow Q(\mathit{lb}^{\text{opt}}, \mathit{ub}^{\text{opt}}, X, y)$\; \label{al:csd:best-interval-subgroup-update:line:replace-end}
+	}
 	\caption{evaluate\_subgroup\_updates(\dots) for \emph{Best Interval}}
 	\label{al:csd:best-interval-subgroup-update}
 \end{algorithm}
 
-\paragraph{Best interval}
+\paragraph{Best Interval}
 
-\emph{Best Interval}~\cite{mampaey2012efficient}
+\emph{Best Interval}~\cite{mampaey2012efficient} offers an update procedure for subgroups (cf.~Algorithm~\ref{al:csd:best-interval-subgroup-update}) that is tailored towards WRAcc (cf.~Equation~\ref{eq:csd:wracc}) as the evaluation metric.
+This update procedure can be used within a generic beam-search strategy (cf.~Algorithm~\ref{al:csd:generic-beam-search}).
+As before, the best new solution candidate becomes part of the beam if it improves upon the worst subgroup quality there and is not a duplicate (Lines~\ref{al:csd:best-interval-subgroup-update:line:replace-start}-\ref{al:csd:best-interval-subgroup-update:line:replace-end})
 
+However, solution candidates are generated differently than in the update procedure \emph{Beam Search} (cf.~Algorithm~\ref{al:csd:beam-search-subgroup-update}),
+In particular, \emph{Best Interval} updates lower and upper bounds for a given Feature~$j$ simultaneously rather than separately (Lines~\ref{al:csd:best-interval-subgroup-update:line:main-start}-\ref{al:csd:best-interval-subgroup-update:line:main-end}).
+Thus, this procedure optimizes over all potential combinations of lower and upper bounds.
+However, it still only requires one pass over the unique values of Feature~$j$ rather than quadratic cost, due to theoretical properties of the WRAcc function~\cite{mampaey2012efficient}.
 
 \subsection{Baselines for Subgroup Discovery}
 \label{sec:csd:fundamentals:baselines}

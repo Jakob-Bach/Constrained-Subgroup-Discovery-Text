@@ -154,7 +154,7 @@ We assume that categorical features have already been made numeric, e.g., via on
 There are also subgroup-discovery methods that focus on categorical data.
 $X_{\cdot{}j} \in \mathbb{R}^m$ denotes the vector representation of the $j$-th feature.
 $y \in Y^m$ represents the prediction target with domain $Y$, e.g., $Y=\{0,1\}$ for binary classification or $Y=\mathbb{R}$ for regression.
-In this paper, we focus on binary-classification tasks in our formalization and evaluation.
+In this article, we focus on binary-classification tasks in our formalization and evaluation.
 In principle, subgroup discovery also works for regression problems.
 
 $\mathit{lb}, \mathit{ub}$
@@ -227,7 +227,7 @@ Alternatively, one can also min-max normalize the range to~$[0, 1]$~\cite{carmon
 In this section, we discuss three heuristic search methods for subgroup discovery.
 All of them are well-established and originate from related work.
 
-\begin{algorithm}[t]
+\begin{algorithm}[p]
 	\DontPrintSemicolon
 	\KwIn{Dataset~$X \in \mathbb{R}^{m \times n}$, \newline
 		Prediction target~$y \in \{0, 1\}^n$, \newline
@@ -237,23 +237,65 @@ All of them are well-established and originate from related work.
 	}
 	\KwOut{Subgroup bounds~$\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$}
 	\BlankLine
+	\For(\tcp*[f]{Start with unrestricted subgroup}){$j \leftarrow 1$ \KwTo $n$}{ \label{al:csd:prim:line:initialization-start}
+		$(\mathit{lb}^{\text{opt}}_j,~ \mathit{ub}^{\text{opt}}_j) \leftarrow (-\infty, +\infty)$\;
+	}
+	$Q^{\text{opt}} \leftarrow Q(\mathit{lb}^{\text{opt}}, \mathit{ub}^{\text{opt}}, X, y)$\;
+	$(\mathit{lb}^{\text{peel}}, \mathit{ub}^{\text{peel}}) \leftarrow (\mathit{lb}^{\text{opt}},~ \mathit{ub}^{\text{opt}})$\; \label{al:csd:prim:line:initialization-end}
+	\While(\tcp*[f]{Support threshold satisfied}){$\frac{m_b}{m} > \beta_0$}{ \label{al:csd:prim:line:stop} \label{al:csd:prim:iteration-start}
+		$Q^{\text{cand}} \leftarrow -\infty$\;
+		\For{$j \in$ get\_permissible\_feature\_idxs(\dots)}{ \label{al:csd:prim:line:peel-start}
+			$(\mathit{lb},~ \mathit{ub}) \leftarrow (\mathit{lb}^{\text{peel}},~ \mathit{ub}^{\text{peel}})$ \tcp*{Try peeling lower bound}
+			$\mathit{lb}_j \leftarrow$ quantile($X_{\cdot j}$, $\mathit{lb}$, $\mathit{ub}$, $\alpha$)\;
+			\If{$Q(\mathit{lb}, \mathit{ub}, X, y) > Q^{\text{cand}}$}{
+				$(\mathit{lb}^{\text{cand}}, \mathit{ub}^{\text{cand}}) \leftarrow (\mathit{lb}, \mathit{ub})$\;
+			}
+			$(\mathit{lb},~ \mathit{ub}) \leftarrow (\mathit{lb}^{\text{peel}},~ \mathit{ub}^{\text{peel}})$ \tcp*{Try peeling upper bound}
+			$\mathit{ub}_j \leftarrow$ quantile($X_{\cdot j}$, $\mathit{lb}$, $\mathit{ub}$, $1-\alpha$)\;
+			\If{$Q(\mathit{lb}, \mathit{ub}, X, y) > Q^{\text{cand}}$}{
+				$(\mathit{lb}^{\text{cand}}, \mathit{ub}^{\text{cand}}) \leftarrow (\mathit{lb}, \mathit{ub})$\; \label{al:csd:prim:line:peel-end}
+			}
+		}
+		$(\mathit{lb}^{\text{peel}}, \mathit{ub}^{\text{peel}}) \leftarrow (\mathit{lb}^{\text{cand}}, \mathit{ub}^{\text{cand}})$ \tcp*{Retain best candidate} \label{al:csd:prim:line:best-peel-selection}
+		\If(\tcp*[f]{Update optimum}){$Q(\mathit{lb}^{\text{peel}}, \mathit{ub}^{\text{peel}}, X, y) > Q^{\text{opt}}$}{ \label{al:csd:prim:line:opt-check-start}
+			$Q^{\text{opt}} \leftarrow Q(\mathit{lb}^{\text{peel}}, \mathit{ub}^{\text{peel}}, X, y)$\;
+			$(\mathit{lb}^{\text{opt}},~ \mathit{ub}^{\text{opt}}) \leftarrow (\mathit{lb}^{\text{peel}},~ \mathit{ub}^{\text{peel}})$\; \label{al:csd:prim:line:opt-check-end} \label{al:csd:prim:iteration-end}
+		}
+	}
+	$(\mathit{lb}, \mathit{ub}) \leftarrow (\mathit{lb}^{\text{opt}}, \mathit{ub}^{\text{opt}})$\;
+	\For(\tcp*[f]{Reset non-excluding bounds}){$j \leftarrow 1$ \KwTo $n$}{ \label{al:csd:prim:line:bounds-infty-start}
+		\lIf{$\mathit{lb}_j = \min_{i \in \{1, \dots, m\}} X_{ij}$}{$\mathit{lb}_j \leftarrow -\infty$}
+		\lIf{$\mathit{ub}_j = \max_{i \in \{1, \dots, m\}} X_{ij}$}{$\mathit{ub}_j \leftarrow +\infty$} \label{al:csd:prim:line:bounds-infty-end}
+	}
+	\Return{$\mathit{lb}, \mathit{ub}$}
 	\caption{\emph{PRIM} for subgroup discovery.}
 	\label{al:csd:prim}
 \end{algorithm}
 
 \paragraph{PRIM}
 
-\emph{Patient Rule Induction Method (PRIM)}~\cite{friedman1999bump}
+\emph{Patient Rule Induction Method (PRIM)}~\cite{friedman1999bump} is an iterative search algorithm.
+In its basic form, it consists of a peeling phase and a pasting phase.
+Peeling iteratively restricts bounds of the subgroup, while pasting iteratively expands them.
+Algorithm~\ref{al:csd:prim} outlines the peeling phase for finding one subgroup, which is the flavor of PRIM we consider in this article and denote as \emph{PRIM}.
+Pasting may have little effect on the subgroup quality and is often left out~\cite{arzamasov2021reds}.
+Further, we do not discuss extensions of PRIM like bumping~\cite{friedman1999bump, kwakkel2016improving}, which uses bagging of multiple PRIM runs to improve subgroup quality, or covering~\cite{friedman1999bump}, which returns a sequence of subgroups.
 
-Algorithm~\ref{al:csd:prim}
+The algorithm \emph{PRIM} starts with a subgroup containing all data objects, which is the initial solution candidate (Lines~\ref{al:csd:prim:line:initialization-start}-\ref{al:csd:prim:line:initialization-end}), 
+It continues peeling until the current solution candidate contains at most a fraction~$\beta_0$ of data objects (Line~\ref{al:csd:prim:line:stop}).
+The support threshold~$\beta_0 \in [0, 1]$ is a user parameter.
+The returned subgroup is the optimal solution candidate over all peeling iterations.
+In our \emph{PRIM} implementation, we add a small post-processing step after peeling.
+In particular, we set \emph{non-excluding bounds} to infinity (Lines~\ref{al:csd:prim:line:bounds-infty-start}-\ref{al:csd:prim:line:bounds-infty-end}).
+These are bounds that do not exclude any data objects from the subgroup, i.e., lower/upper bounds that equal the minimum/maximum feature value of all data objects.
+Thereby, we ensure that these bounds remain non-excluding for any new data, where global feature minima/maxima may differ.
 
-according to Vadim's Medium blog post, REDS article should say that pasting phase of PRIM has little effect on quality
-
-Coin term \emph{permissible features} for function \emph{get\_permissible\_feature\_idxs(\dots)}
-
-\emph{non-excluding bounds}
-we set bounds to infinity if the minimum/maximum feature value of positive data objects equals the minimum/maximum feature value of all data objects (Lines~\ref{al:csd:morb:line:bounds-infty-start}-\ref{al:csd:morb:line:bounds-infty-end}).
-I.e., if a bound does not exclude any negative data object from the subgroup on the given data, we ensure that this property also holds for any new data, where global feature minima/maxima may differ.
+In the iterative peeling procedure (Lines~\ref{al:csd:prim:iteration-start}-\ref{al:csd:prim:iteration-end}), the algorithm generates new solution candidates by trying to restrict each \emph{permissible feature} (Lines~\ref{al:csd:prim:line:peel-start}-\ref{al:csd:prim:line:peel-end}).
+In unconstrained subgroup discovery, each feature is permissible, but the function \emph{get\_permissible\_feature\_idxs(\dots)} will become useful once we introduce constraints.
+For each Feature~$j$, the algorithm tests a new lower bound at the $\alpha$-quantile of feature values in the subgroup and a new upper bound at the $1-\alpha$-quantile of feature values in the subgroup.
+The peeling fraction $\alpha \in (0, 1)$ is a user parameter.
+It describes which fraction of data objects gets excluded from the subgroup in each peeling iteration.
+Having tested two new bounds for each feature, the algorithm takes the subgroup with the highest associated quality (Line~\ref{al:csd:prim:line:best-peel-selection}) and continues peeling it in the next iteration. Further, if this solution candidate improves upon the optimal solution candidate from prior iterations, it is stored as the new optimum (Lines~\ref{al:csd:prim:line:opt-check-start}-\ref{al:csd:prim:line:opt-check-end}).
 
 \begin{algorithm}[p]
 	\DontPrintSemicolon
@@ -271,7 +313,7 @@ I.e., if a bound does not exclude any negative data object from the subgroup on 
 		$\mathit{cand\_has\_changed}^{(l)} \leftarrow$ \textbf{true}\;
 		$Q^{(l)} \leftarrow Q(\mathit{lb}^{(\text{beam, } l)}, \mathit{ub}^{(\text{beam, } l)}, X, y)$\; \label{al:csd:generic-beam-search:line:initialization-end}
 	}
-	\While(\tcp*[f]{Beam has changed}){$\left( \sum_{l=1}^w \mathit{cand\_has\_changed}^{(l)} \right) > 0$}{ \label{al:csd:generic-beam-search:line:iteration-start}
+	\While(\tcp*[f]{Beam has changed}){$\left( \sum_{l=1}^w \mathit{cand\_has\_changed}^{(l)} \right) > 0$}{ \label{al:csd:generic-beam-search:line:iteration-start} \label{al:csd:generic-beam-search:line:stop}
 		$\mathit{prev\_cand\_changed\_idxs} \leftarrow \{l \mid \mathit{cand\_has\_changed}^{(l)} \}$\;
 		\For(\tcp*[f]{Create temporary solution candidates}){$l \leftarrow 1$ \KwTo $w$}{
 			$(\mathit{lb}^{(\text{cand, } l)},~ \mathit{ub}^{(\text{cand, } l)}) \leftarrow$ $(\mathit{lb}^{(\text{beam, } l)},~ \mathit{ub}^{(\text{beam, } l)})$\;
@@ -288,7 +330,7 @@ I.e., if a bound does not exclude any negative data object from the subgroup on 
 	}
 	$l \leftarrow \arg\max_{l \in \{1, \dots, w\}} Q^{(l)}$ \tcp*{Select best subgroup from beam} \label{al:csd:generic-beam-search:line:finalization-start}
 	$(\mathit{lb},~ \mathit{ub}) \leftarrow (\mathit{lb}^{(\text{beam, } l)},~ \mathit{ub}^{(\text{beam, } l)})$\;
-	\For{$j \leftarrow 1$ \KwTo $n$}{ \label{al:csd:generic-beam-search:line:bounds-infty-start}
+	\For(\tcp*[f]{Reset non-excluding bounds}){$j \leftarrow 1$ \KwTo $n$}{ \label{al:csd:generic-beam-search:line:bounds-infty-start}
 		\lIf{$\mathit{lb}_j = \min_{i \in \{1, \dots, m\}} X_{ij}$}{$\mathit{lb}_j \leftarrow -\infty$}
 		\lIf{$\mathit{ub}_j = \max_{i \in \{1, \dots, m\}} X_{ij}$}{$\mathit{ub}_j \leftarrow +\infty$} \label{al:csd:generic-beam-search:line:bounds-infty-end}
 	}
@@ -332,12 +374,12 @@ For subgroup discovery, one way to implement this strategy is outlined in Algori
 It is an adapted version of the beam-search implementation in the Python package \emph{pysubgroup}~\cite{lemmerich2019pysubgroup}.
 The number of solution candidates, i.e., subgroups, in the beam is a user parameter, i.e., the beam width~$w$.
 
-First, the algorithm initializes the beam by creating $w$ unrestricted subgroups, characterized by their bounds $\mathit{lb}^{(\text{beam, } l)}$ and $\mathit{ub}^{(\text{beam, } l)}$ (Lines~\ref{al:csd:generic-beam-search:line:initialization-start}-\ref{al:csd:generic-beam-search:line:initialization-end}).
+First, the algorithm \emph{Beam Search} initializes the beam by creating $w$ unrestricted subgroups, characterized by their bounds $\mathit{lb}^{(\text{beam, } l)}$ and $\mathit{ub}^{(\text{beam, } l)}$ (Lines~\ref{al:csd:generic-beam-search:line:initialization-start}-\ref{al:csd:generic-beam-search:line:initialization-end}).
 Further, it stores the quality $Q^{(l)}$ of each subgroup in the beam.
 Additionally, it records which subgroups changed in the previous iteration (Lines~\ref{al:csd:generic-beam-search:line:iteration-start}-\ref{al:csd:generic-beam-search:line:iteration-end}) of the search.
-In particular, it stops once all subgroups in the beam remain unchanged.
+In particular, it stops once all subgroups in the beam remain unchanged (Line~\ref{al:csd:generic-beam-search:line:stop}).
 Subsequently, it returns the best subgroup from the beam (Lines~\ref{al:csd:generic-beam-search:line:finalization-start}-\ref{al:csd:generic-beam-search:line:finalization-end}).
-As for \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), we replace all non-excluding bounds with infinity.
+As for \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Beam Search} replaces all non-excluding bounds with infinity.
 
 In the main loop (Lines~\ref{al:csd:generic-beam-search:line:iteration-start}-\ref{al:csd:generic-beam-search:line:iteration-end}), the algorithm updates the beam.
 In particular, for each subgroup that changed in the previous iteration, the algorithm creates new solution candidates by attempting to update the bounds of each feature separately (Lines~\ref{al:csd:generic-beam-search:line:update-start}-\ref{al:csd:generic-beam-search:line:update-end}).
@@ -437,7 +479,7 @@ In this sense, the bounds are minimal.
 The corresponding subgroup is unique.
 
 Algorithm~\ref{al:csd:morb} outlines the procedure to determine these bounds.
-Slightly deviating from the previously described criterion, but consistent to \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), we replace all non-excluding bounds with infinity (Lines~\ref{al:csd:random-search:line:bounds-infty-start}-\ref{al:csd:random-search:line:bounds-infty-end}).
+Slightly deviating from the previously described criterion, but consistent to \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{MORB} replaces all non-excluding bounds with infinity (Lines~\ref{al:csd:random-search:line:bounds-infty-start}-\ref{al:csd:random-search:line:bounds-infty-end}).
 Further, if only certain features are permissible, we reset the bounds of the remaining features (Line~\ref{al:csd:morb:line:reset-start}-\ref{al:csd:morb:line:reset-end}).
 
 Since \emph{MORB} only needs to iterate over all data objects and features once to determine the minima and maxima, the computational complexity of this heuristic is~$O(n \cdot m)$.
@@ -507,10 +549,10 @@ Having \emph{MORB} as an efficient algorithm for perfect-subgroup discovery, we 
 \label{sec:csd:fundamentals:baselines:random-search}
 
 Algorithm~\ref{al:csd:random-search} outlines the randomized search procedure that constitutes the second baseline.
-It generates and evaluates subgroups for a fixed number of iterations, which the user controls with the parameter~$\mathit{n\_iters}$.
+\emph{Random Search} generates and evaluates subgroups for a fixed number of iterations, which the user controls with the parameter~$\mathit{n\_iters}$.
 Hereby, subgroup generation samples a pair of lower and upper bound uniformly random from the unique values for each permissible feature, leaving the remaining features unrestricted (Lines~\ref{al:csd:random-search:line:sampling-start}-\ref{al:csd:random-search:line:sampling-end}).
 The algorithm tracks the best generated subgroup so far over the iterations (Lines~\ref{al:csd:random-search:line:optimum-update-start}-\ref{al:csd:random-search:line:optimum-update-end}) and finally returns the subgroup with the highest quality.
-As for \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), we replace all non-excluding bounds with infinity (Lines~\ref{al:csd:random-search:line:bounds-infty-start}-\ref{al:csd:random-search:line:bounds-infty-end}).
+As for \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Random Search} replaces all non-excluding bounds with infinity (Lines~\ref{al:csd:random-search:line:bounds-infty-start}-\ref{al:csd:random-search:line:bounds-infty-end}).
 
 \section{Constrained Subgroup Discovery}
 \label{sec:csd:approach}
@@ -619,7 +661,8 @@ existing methods need adaptation to support certain constraint types, white-box 
 
 according to \cite{meeng2021real}, lower bounds on data objects and subgroup quality are common constraints in SD algorithms
 \cite{lavravc2006relevancy} mentions feature-cardinality constraints, recall constraints
-\cite{helal2016subgroup, herrera2011overview, ventura2018subgroup} mention number of features (and number os subgroups) as complexity measure
+\cite{helal2016subgroup, herrera2011overview, ventura2018subgroup} mention number of features (and number of subgroups) as complexity measure
+\cite{friedman1999bump} also mentions feature cardinality as complexity measure and lower complexity as desirable for interpretability
 (non-user) quality constraints are also used within SD algorithms for refinement/pruning \cite{atzmueller2015subgroup, grosskreutz2009subgroup}
 
 \subsection{Feature-Cardinality Constraints}
@@ -638,6 +681,8 @@ define term selected == restricted
 note that only constraints added, rest of optimization problem (particularly objective) remains as-is
 
 give reason why less than $k$ features may be selected
+
+as alternative to prescribing k, can also eliminate irrelevant variables after having found box \cite{friedman1999bump}
 
 \begin{definition}[Feature-cardinality constraint]
 	\emph{feature-cardinality constraint}
@@ -968,7 +1013,8 @@ In practice, however, we set solver timeouts to keep the runtime under control (
 We evaluate three heuristic search methods from related work:
 \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Beam Search} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}), subsequently called \emph{Beam}), and \emph{Best Interval} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:best-interval-subgroup-update}), subsequently called \emph{BI}).
 For all three methods, we use WRAcc (cf.~Equation~\ref{eq:csd:wracc}) as the subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$.
-We set the peeling fraction of PRIM to~$\alpha = 0.05$, consistent with other implementations of PRIM~\cite{arzamasov2021reds, kwakkel2017the}, and the support threshold to~$\beta_0 = 0$, so the shrinking of the subgroup is solely limited by WRAcc improvement and not the subgroup size.
+We set the peeling fraction of PRIM to~$\alpha = 0.05$, consistent with other implementations of PRIM~\cite{arzamasov2021reds, kwakkel2017the} and within the recommended value range proposed by the original authors~\cite{friedman1999bump}.
+Further, we set the support threshold to~$\beta_0 = 0$, so the shrinking of the subgroup is solely limited by WRAcc improvement and not the subgroup size.
 For \emph{Beam} and \emph{BI}, we choose a beam width of $w=10$, falling between default values used in other implementations~\cite{arzamasov2021reds, lemmerich2019pysubgroup}.
 
 \paragraph{Baselines}

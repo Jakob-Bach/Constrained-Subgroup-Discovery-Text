@@ -129,67 +129,86 @@ The similarity to the original subgroup and the quality of the alternatives decr
 
 \paragraph{Outline}
 
-Section~\ref{sec:csd:fundamentals} introduces notation and fundamentals.
+Section~\ref{sec:csd:fundamentals} introduces fundamentals.
 Section~\ref{sec:csd:approach} describes and analyzes constrained subgroup discovery.
 Section~\ref{sec:csd:related-work} reviews related work.
 Section~\ref{sec:csd:experimental-design} outlines our experimental design, while Section~\ref{sec:csd:evaluation} presents the experimental results.
 Section~\ref{sec:csd:conclusion} concludes and discusses future work.
 Appendix~\ref{sec:csd:appendix} contains supplementary materials.
 
-\section{Fundamentals}
+\section{Fundamentals of Subgroup Discovery}
 \label{sec:csd:fundamentals}
 
 In this section, we describe fundamentals for our work.
-First, we introduce notation (cf.~Section~\ref{sec:csd:fundamentals:notation}).
-Next, we describe the problem of subgroup discovery (cf.~Section~\ref{sec:csd:fundamentals:subgroup-discovery}) and common heuristic search methods to solve this problem (cf.~Section~\ref{sec:csd:fundamentals:heuristics}).
+First, we introduce the optimization problem of subgroup discovery (cf.~Section~\ref{sec:csd:fundamentals:problem}).
+Next, we describe common heuristic search methods to solve this problem (cf.~Section~\ref{sec:csd:fundamentals:heuristics}).
 Finally, we propose two baselines for subgroup discovery that we also use in our experiments. (cf.~Section~\ref{sec:csd:fundamentals:baselines}).
 
-\subsection{Notation}
-\label{sec:csd:fundamentals:notation}
+\subsection{Problem}
+\label{sec:csd:fundamentals:problem}
 
-$X \in \mathbb{R}^{m \times n}$ stands for a dataset in the form of a matrix.
+\paragraph{Context}
+
+In general, subgroup discovery involves finding descriptions of interesting subsets of a dataset~\cite{atzmueller2015subgroup}.
+There are multiple options to define the type of dataset, the kind of subgroup description, and the criterion of interestingness.
+In the following, we formalize the notion of subgroup discovery that we tackle in this article.
+For broader surveys, see~\cite{atzmueller2015subgroup, helal2016subgroup, herrera2011overview, ventura2018subgroup}.
+
+\paragraph{Dataset}
+
+We focus on tabular, real-valued data.
+In particular, $X \in \mathbb{R}^{m \times n}$ stands for a dataset in the form of a matrix.
 Each row is a data object, and each column is a feature.
-$F = \{f_1, \dots, f_n\}$ is the corresponding set of feature names.
 We assume that categorical features have already been made numeric, e.g., via one-hot or ordinal encoding.
-There are also subgroup-discovery methods that focus on categorical data.
-$X_{\cdot{}j} \in \mathbb{R}^m$ denotes the vector representation of the $j$-th feature.
+There are also many subgroup-discovery methods that only process categorical data and require continuous features to be discretized~\cite{herrera2011overview, meeng2021real}.
+$X_{i \cdot} \in \mathbb{R}^n$ denotes the values of all features for the $i$-th data object,
+while $X_{\cdot j} \in \mathbb{R}^m$ denotes the values of the $j$-th feature for all data objects.
 $y \in Y^m$ represents the prediction target with domain $Y$, e.g., $Y=\{0,1\}$ for binary classification or $Y=\mathbb{R}$ for regression.
-In this article, we focus on binary-classification tasks in our formalization and evaluation.
-In principle, subgroup discovery also works for regression problems.
+Thus, we are in a supervised-learning scenario.
+In this article, we focus on binary-classification scenarios in our formalization and evaluation.
+In general, one may also conduct subgroup discovery in multi-class, multi-target, or regression scenarios~\cite{atzmueller2015subgroup}.
 
-$\mathit{lb}, \mathit{ub}$
-In subgroup discovery, one ... (goal, decision variables)
---either definition or equation
--- first general (interesting region, then for binary classification)
+\paragraph{Subgroup}
 
+A Subgroup description typically comprises a conjunction of conditions on individual features~\cite{meeng2021real}.
+For real-valued data, the conditions constitute intervals.
+Thus, a subgroup description is a hyperrectangle in~$\mathbb{R}^n$.
+In particular, the subgroup description comprises a lower bound and an upper bound for each feature.
+The bounds for a feature may also be infinite to leave it unrestricted.
+A data object resides in the subgroup if all its feature values are in the intervals formed by lower and upper bounds:
+%
 \begin{definition}[Subgroup]
-	\emph{subgroup}
+	Given a dataset~$X \in \mathbb{R}^{m \times n}$, a \emph{subgroup} is defined by lower bounds~$\mathit{lb} \in \mathbb{R}^n$ and upper bounds~$\mathit{ub} \in \mathbb{R}^n$.
+	A data object $X_{i \cdot}$ is a \emph{member} of the subgroup if $\forall j \in \{1, \dots, n\}:~ \left( X_{ij} \geq \mathit{lb}_j \right) \land \left( X_{ij} \leq \mathit{ub}_j \right)$.
 	\label{def:csd:subgroup}
 \end{definition}
+%
+For categorical features, one may replace the inequality comparisons with equality comparisons against categorical feature values~\cite{atzmueller2015subgroup}.
 
+Throughout this article, we often use the terms \emph{subgroup} and \emph{subgroup description} interchangeably.
+In a more strict sense, one may use the former term to denote the subgroup's members and the latter for the subgroup's bounds~\cite{atzmueller2015subgroup}.
+
+\paragraph{Subgroup discovery}
+
+For framing subgroup discovery as an optimization problem, we need a notion of subgroup quality, i.e., interestingness of the subgroup.
+A function $Q(\mathit{lb}, \mathit{ub}, X, y)$ shall return the quality of a subgroup on a particular dataset.
+Without loss of generality, we assume that this function should be maximized:
+%
 \begin{definition}[Subgroup discovery]
-	\emph{subgroup discovery}
+	Given a dataset~$X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^n$,
+	\emph{subgroup discovery} is the problem of finding a subgroup (cf.~Definition~\ref{def:csd:subgroup}) with bounds~$\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$ that maximize a given notion of subgroup quality~$Q(\mathit{lb}, \mathit{ub}, X, y)$.
 	\label{def:csd:subgroup-discovery}
 \end{definition}
+%
+While this definition refers to one subgroup, some subgroup-discovery methods may also return a set of subgroups~\cite{atzmueller2015subgroup}.
 
-Without loss of generality, we assume that the class with label~`1' is the class of interest, also called \emph{positive} class, which should be captured by subgroups.
-The function $Q(\mathit{lb}, \mathit{ub}, X, y)$ returns the quality of such a subgroup.
-Without loss of generality, we assume that this function should be maximized.
+For binary-classification scenarios, interesting subgroups should typically contain many data objects from one class but few from the other class.
+While traditional classification tries to characterize the dataset globally, subgroup discovery follows a local paradigm, i.e., focuses on the data objects in the subgroup~\cite{meeng2021real}.
+Without loss of generality, we assume that the class with label~`1' is the class of interest, also called \emph{positive} class.
 
-\subsection{Subgroup Discovery}
-\label{sec:csd:fundamentals:subgroup-discovery}
+\paragraph{Subgroup quality}
 
-\cite{helal2016subgroup} \cite{herrera2011overview} \cite{atzmueller2015subgroup} \cite{ventura2018subgroup} \cite{meeng2021real}
-
-\paragraph{Problem}
-
-subgroup == (hyper)box
-
-introduce (here or in notation) the Iverson bracket [], which turns Boolean expressions into 0/1
-
-\paragraph{Evaluation}
-
-A popular evaluation metric for subgroup quality is Weighted Relative Accuracy (WRAcc)~\cite{lavravc1999rule}:
+Weighted Relative Accuracy (WRAcc)~\cite{lavravc1999rule} is a popular metric for subgroup quality~\cite{meeng2021real}:
 %
 \begin{equation}
 	\text{WRACC} = \frac{m_b}{m} \cdot \left( \frac{m_b^+}{m_b} - \frac{m^+}{m} \right)
@@ -198,7 +217,7 @@ A popular evaluation metric for subgroup quality is Weighted Relative Accuracy (
 %
 Besides the total number of data objects~$m$, this metric considers the number of positive data objects~$m^+$, the number of data objects in the subgroup~$m_b$, and the number of positive data objects in the subgroup~$m_b^+$.
 In particular, WRAcc is the product of two factors:
-$m_b / m$ denotes the relative frequency of subgroup membership, i.e., the generality of the subgroup.
+$m_b / m$ quantifies the generality of the subgroup with the relative frequency of subgroup membership.
 The second factor measures the difference in relative frequency of the positive class between the subgroup and the whole dataset, i.e., the relative accuracy of the subgroup.
 If the subgroup contains the same fraction of positive data objects as the whole dataset, WRAcc is zero.
 The maximum and minimum of WRAcc depend on the class frequencies.
@@ -211,7 +230,7 @@ In particular, the maximum WRAcc equals the product of the relative frequencies 
 %
 This maximum is reached if all positive data objects are in the subgroup and all negative data objects are outside, i.e., $m_b^+ = m_b = m^+$.
 While the maximum is 0.25 if both classes occur with equal frequency, it becomes smaller the more imbalanced the classes are.
-Thus, it makes sense to normalize WRAcc when working with datasets with different relative class frequencies.
+Thus, it makes sense to normalize WRAcc when working with datasets with different class frequencies.
 One normalization, which we use in our experiments, is a max-normalization to the range $[-1, 1]$~\cite{mathonat2021anytime}:
 %
 \begin{equation}
@@ -221,11 +240,12 @@ One normalization, which we use in our experiments, is a max-normalization to th
 %
 Alternatively, one can also min-max normalize the range to~$[0, 1]$~\cite{carmona2018unifying, ventura2018subgroup}.
 
-\subsection{Heuristic Search Methods for Subgroup Discovery}
+\subsection{Heuristic Search Methods}
 \label{sec:csd:fundamentals:heuristics}
 
-In this section, we discuss three heuristic search methods for subgroup discovery.
-All of them are well-established and originate from related work.
+In general, there are heuristic and exhaustive search methods for subgroup discovery~\cite{atzmueller2015subgroup}.
+In this section, we discuss three heuristic search methods, which we will employ in our experiments.
+All three methods are well-established and originate from related work.
 
 \begin{algorithm}[p]
 	\DontPrintSemicolon
@@ -369,10 +389,11 @@ Having tested two new bounds for each feature, the algorithm takes the subgroup 
 
 \paragraph{Beam Search}
 
-Beam search is a generic search strategy that maintains a set of currently best solution candidates, i.e., the beam, and iteratively updates them.
-For subgroup discovery, one way to implement this strategy is outlined in Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}, which we refer to as \emph{Beam Search} in the following.
-It is an adapted version of the beam-search implementation in the Python package \emph{pysubgroup}~\cite{lemmerich2019pysubgroup}.
+Beam search is a generic search strategy that maintains a set of currently best solution candidates, i.e., the beam, and iteratively updates it.
 The number of solution candidates, i.e., subgroups, in the beam is a user parameter, i.e., the beam width~$w$.
+This strategy is common in heuristic search for subgroups~\cite{atzmueller2005exploiting}.
+One way to implement this strategy is outlined in Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}, which we refer to as \emph{Beam Search} in the following.
+It is an adapted version of the beam-search implementation in the Python package \emph{pysubgroup}~\cite{lemmerich2019pysubgroup}.
 
 First, the algorithm \emph{Beam Search} initializes the beam by creating $w$ unrestricted subgroups, characterized by their bounds $\mathit{lb}^{(\text{beam, } l)}$ and $\mathit{ub}^{(\text{beam, } l)}$ (Lines~\ref{al:csd:generic-beam-search:line:initialization-start}-\ref{al:csd:generic-beam-search:line:initialization-end}).
 Further, it stores the quality $Q^{(l)}$ of each subgroup in the beam.
@@ -433,7 +454,7 @@ In particular, \emph{Best Interval} updates lower and upper bounds for a given F
 Thus, this procedure optimizes over all potential combinations of lower and upper bounds.
 However, it still only requires one pass over the unique values of Feature~$j$ rather than quadratic cost, due to theoretical properties of the WRAcc function~\cite{mampaey2012efficient}.
 
-\subsection{Baselines for Subgroup Discovery}
+\subsection{Baselines}
 \label{sec:csd:fundamentals:baselines}
 
 In this section, we propose two baselines for subgroup discovery, \emph{MORB} (cf.~Section~\ref{sec:csd:fundamentals:baselines:morb}) and \emph{Random Search} (cf.~Section~\ref{sec:csd:fundamentals:baselines:random-search}).
@@ -487,7 +508,7 @@ Further, the heuristic is not only fast, but also optimal in certain scenarios.
 To describe these scenarios, we introduce the following term:
 %
 \begin{definition}[Perfect subgroup]
-	Given a dataset~$X \in \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^n$,
+	Given a dataset~$X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^n$,
 	a \emph{perfect subgroup} is a subgroup (cf.~Definition~\ref{def:csd:subgroup}) that contains all positive data objects (i.e., with $y_i = 1$) but zero negative data objects (i.e., with $y_i = 0$) from the dataset.
 	\label{def:csd:perfect-subgroup}
 \end{definition}
@@ -567,7 +588,7 @@ Fourth, we formalize and analyze alternative subgroup descriptions (cf.~Section~
 \label{sec:csd:approach:smt}
 
 To find optimal subgroups exactly, one can encode subgroup discovery as a white-box optimization problem and employ a solver.
-Here, we propose a Satisfiability Module Theories (SMT)~\cite{barrett2018satisfiability} encoding, which is straightforward given the problem definition (cf.~Section~\ref{sec:csd:fundamentals:subgroup-discovery}).
+Here, we propose a Satisfiability Module Theories (SMT)~\cite{barrett2018satisfiability} encoding, which is straightforward given the problem definition (cf.~Definition~\ref{def:csd:subgroup-discovery}).
 SMT generally allows expressions in first-order logic with particular interpretations, e.g., arrays, arithmetic, or bit vectors~\cite{barrett2018satisfiability}.
 For our encoding of optimal subgroup discovery, we use linear real arithmetic (LRA).
 Complementing this SMT encoding, Appendix~\ref{sec:csd:appendix:further-encodings} describes further encodings:
@@ -589,7 +610,7 @@ However, one can reformulate the expression by multiplying its two factors, obta
 %
 In this new expression, the denominators are constant and the factor~$m^+$ in the enumerator is constant as well.
 Thus, the whole expression is linear in~$m_b^+$ and~$m_b$.
-We define these two quantities as linear expressions from binary decision variables~$b \in \{0, 1\}^m$ that denote \emph{subgroup membership}.
+We define these two quantities as linear expressions from binary decision variables~$b \in \{0, 1\}^m$ that denote subgroup membership.
 I.e., $b_i$~expresses whether the $i$-th data object is in the subgroup or not:
 %
 \begin{equation}
@@ -609,7 +630,7 @@ The formula for nWRAcc (cf.~Equation~\ref{eq:csd:wracc-normalized}) is linear as
 
 \paragraph{Constraints}
 
-The subgroup membership~$b_i$ of a data object depends on the bounds of the subgroup.
+The subgroup membership~$b_i$ of a data object depends on the bounds of the subgroup (cf.~Definition~\ref{def:csd:subgroup}).
 Thus, we define real-valued decision variables $\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$ for the latter.
 In particular, there is one lower bound and one upper bound for each of the $n$~features.
 The upper bounds naturally need to be at least as high as the lower bounds:
@@ -659,7 +680,8 @@ alternatives (covering different data objects and covering same data objects dif
 
 existing methods need adaptation to support certain constraint types, white-box formulation like SMT is more general
 
-according to \cite{meeng2021real}, lower bounds on data objects and subgroup quality are common constraints in SD algorithms
+background knowledge \cite{atzmueller2005exploiting, atzmueller2006methodological, atzmueller2007using, atzmueller2009semi}
+according to \cite{meeng2021real}, lower bounds on data objects and subgroup quality are common constraints in SD algorithms, as well as upper bound on search depth (feature cardinality)
 \cite{lavravc2006relevancy} mentions feature-cardinality constraints, recall constraints
 \cite{helal2016subgroup, herrera2011overview, ventura2018subgroup} mention number of features (and number of subgroups) as complexity measure
 \cite{friedman1999bump} also mentions feature cardinality as complexity measure and lower complexity as desirable for interpretability
@@ -682,7 +704,11 @@ note that only constraints added, rest of optimization problem (particularly obj
 
 give reason why less than $k$ features may be selected
 
-as alternative to prescribing k, can also eliminate irrelevant variables after having found box \cite{friedman1999bump}
+cardinality also known as depth \cite{meeng2021real} or length \cite{atzmueller2015subgroup, helal2016subgroup}, though that may refer to number of conditions (and interval may count as two conditions)
+
+complex subgroup descriptions bad for interpretability \cite{meeng2021real}
+
+as alternative to prescribing k, can also eliminate irrelevant variables after having found subgroup \cite{friedman1999bump}
 
 \begin{definition}[Feature-cardinality constraint]
 	\emph{feature-cardinality constraint}
@@ -807,7 +833,7 @@ We turn this distance into a similarity measure by counting identical vector ent
 Further, we normalize the similarity with the vector length, i.e., number of data objects~$m$, to obtain the following \emph{normalized Hamming similarity} for two subgroup-membership vectors~$b', b'' \in \{0, 1\}^m$:
 %
 \begin{equation}
-	\text{sim}_{\text{nHamm}}(b', b'') = \frac{\sum_{i=1}^{m} [b'_i = b''_i]}{m}
+	\text{sim}_{\text{nHamm}}(b', b'') = \frac{\sum_{i=1}^{m} (b'_i = b''_i)}{m}
 	\label{eq:csd:hamming-general}
 \end{equation}
 %
@@ -817,7 +843,7 @@ Further, if one considers one vector to be a prediction and the other one to be 
 Another popular similarity measure for sets or binary vectors is the Jaccard index~\cite{choi2010survey}, which relates the overlap of positive vector entries to their union:
 %
 \begin{equation}
-	\text{sim}_{\text{Jacc}}(b', b'') = \frac{\sum_{i=1}^{m} [b'_i \land b''_i ]}{\sum_{i=1}^{m} [b'_i \lor b''_i]}
+	\text{sim}_{\text{Jacc}}(b', b'') = \frac{\sum_{i=1}^{m} (b'_i \land b''_i)}{\sum_{i=1}^{m} (b'_i \lor b''_i)}
 	\label{eq:csd:jaccard}
 \end{equation}
 %
@@ -830,7 +856,7 @@ There are various options to quantify the dissimilarity between feature-selectio
 We employ the following \emph{deselection dissimilarity} in combination with an adapted dissimilarity threshold:
 %
 \begin{equation}
-	\text{dis}_{\text{des}}(s^{\text{new}}, s^{\text{old}}) = \sum_{j=1}^n [\lnot s^{\text{new}}_j \land s^{\text{old}}_j] \geq \min \left( \tau_{\text{abs}},~k^{\text{old}} \right)
+	\text{dis}_{\text{des}}(s^{\text{new}}, s^{\text{old}}) = \sum_{j=1}^n (\lnot s^{\text{new}}_j \land s^{\text{old}}_j) \geq \min \left( \tau_{\text{abs}},~k^{\text{old}} \right)
 	\label{eq:csd:constraint-dissimilarity}
 \end{equation}
 %
@@ -921,10 +947,13 @@ depth-first~\cite{millot2020optimal}
 exhaustive~\cite{atzmueller2006sd, atzmueller2009fast, grosskreutz2009subgroup, lemmerich2016fast} -- but may use pruning, e.g., \cite{grosskreutz2009subgroup} defines quality constraints for refinement
 exhaustive with diversity~\cite{bosc2018anytime, lemmerich2010fast}
 if SMT formulation is novel, should say so
-heuristics with diversity \cite{leeuwen2012diverse, lucas2018ssdp+, proencca2022robust}
+subgroup algorithms may return set of subgroups, which may be pruned (though that does not seem to target at diversity) \cite{atzmueller2015subgroup}
+\cite{atzmueller2015subgroup} mentions different types of subgroup-set discovery
+heuristics with diversity \cite{leeuwen2012diverse, lucas2018ssdp+, proencca2022robust} -> 1st paper defines task of diverse subgroup set discovery
 kind of diversity (term not directly used) by downweighting (instead of removing) positive data objects covered by previous subgroups \cite{lavrac2004subgroup}
 \cite{atzmueller2015subgroup} discusses different from of subgroup set selection
 post-processing set of subgroups (four criteria based on data object overlap or prediction performance) \cite{knobbe2006pattern}
+\cite{meeng2021real} generally mentions post-processing and directly preventing redundancies as possible strategies to deal with redundancy
 relevance/dominance for filtering subgroups \cite{grosskreutz2012enhanced}
 analyze Pareto front for diversity (exact and greedy) \cite{leeuwen2013discovering}
 diverse subgroup lists \cite{lopez2023discovering, lopez2023novel}
@@ -932,13 +961,16 @@ diverse rule sets \cite{zhang2020diverse}
 heuristic (beam search) with constraints \cite{lavravc2006relevancy} -- has feature-cardinality constraints, but does not vary them; also, rather specific dataset (gene expression)
 min and max num of data objects in beam search \cite{meeng2021real}
 contrasting SD \cite{langohr2013contrasting}
+\cite{hudson2023subgroup} provides filtering of subgroup based on membership similarity
 involve domain experts/knowledge \cite{dzyuba2013interactive, gamberger2002expert, lemmerich2011local}
-background knowledge \cite{atzmueller2005exploiting, atzmueller2006methodological}
-`propositionalization to describe subgroups' \cite{zelezny2006propositionalization}
+background knowledge \cite{atzmueller2005exploiting, atzmueller2006methodological, atzmueller2007using, atzmueller2009semi}
+`propositionalization to describe subgroups' \cite{zelezny2006propositionalization}, used in \cite{lavrac2009semantic} (ontologies)
+\cite{helal2016subgroup} contains empirical study of SD methods, but categorical features only; also evaluates length of subgroups, but does not systematically constrain it (only one upper bound for depth parameter in beam search)
+\cite{meeng2021real} compares SD methods for numeric data, including exhaustive vs. beam/BI (no PRIM and baselines), classification and regression; uses min and max subgroup size; only ``cursory analysis'' of search depth because ``Years of observation showed that the type of SD algorithm employed here rarely produces better results beyond the first three levels'', mostly depth 1-4, once 5, but never unlimited; only 6 UCI datasets for classification, 5 with <= 10 features; highest quality for local - binary - fine (- all) discretization (like we use in beam search; conclusion also recommends finely tuning threshold) and BI; also find that quality difference between beam and exhaustive not high (though comparison only for search depth of 2 and 3), while beam faster
 
 from chair: \cite{arzamasov2021reds} \cite{arzamasov2022pedagogical} \cite{vollmer2019informative}
 
-minimizing subgroups NP-hard~\cite{boley2009non}
+minimizing subgroups NP-hard~\cite{boley2009non}; also, notions of equivalence classes covering exactly same data objects (more strict than our notion of alternative descriptions)
 
 measures of subgroup complexity \cite{helal2016subgroup, herrera2011overview, ventura2018subgroup} -> num subgroups and num selected features
 
@@ -949,6 +981,8 @@ measures of subgroup complexity \cite{helal2016subgroup, herrera2011overview, ve
 
 \subsection{Other Fields}
 \label{sec:csd:related-work:other}
+
+redescription mining \cite{galbrun2017redescription} - language of descriptions may be similar ot SD (or more complicated), but no overlap, partitioning of attributes into subsets given as problem input, simultaneous search of alternative pairs rather than sequential, unsupervised; optimized without solver (exhaustive or heuristically) 
 
 \cite{bailey2014alternative} \cite{grossi2017survey}
 \cite{guidotti2022counterfactual}
@@ -1218,7 +1252,7 @@ In solver-based search for subgroups, we used an SMT encoding (cf.~Section~\ref{
 Different white-box encodings or solvers may speed up the search and lead to less timeouts, potentially improving the subgroup quality.
 We already proposed MILP and MaxSAT encodings of subgroup discovery (cf.~Appendix~\ref{sec:csd:appendix:further-encodings}), though without evaluation.
 
-Two assumptions for subgroup discovery in our paper were numerical features and a binary target (cf.~Section~\ref{sec:csd:fundamentals:notation}).
+Two assumptions for subgroup discovery in our paper were numerical features and a binary target (cf.~Section~\ref{sec:csd:fundamentals:problem}).
 One could adapt the SMT encoding to multi-valued categorical features (cf.~Appendix~\ref{sec:csd:appendix:further-encodings}) and continuous targets.
 
 \paragraph{Computational complexity}
@@ -1259,7 +1293,8 @@ Next, we discuss encodings as a mixed-integer linear program (cf.~Section~\ref{s
 \subsubsection{Handling Categorical Features in SMT Encoding}
 \label{sec:csd:appendix:further-encodings:smt-categorical}
 
-There are different options to consider categorical features in the SMT optimization problem.
+In general, there are many different options to numerically encode categorical data in machine learning~\cite{matteucci2023benchmark}.
+Similarly, there are also multiple options to consider categorical features in the SMT formulation of subgroup discovery.
 We present three of them in the following.
 
 \paragraph{Two variables per categorical feature}

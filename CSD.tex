@@ -833,7 +833,7 @@ We turn this distance into a similarity measure by counting identical vector ent
 Further, we normalize the similarity with the vector length, i.e., number of data objects~$m$, to obtain the following \emph{normalized Hamming similarity} for two subgroup-membership vectors~$b', b'' \in \{0, 1\}^m$:
 %
 \begin{equation}
-	\text{sim}_{\text{nHamm}}(b', b'') = \frac{\sum_{i=1}^{m} (b'_i = b''_i)}{m}
+	\text{sim}_{\text{nHamm}}(b', b'') = \frac{1}{m} \cdot \sum_{i=1}^{m} (b'_i = b''_i)
 	\label{eq:csd:hamming-general}
 \end{equation}
 %
@@ -886,7 +886,10 @@ In particular, these dissimilarities can increase by selecting features that wer
 We only need to slightly reformulate Equation~\ref{eq:csd:hamming-general} to obtain an objective function that is linear regarding the alternative subgroup-membership vector~$b^{(a)}$:
 %
 \begin{equation}
-	\text{sim}_{\text{nHamm}}(b^{(a)}, b^{(0)}) = \frac{\sum_{i=1}^m \left( b_i^{(a)} \leftrightarrow b_i^{(0)} \right) }{m} = \frac{\sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 1}} b_j^{(a)} + \sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 0}} \lnot b_j^{(a)}}{m}
+	\begin{aligned}
+		\text{sim}_{\text{nHamm}}(b^{(a)}, b^{(0)}) &= \frac{1}{m} \cdot \sum_{i=1}^m \left( b_i^{(a)} \leftrightarrow b_i^{(0)} \right) \\
+		&= \frac{1}{m} \cdot \left( \sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 1}} b_i^{(a)} + \sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 0}} \lnot b_i^{(a)} \right)
+	\end{aligned}
 	\label{eq:csd:smt-hamming}
 \end{equation}
 %
@@ -1464,7 +1467,7 @@ The objective function for alternative subgroup descriptions in the SMT formulat
 We only need to replace the logical negation operators ($\lnot$):
 %
 \begin{equation}
-	\text{sim}_{\text{nHamm}}(b^{(a)}, b^{(0)}) = \frac{\sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 1}} b_j^{(a)} + \sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 0}} \left( 1 - b_j^{(a)} \right)}{m}
+	\text{sim}_{\text{nHamm}}(b^{(a)}, b^{(0)}) = \frac{1}{m} \cdot \left( \sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 1}} b_i^{(a)} + \sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 0}} \left( 1 - b_i^{(a)} \right) \right)
 	\label{eq:csd:mip-hamming}
 \end{equation}
 %

@@ -1241,7 +1241,17 @@ minimizing subgroups NP-hard~\cite{boley2009non}; also, notions of equivalence c
 \subsection{Feature Selection}
 \label{sec:csd:related-work:feature-selection}
 
-\cite{bach2022empirical} \cite{bach2023finding, bach2024alternative}
+Feature-cardinality constraints and alternative subgroup descriptions both relate to the features used in the subgroup.
+In the field of feature selection~\cite{guyon2003introduction, li2017feature}, constraints are a topic as well~\cite{bach2023finding, bach2024alternative, bach2022empirical}.
+While limiting feature-set cardinality is very common in feature-selection methods, \cite{bach2023finding, bach2024alternative} are unique in that they propose a white-box formulation of alternative feature selection.
+Similar to Equation~\ref{eq:csd:smt-constraint-dissimilarity}, they use a threshold-based dissimilarity constraint on feature selection, though with a different dissimilarity measure.
+Besides sequential search for alternatives, which we use as well, they also analyze simultaneous search.
+
+Despite the similarities, feature selection generally tackles a fundamentally different optimization problem than subgroup discovery.
+In particular, the former problem is `only' about selecting the features instead of also determining bounds on them.
+The selected features do not form a prediction model per se but are used in another machine-learning model afterwards.
+For feature selection itself, a notion of feature-set quality serves as the objective function.
+The latter depends on the feature-selection method but typically assesses features globally, while subgroups describe a particular region in the data.
 
 \subsection{Other Fields}
 \label{sec:csd:related-work:other}

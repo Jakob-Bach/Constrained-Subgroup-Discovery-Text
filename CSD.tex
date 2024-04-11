@@ -728,8 +728,9 @@ We see two major notions of alternatives, which we call \emph{alternative subgro
 \emph{Alternative subgroups} aim to cover different data objects.
 Since subgroups only intend to cover certain regions of the data, it is natural to search for multiple subgroups to cover multiple regions.
 One can search for multiple subgroups sequentially or simultaneously.
-The first option is possible with any subgroup-discovery method, e.g., by the so-called `covering' approach that removes all data objects covered by previous subgroups and repeats subgroup discovery~\cite{friedman1999bump}.
-The second options requires subgroup-discovery methods that specifically target at multiple solutions~\cite{leeuwen2012diverse, lucas2018ssdp+, proencca2022robust}.
+The `covering' approach allows sequential search for any subgroup-discovery method by removing all data objects covered by previous subgroups and repeating subgroup discovery~\cite{friedman1999bump}.
+Alternatively, one may resample data objects based on their subgroup membership~\cite{scholz2005sampling}.
+In contrast, simultaneous search requires subgroup-discovery methods that specifically target at multiple solutions~\cite{leeuwen2012diverse, lucas2018ssdp+, proencca2022robust}.
 E.g., a heuristic search may retain multiple solution candidates at each step.
 The notion of subgroup quality typically becomes broader:
 Besides measures for predictive quality like WRAcc, the diversity of subgroups~\cite{leeuwen2012diverse, lucas2018ssdp+}, e.g., to which extent they cover different data objects, and their number~\cite{helal2016subgroup, herrera2011overview, ventura2018subgroup} may also serve as metrics.
@@ -1241,7 +1242,7 @@ minimizing subgroups NP-hard~\cite{boley2009non}; also, notions of equivalence c
 \subsection{Feature Selection}
 \label{sec:csd:related-work:feature-selection}
 
-Feature-cardinality constraints and alternative subgroup descriptions both relate to the features used in the subgroup.
+Both constraint types we analyze, i.e., feature-cardinality constraints and alternative subgroup descriptions, relate to the features used in the subgroup.
 In the field of feature selection~\cite{guyon2003introduction, li2017feature}, constraints are a topic as well~\cite{bach2023finding, bach2024alternative, bach2022empirical}.
 While limiting feature-set cardinality is very common in feature-selection methods, \cite{bach2023finding, bach2024alternative} are unique in that they propose a white-box formulation of alternative feature selection.
 Similar to Equation~\ref{eq:csd:smt-constraint-dissimilarity}, they use a threshold-based dissimilarity constraint on feature selection, though with a different dissimilarity measure.
@@ -1256,11 +1257,38 @@ The latter depends on the feature-selection method but typically assesses featur
 \subsection{Other Fields}
 \label{sec:csd:related-work:other}
 
-redescription mining \cite{galbrun2017redescription} - language of descriptions may be similar ot SD (or more complicated), but no overlap, partitioning of attributes into subsets given as problem input, simultaneous search of alternative pairs rather than sequential, unsupervised; optimized without solver (exhaustive or heuristically) 
+\paragraph{Classification}
 
-\cite{bailey2014alternative} \cite{grossi2017survey}
-\cite{guidotti2022counterfactual}
-\cite{narodytska2018learning} \cite{schidler2021sat} \cite{yu2021learning}
+There are white-box formulations for various types of classification models.
+E.g., there are formulations in propositional logic (SAT) for optimal decision trees, decision sets, and decision lists~\cite{narodytska2018learning, shati2021sat, yu2021learning}.
+Similar to subgroups, these three model types also use conjunctions of binary checks to form decision rules.
+However, they use multiple rules to classify data globally, while subgroup discovery employs one rule to describe an interesting region.
+Further, some of these particular white-box formulations target at perfect predictions rather than optimizing a notion of prediction quality.
+
+\paragraph{Constrained data mining}
+
+\cite{grossi2017survey} provides a broad survey on constraints in various fields of data mining, i.e., classification, clustering, and pattern mining.
+
+\paragraph{Counterfactual explanations}
+
+Searching for counterfactual explanations is an explainable-AI paradigm that targets at data objects with feature values as similar as possible to a given data object but with a different prediction of a given classifier~\cite{guidotti2022counterfactual}.
+Thus, counterfactuals provide alternative explanations on the local level, i.e., for individual data objects.
+In contrast, alternative subgroup descriptions aim to reproduce subgroup membership globally, striving for a similar prediction but a different feature selection.
+Approaches yielding multiple counterfactual often foster diversity, e.g., by extending the optimization objective~\cite{mothilal2020explaining} or introducing constraints~\cite{karimi2020model, mohammadi2021scaling, russell2019efficient}.
+However, only some approaches have a user-friendly parameter to actively control the diversity of solutions.
+In particular, \cite{mohammadi2021scaling} offers a dissimilarity threshold comparable to our parameter~$\tau$ for alternative subgroup descriptions.
+
+\paragraph{Redescription mining}
+
+Redescription mining aims to find pairs or sets of descriptions that cover exactly or approximately the same data objects~\cite{galbrun2017redescription, ramakrishnan2004turning}.
+Our notion of alternative subgroup descriptions also pursues a similarity objective based on data objects.
+However, we search for alternative descriptions sequentially instead of simultaneously.
+The original subgroup description usually optimizes subgroup quality, while redescription mining has no target variable, i.e., is unsupervised~\cite{ramakrishnan2004turning}.
+Further, redescription mining works with different dissimilarity criteria than we do, e.g., having features pre-partitioned into non-overlapping sets~\cite{galbrun2017redescription, gallo2008finding, mihelcic2023complexity} or requiring only one arbitrary part of the description to differ~\cite{parida2005redescription}.
+In contrast, we provide the parameter~$\tau$ to allow users to control the overlap between feature sets. (cf.~Equation~\ref{eq:csd:smt-constraint-dissimilarity}.
+Also, the language for redescriptions may be more complex than for subgroups, e.g., also involve logical negation ($\lnot$) and disjunction ($\lor$)~\cite{galbrun2017redescription, gallo2008finding}, while subgroup descriptions only use the logical AND ($\land$) over features.
+Finally, existing approaches for redescription mining are algorithmic rather than using white-box optimization~\cite{galbrun2017redescription, mihelcic2023complexity}.
+Several formulations and parametrizations of the redescription-mining problem are $\mathcal{NP}$-hard; see \cite{mihelcic2023complexity} for a detailed analysis.
 
 \section{Experimental Design}
 \label{sec:csd:experimental-design}

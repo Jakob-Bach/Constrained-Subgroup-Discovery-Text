@@ -6,7 +6,7 @@
 \author{
 	Jakob Bach~\orcidlink{0000-0003-0301-2798}\\
 	\small Karlsruhe Institute of Technology (KIT), Germany\\
-	\small \href{mailto:jakob.bach@student.kit.edu}{jakob.bach@student.kit.edu}
+	\small \href{mailto:jakob.bach@kit.edu}{jakob.bach@kit.edu}
 }
 \date{} % don't display a date
 
@@ -35,13 +35,13 @@
 
 \begin{abstract}
 Subgroup-discovery methods allow users to obtain simple descriptions of interesting regions in a dataset.
-However, existing methods have at most limited support for constraints, though the latter could improve interpretability even further.
+Using constraints in subgroup discovery can enhance interpretability even further.
 In this article, we focus on two types of constraints:
 First, we limit the number of features used in subgroups, making the subgroups sparse.
 Second, we propose a novel optimization problem of finding alternative subgroup descriptions, which cover similar data objects as a given subgroup but use different features.
 For both constraint types, we describe how to integrate them into heuristic search methods for subgroups.
-Further, we propose a novel formulation of subgroup discovery as a white-box optimization problem, which allows solver-based search and is open for a variety of constraint types.
-Additionally, we show that both constraint types lead to an $\mathcal{NP}$-hard optimization problem.
+Further, we propose a novel Satisfiability Module Theories (SMT) formulation of subgroup discovery as a white-box optimization problem, which allows solver-based search and is open for a variety of constraint types.
+Additionally, we prove that both constraint types lead to an $\mathcal{NP}$-hard optimization problem.
 Finally, we employ 27 binary-classification datasets to compare heuristic and solver-based search for unconstrained and constrained subgroup discovery.
 We observe that heuristic search methods often yield subgroups of high quality within a short runtime, also in scenarios with constraints.
 \end{abstract}
@@ -78,21 +78,21 @@ Such alternative explanations are also popular in other explainable-AI technique
 
 \paragraph{Related work}
 
-There are various search methods for subgroup discovery, exact~\cite{bosc2018anytime, lemmerich2010fast, millot2020optimal} as well as heuristic~\cite{friedman1999bump, leeuwen2012diverse, mampaey2012efficient, proencca2022robust} ones.
+There are various search methods for subgroup discovery, exact~\cite{atzmueller2006sd, bosc2018anytime, grosskreutz2009subgroup, lemmerich2010fast} as well as heuristic~\cite{friedman1999bump, leeuwen2012diverse, mampaey2012efficient, proencca2022robust} ones.
 We see research gaps in three aspects:
-First, if these methods support constraints at all, then typically only a limited set of constraints, as the search routines need to be specifically adapted to particular constraint types.
+First, all widely used subgroup-discovery methods are algorithmic in nature and only support a limited set of constraints, as the search routines need to be specifically adapted to particular constraint types.
 Second, the number of features used in a subgroup description is a well-known measure for subgroup complexity~\cite{helal2016subgroup, herrera2011overview, ventura2018subgroup}.
-However, there is no systematic evaluation of this constraint type, particularly regarding different cardinality bounds and comparing multiple subgroup-discovery methods.
-Third, various subgroup-discovery methods yield a diverse set of subgroups rather than only one subgroup, thereby providing alternative solutions~\cite{bosc2018anytime, lemmerich2010fast, leeuwen2012diverse, proencca2022robust}.
-However, these alternatives target at covering different subsets of data objects from the dataset.
-In contrast, our notion of alternative subgroup descriptions tries to capture the same data objects as in the original subgroup but with different features.
+However, there is a lack of systematic evaluations of this constraint type, particularly regarding different cardinality thresholds and comparing multiple subgroup-discovery methods.
+Third, various subgroup-discovery methods yield a diverse set of subgroups rather than only one subgroup, thereby providing alternative solutions~\cite{belfodil2019fssd, bosc2018anytime, leeuwen2012diverse, lemmerich2010fast, lucas2018ssdp+, proencca2022robust}.
+However, this notion of alternatives targets at capturing different subsets of data objects from the dataset.
+In contrast, our notion of alternative subgroup descriptions tries to capture the same data objects as in the original subgroup but with different features in the description.
 
 \paragraph{Contributions}
 
 Our contribution is fivefold:
 
-First, we formalize subgroup discovery as a white-box optimization problem.
-This formulation admits solver-based search for subgroups and allows integrating a broad range of constraints.
+First, we formalize subgroup discovery as a Satisfiability Modulo Theories (SMT) optimization problem.
+This novel white-box formulation admits solver-based search for subgroups and allows integrating a broad range of constraints.
 
 Second, we formalize two constraint types for this optimization problem, i.e., feature-cardinality constraints and alternative subgroup descriptions.
 For the latter, we allow users to control alternatives with two parameters, i.e., the number of alternatives and a dissimilarity threshold.
@@ -710,7 +710,7 @@ As an alternative formulation, one can keep a single primary objective and add t
 According to~\cite{meeng2021real}, such lower bounds on subgroup quality are a common constraint type in subgroup discovery.
 One may also prune the set of discovered subgroups as a post-processing step~\cite{atzmueller2015subgroup}.
 Finally, quality-based pruning can also reduce the search space during subgroup discovery, e.g., using optimistic estimates in exhaustive search~\cite{atzmueller2015subgroup, atzmueller2009fast, grosskreutz2009subgroup}.
-However, such automatically determined bounds on subgroup quality differ from the user-provided constraints that we focus on.
+However, such automatically determined bounds on subgroup quality relate to the primary optimization objective and differ from the user-provided constraints that we focus on.
 
 \paragraph{Regularization}
 
@@ -732,26 +732,29 @@ The latter constraint type may prevent setting over-sensitive bounds that only p
 
 Regarding \emph{features selection}, one can limit the number of features used in the subgroup description, which is a common constraint type~\cite{meeng2021real} and also a metric for subgroup complexity~\cite{atzmueller2015subgroup, helal2016subgroup, herrera2011overview, ventura2018subgroup}, proposed as early as in the article introducing PRIM~\cite{friedman1999bump}.
 Section~\ref{sec:csd:approach:cardinality} discusses such feature-cardinality constraints in detail.
+Instead of using this constraint type while searching subgroups, one may also post-process subgroups to eliminate irrelevant features after search~\cite{friedman1999bump}.
+Further, instead of limiting the total number of used features, one may also introduce constraints to remove individual irrelevant features based on the number of data objects they represent correctly in absolute terms or relative to other features~\cite{lavrac2006relevancy}.
 
 \paragraph{Alternatives}
 
 As for regularization, constraints for alternatives may relate to data objects, features, or feature values.
 We see two major notions of alternatives, which we call \emph{alternative subgroups} and \emph{alternative subgroup descriptions}.
 
-\emph{Alternative subgroups} aim to cover different data objects.
-Since subgroups only intend to cover certain regions of the data, it is natural to search for multiple subgroups to cover multiple regions.
+\emph{Alternative subgroups} aim to contain different sets of data objects.
+Since subgroups only intend to cover certain regions of the data, it is natural to search for multiple subgroups to cover multiple regions; see~\cite{atzmueller2015subgroup} for an overview of subgroup-set selection.
 One can search for multiple subgroups sequentially or simultaneously.
-The `covering' approach allows sequential search for any subgroup-discovery method by removing all data objects covered by previous subgroups and repeating subgroup discovery~\cite{friedman1999bump}.
-Alternatively, one may resample data objects based on their subgroup membership~\cite{scholz2005sampling}.
-In contrast, simultaneous search requires subgroup-discovery methods that specifically target at multiple solutions~\cite{leeuwen2012diverse, lucas2018ssdp+, proencca2022robust}.
+The `covering' approach allows sequential search for any subgroup-discovery method by removing all data objects contained in previous subgroups and repeating subgroup discovery~\cite{friedman1999bump}.
+Alternatively, one may reweight~\cite{gamberger2002expert, lavrac2004subgroup} or resample~\cite{scholz2005sampling} data objects based on their subgroup membership.
+In contrast, simultaneous search requires subgroup-discovery methods that specifically target at multiple solutions~\cite{leeuwen2012diverse, leeuwen2013discovering, lemmerich2010fast, lucas2018ssdp+, proencca2022robust}.
 E.g., a heuristic search may retain multiple solution candidates at each step.
 The notion of subgroup quality typically becomes broader:
-Besides measures for predictive quality like WRAcc, the diversity of subgroups~\cite{leeuwen2012diverse, lucas2018ssdp+}, e.g., to which extent they cover different data objects, and their number~\cite{helal2016subgroup, herrera2011overview, ventura2018subgroup} may also serve as metrics.
+Besides measures for predictive quality like WRAcc, the diversity of subgroups~\cite{belfodil2019fssd, leeuwen2012diverse, leeuwen2013discovering, lucas2018ssdp+}, e.g., to which extent they contain different data objects, and their number~\cite{helal2016subgroup, herrera2011overview, ventura2018subgroup} may also serve as metrics.
+One may also filter redundant subgroups as a post-processing step~\cite{bosc2018anytime, grosskreutz2012enhanced, hudson2023subgroup, leeuwen2013discovering}.
 In a white-box formulation of subgroup discovery, one can enforce diversity with appropriate constraints on subgroup membership (cf.~Equation~\ref{eq:csd:smt-constraint-subgroup-membership}), e.g., limiting the number of data objects that can be members of two subgroups simultaneously.
 
-In contrast, \emph{alternative subgroup descriptions} explicitly aim to cover similar data objects, but use different subgroup descriptions for this result, e.g., a different feature selection.
-To the best of out knowledge, this notion of alternatives is novel in subgroup discovery.
+In contrast, \emph{alternative subgroup descriptions} explicitly aim to contain a similar set of data objects, but use different subgroup descriptions, e.g., a different feature selection.
 Section~\ref{sec:csd:approach:alternatives} discusses this constraint type in detail.
+Related to this concept, \cite{boley2009non}~introduces the notion of equivalent subgroup descriptions of minimal length, which cover exactly the same set of data objects.
 
 \subsection{Feature-Cardinality Constraints}
 \label{sec:csd:approach:cardinality}
@@ -798,7 +801,6 @@ Adding this constraint to the subgroup-discovery problem (cf.~Definition~\ref{de
 %
 In practice, less than $k$ features may be selected if selecting more features does not improve the subgroup quality.
 I.e., depending on the notion of subgroup quality, selecting more features may decrease quality.
-Finally, instead of using this constraint while searching subgroups, one may also post-process subgroups to eliminate irrelevant features after search~\cite{friedman1999bump}.
 
 \subsubsection{SMT Encoding}
 \label{sec:csd:approach:cardinality:smt}
@@ -1210,52 +1212,130 @@ Next to literature on subgroup discovery (cf.~Section~\ref{sec:csd:related-work:
 \subsection{Subgroup Discovery}
 \label{sec:csd:related-work:subgroup-discovery}
 
-For constraint types in subgroup discovery, see Section~\ref{sec:csd:approach:constraint-types}.
+In this section, we present related work from the field of subgroup discovery.
+First, we discuss algorithmic search methods (cf.~Section~\ref{sec:csd:related-work:subgroup-discovery:algorithmic-methods}) as well as white-box formulations (cf.~Section~\ref{sec:csd:related-work:subgroup-discovery:white-box}) for this problem.
+Second, we cover constrained subgroup discovery in general (cf.~Section~\ref{sec:csd:related-work:subgroup-discovery:constraints}) and for the two constraint types we focus on, i.e., feature-cardinality constraints (cf.~Section~\ref{sec:csd:related-work:subgroup-discovery:cardinality}) and alternative subgroup descriptions (cf.~Section~\ref{sec:csd:related-work:subgroup-discovery:alternatives}).
 
-TODO: MergeSD recommended by Vadim as starting point (special pruning criterion for WRAcc)
-TODO: have a look at related work in Michael Vollmer's paper, but according to Vadim not aware of SD as a field
-TODO: anchors (XAI approach) as white-box
-TODO: optimal decision tree/list/set
-TODO: SMT or whiteboc in general novel?
-TODO: studies with cardinality constraint?
-TODO: studies with complexity results?
-TODO: alternative subgroups
-TODO: alternative subgroup descriptions
+\subsubsection{Algorithmic Search Methods}
+\label{sec:csd:related-work:subgroup-discovery:algorithmic-methods}
 
-PRIM~\cite{friedman1999bump}, BI~\cite{mampaey2012efficient}
-depth-first~\cite{millot2020optimal}
-exhaustive~\cite{atzmueller2006sd, atzmueller2009fast, grosskreutz2009subgroup, lemmerich2016fast} -- but may use pruning, e.g., \cite{grosskreutz2009subgroup} defines quality constraints for refinement
-exhaustive with diversity~\cite{bosc2018anytime, lemmerich2010fast}
-if SMT formulation is novel, should say so
-subgroup algorithms may return set of subgroups, which may be pruned (though that does not seem to target at diversity) \cite{atzmueller2015subgroup}
-\cite{atzmueller2015subgroup} mentions different types of subgroup-set discovery
-heuristics with diversity \cite{leeuwen2012diverse, lucas2018ssdp+, proencca2022robust} -> 1st paper defines task of diverse subgroup set discovery
-kind of diversity (term not directly used) by downweighting (instead of removing) positive data objects covered by previous subgroups \cite{lavrac2004subgroup}
-\cite{atzmueller2015subgroup} discusses different from of subgroup set selection
-post-processing set of subgroups (four criteria based on data object overlap or prediction performance) \cite{knobbe2006pattern}
-\cite{meeng2021real} generally mentions post-processing and directly preventing redundancies as possible strategies to deal with redundancy
-relevance/dominance for filtering subgroups \cite{grosskreutz2012enhanced}
-analyze Pareto front for diversity (exact and greedy) \cite{leeuwen2013discovering}
-diverse subgroup lists \cite{lopez2023discovering, lopez2023novel}
-diverse rule sets \cite{zhang2020diverse}
-heuristic (beam search) with constraints \cite{lavravc2006relevancy} -- has feature-cardinality constraints, but does not vary them; also, rather specific dataset (gene expression)
-min and max num of data objects in beam search \cite{meeng2021real}
-contrasting SD \cite{langohr2013contrasting}
-\cite{hudson2023subgroup} provides filtering of subgroup based on membership similarity
-involve domain experts/knowledge \cite{dzyuba2013interactive, gamberger2002expert, lemmerich2011local}
-background knowledge in PROLOG (not sure how exactly considered in search, not an overall whitebox formulation of optimization) \cite{atzmueller2007using}
-`propositionalization to describe subgroups' \cite{zelezny2006propositionalization}, used in \cite{lavrac2009semantic} (ontologies)
-\cite{helal2016subgroup} contains empirical study of SD methods, but categorical features only; also evaluates length of subgroups, but does not systematically constrain it (only one upper bound for depth parameter in beam search)
-\cite{meeng2021real} compares SD methods for numeric data, including exhaustive vs. beam/BI (no PRIM and baselines), classification and regression; uses min and max subgroup size; only ``cursory analysis'' of search depth because ``Years of observation showed that the type of SD algorithm employed here rarely produces better results beyond the first three levels'', mostly depth 1-4, once 5, but never unlimited; only 6 UCI datasets for classification, 5 with <= 10 features; highest quality for local - binary - fine (- all) discretization (like we use in beam search; conclusion also recommends finely tuning threshold) and BI; also find that quality difference between beam and exhaustive not high (though comparison only for search depth of 2 and 3), while beam faster
+Nearly all existing subgroup-discovery methods are algorithmic.
+In particular, there are heuristic search methods like PRIM~\cite{friedman1999bump} and BI~\cite{mampaey2012efficient} as well as exhaustive search methods, potentially with pruning to cut down the search space, like SD-Map~\cite{atzmueller2009fast, atzmueller2006sd}, MergeSD~\cite{grosskreutz2009subgroup}, and BSD~\cite{lemmerich2016fast, lemmerich2010fast}.
+See~\cite{atzmueller2015subgroup, helal2016subgroup, herrera2011overview, ventura2018subgroup} for surveys of subgroup-discovery methods.
+To the best of our knowledge, optimizing subgroup discovery with an SMT solver is novel.
+There are a few other white-box formulations of particular variants of subgroup discovery, which differ from our work in several aspects, as we discuss in the following.
 
-from chair: \cite{arzamasov2021reds} \cite{arzamasov2022pedagogical}
+\subsubsection{White-Box Formulations}
+\label{sec:csd:related-work:subgroup-discovery:white-box}
 
-minimizing subgroups NP-hard~\cite{boley2009non}; also, notions of equivalence classes covering exactly same data objects (more strict than our notion of alternative descriptions)
+\paragraph{Maximum box problem}
+
+\cite{eckstein2002maximum}~formulates an integer program for the \textsc{Maximum Box} problem, which is about finding a hyperrectangle containing as many positive data objects as possible but no negative data objects, i.e., no false positives.
+This problem is an intermediate between subgroup discovery (cf.~Definition~\ref{def:csd:subgroup-discovery}), which allows false positives and false negatives, and perfect-subgroup discovery (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}), which allows neither.
+Also, it has some similarity to minimal-optimal-recall-subgroup discovery (cf.~Definition~\ref{def:csd:minimal-optimal-recall-subgroup-discovery}), which is about finding a subgroup with as \emph{few negative} data objects as possible but \emph{all positive} data objects.
+While the latter problem is in~$\mathcal{P}$ (cf.~Proposition~\ref{prop:csd:complexity-unconstrained-minimal-optimal-recall-subgroup-discovery}), \cite{eckstein2002maximum}~proves $\mathcal{NP}$-hardness of the \textsc{Maximum Box} problem by reduction from the \textsc{Maximum Independent Set}~\cite{tarjan1977finding} problem.
+In their evaluation, the authors only use a customized branch-and-bound algorithm but neither solver-based search nor heuristic search methods.
+Further, they consider neither feature-cardinality constraints nor alternative descriptions.
+
+\paragraph{Maximum $\alpha$ pattern problem}
+
+\cite{bonates2008maximum}~investigates the \textsc{Maximum $\alpha$-Pattern} problem.
+This problem is similar to the \textsc{Maximum Box} problem but involves a binary dataset and requires a user-selected data object~$\alpha$ to be member of the subgroup.
+Again, cardinality constraints or alternative descriptions are not considered.
+The authors formulate two integer programs as well as two heuristics.
+They evaluate their approaches, but no existing subgroup-discovery methods, on generated and benchmark datasets, comparing subgroup quality as well as runtime.
+Similar to us, they find that heuristics  may reach a subgroup quality similar to a solver-based search with orders of magnitude less runtime.
+
+\paragraph{Box search problem}
+
+\cite{louveaux2014combinatorial}~proposes two integer-programming formulation for the \textsc{Box Search} problem, which is about finding a hyperrectangle that optimizes the sum of the target variable of all contained data objects.
+In particular, the target variable is continuous rather than binary and the chosen objective differs from ours.
+Further, there are no constraints on feature cardinality or for alternative descriptions.
+In their evaluation, the authors compare solver-based search to multiple versions of a new branch-and-bound approach but not heuristic search methods.
+They use synthetically generated datasets rather than typical machine-learning benchmark datasets.
+
+\paragraph{Closed discriminative itemset mining problem}
+
+Besides five other related problems, \cite{koccak2020exploiting}~formulates \textsc{Closed Discriminative Itemset Mining} with the constraint-specification language \emph{Essence}~\cite{frisch2008ssence}.
+In particular, this formulation is close to frequent itemset mining, where items correspond to binary features and the subgroup description is an itemset.
+There is no optimization objective but constraints on the frequency of itemsets and on their relevance, excluding dominated solutions.
+The authors propose a transformation of their problem specification to enable using standard propositional-satisfiability (SAT) or constraint-programming (CP) solvers.
+Their evaluation exclusively analyzes solver runtime rather than subgroup quality and does not compare against heuristic search methods.
+Finally, they do not search for alternative descriptions and instead of feature-cardinality constraints, they randomly generate costs and values for items and according lower and upper bounds for itemsets.
+
+\cite{guns2011itemset} also provides a constraint-programming formulation of \textsc{Discriminative Itemset Mining}.
+The authors compare two configurations of a constraint solver against two existing itemset-mining algorithms.
+They evaluate runtime but not quality, as they enumerate all non-redundant itemsets, and do not include constraints for feature cardinality or alternative descriptions.
+
+\subsubsection{Constrained Subgroup Discovery}
+\label{sec:csd:related-work:subgroup-discovery:constraints}
+
+Section~\ref{sec:csd:approach:constraint-types} has already discussed various constraint types in subgroup discovery.
+Typically, constraints are not formulated declaratively for solver-based optimization but integrated into algorithmic search methods.
+\cite{atzmueller2007using}~expresses domain knowledge with the logic programming language Prolog, creating a knowledgebase composed of facts and rules.
+However, the authors do not use a solver to optimize subgroup discovery.
+
+In the following, we discuss particular related work for the two constraint types we analyze in detail.
+
+\subsubsection{Feature-Cardinality Constraints}
+\label{sec:csd:related-work:subgroup-discovery:cardinality}
+
+\paragraph{Formulation}
+
+Feature cardinality is a common constraint type~\cite{meeng2021real} and a well-known metric for subgroup complexity~\cite{atzmueller2015subgroup, helal2016subgroup, herrera2011overview, ventura2018subgroup}.
+However, our SMT formulation of this constraint type is novel.
+\cite{li2015efficient}~formulates a quadratic program to select non-redundant features for subgroups, but this is only a subroutine within an algorithmic search for subgroups.
+Also, the authors define a continuous optimization problem with real-valued feature weights as decision variables, while feature selection within our SMT formulation is discrete (cf.~Equation~\ref{eq:csd:smt-constraint-feature-selection}).
+
+\paragraph{Empirical studies}
+
+While several articles on subgroup discovery use a feature-cardinality constraint in their experiments~\cite{arzamasov2022pedagogical, mampaey2012efficient, lavrac2006relevancy, leeuwen2012diverse, leeuwen2013discovering}, there are only few studies that analyze the impact of different feature-cardinality thresholds on different subgroup-discovery methods broadly and systematically.
+\cite{friedman1999bump} analyzes the subgroup quality over eliminating a different number of redundant features as a post-processing step for PRIM, but only for one dataset.
+\cite{lemmerich2010fast} evaluates different search depths for their algorithm BSD but only regarding runtime and number of subgroups after quality-based pruning, not subgroup quality itself.
+\cite{proencca2022robust} compares multiple search depths for their algorithm SSD++, which returns a list of multiple subgroups, regarding an information-theoretic quality measure.
+\cite{helal2016subgroup} compares five subgroup-discovery methods with categorical datasets and also evaluates feature cardinality but does not systematically constrain the latter to different values.
+\cite{meeng2021real} evaluates three subgroup-discovery methods, including a beam search and an exhaustive search, with numeric datasets.
+The authors use feature-cardinality constraints with~$k \in \{1, 2, 3, 4\}$ but mainly focus their evaluation on comparing strategies for handling numeric data.
+Also, they only use six datasets, five of them with at most ten features, while we employ more and higher-dimensional datasets.
+Additionally, we compare subgroup discovery with feature-cardinality constraints to an unconstrained setting.
+
+\subsubsection{Alternative Subgroup Descriptions}
+\label{sec:csd:related-work:subgroup-discovery:alternatives}
+
+To the best of our knowledge, alternative subgroup descriptions in the sense of this paper are a novel concept.
+In particular, we aim to maximize the set similarity of contained data objects relative to an original subgroup while using a different subgroup description (cf.~Definition~\ref{def:csd:alternative-subgroup-description-discovery}).
+In contrast, there are various existing approaches striving for alternatives in the sense of diverse or non-redundant sets of subgroups, which aim to minimize rather than maximize the overlap of contained data objects~\cite{atzmueller2015subgroup} (cf.~Section~\ref{sec:csd:approach:constraint-types}).
+In the following, we discuss approaches that focus on subgroup descriptions.
+
+\paragraph{Description-based diverse subgroup set selection}
+
+\cite{leeuwen2012diverse} introduces six strategies to foster diversity while searching for multiple subgroups simultaneously.
+Besides strategies assessing the contained data objects and the compression achieved by subgroups, two strategies refer to the subgroup description.
+The first strategy excludes subgroup descriptions that have the same quality and differ in only one condition from an existing subgroup description.
+The second strategy uses a global upper bound on how often a feature may be selected in a set of subgroup descriptions rather than controlling pairwise dissimilarity.
+Both these strategies give users less control on the overlap of subgroup descriptions than our dissimilarity parameter~$\tau$ does.
+Further, \cite{leeuwen2012diverse} targets at simultaneous beam search, optimizing subgroup quality and using the diversity strategies only to prune certain solution candidates.
+In contrast, we search for alternative descriptions sequentially, optimize similarity to the original subgroup, and also consider a solved-based search method besides heuristic search.
+
+\paragraph{Diverse top-k characteristics lists}
+
+\cite{lopez2023discovering}~introduces the notion of \emph{diverse top-k characteristic lists}, which is a set of lists each containing multiple patterns, e.g., subgroups.
+Within each list, the subgroups should be alternative to each other in terms of data objects covered.
+Between lists, subgroup descriptions should be diverse.
+However, the latter goal is implemented with a very simple notion of diversity, i.e., exactly the same subgroup description must not appear in two lists but any other overlap is allowed.
+
+\paragraph{Equivalent subgroup descriptions of minimal length}
+
+\cite{boley2009non}~introduces the notion of \emph{equivalent subgroup descriptions of minimal length}, which is stricter than our notion of alternative subgroup descriptions.
+In particular, the former descriptions need to cover exactly the same set of data objects, like our notion of perfect alternative subgroup descriptions (cf.~Definition~\ref{def:csd:perfect-alternative}), instead of maximizing similarity.
+Further, the original feature set should be minimized, i.e., a subset be found, instead of using a different feature set subject to a dissimilarity constraint.
+The authors prove $\mathcal{NP}$-hardness and propose two algorithms for their problem but do not pursue a solver-based search.
+We adapt their hardness proof to the perfect-subgroup-discovery problem with a feature-cardinality constraint (cf.~Proposition~\ref{prop:csd:complexity-cardinality-np-perfect-subgroup}), based on which we derive further proofs for problems with feature-cardinality constraints and alternative subgroup descriptions.
 
 \subsection{Feature Selection}
 \label{sec:csd:related-work:feature-selection}
 
-Both constraint types we analyze, i.e., feature-cardinality constraints and alternative subgroup descriptions, relate to the features used in the subgroup.
+Both constraint types we analyze, i.e., feature-cardinality constraints and alternative subgroup descriptions, relate to the features used in the subgroup description.
 In the field of feature selection~\cite{guyon2003introduction, li2017feature}, constraints are a topic as well~\cite{bach2023finding, bach2024alternative, bach2022empirical}.
 While limiting feature-set cardinality is very common in feature-selection methods, \cite{bach2023finding, bach2024alternative} are unique in that they propose a white-box formulation of alternative feature selection.
 Similar to Equation~\ref{eq:csd:smt-constraint-dissimilarity}, they use a threshold-based dissimilarity constraint on feature selection, though with a different dissimilarity measure.
@@ -1272,10 +1352,11 @@ The latter depends on the feature-selection method but typically assesses featur
 
 \paragraph{Classification}
 
-There are white-box formulations for various types of classification models.
+There are white-box formulations for various types of classification models~\cite{ignatiev2021reasoning}.
 E.g., there are formulations in propositional logic (SAT) for optimal decision trees, decision sets, and decision lists~\cite{narodytska2018learning, shati2021sat, yu2021learning}.
-Similar to subgroups, these three model types also use conjunctions of binary checks to form decision rules.
-However, they use multiple rules to classify data globally, while subgroup discovery employs one rule to describe an interesting region.
+Similar to subgroup descriptions, these three model types also use conjunctions of conditions to form decision rules.
+Creating sparse models to reduce model complexity, as we do with feature-cardinality constraints, is an issue for such models as well~\cite{yu2021learning}.
+However, these model types use multiple rules to classify data globally, while subgroup discovery employs one rule to describe an interesting region.
 Further, some of these particular white-box formulations target at perfect predictions rather than optimizing a notion of prediction quality.
 
 \paragraph{Constrained data mining}
@@ -1287,20 +1368,20 @@ Further, some of these particular white-box formulations target at perfect predi
 Searching for counterfactual explanations is an explainable-AI paradigm that targets at data objects with feature values as similar as possible to a given data object but with a different prediction of a given classifier~\cite{guidotti2022counterfactual}.
 Thus, counterfactuals provide alternative explanations on the local level, i.e., for individual data objects.
 In contrast, alternative subgroup descriptions aim to reproduce subgroup membership globally, striving for a similar prediction but a different feature selection.
-Approaches yielding multiple counterfactual often foster diversity, e.g., by extending the optimization objective~\cite{mothilal2020explaining} or introducing constraints~\cite{karimi2020model, mohammadi2021scaling, russell2019efficient}.
+Approaches yielding multiple counterfactuals often foster diversity, e.g., by extending the optimization objective~\cite{mothilal2020explaining} or introducing constraints~\cite{karimi2020model, mohammadi2021scaling, russell2019efficient}.
 However, only some approaches have a user-friendly parameter to actively control the diversity of solutions.
 In particular, \cite{mohammadi2021scaling} offers a dissimilarity threshold comparable to our parameter~$\tau$ for alternative subgroup descriptions.
 
 \paragraph{Redescription mining}
 
 Redescription mining aims to find pairs or sets of descriptions that cover exactly or approximately the same data objects~\cite{galbrun2017redescription, ramakrishnan2004turning}.
-Our notion of alternative subgroup descriptions also pursues a similarity objective based on data objects.
+Our notion of alternative subgroup descriptions pursues a similarity goal.
 However, we search for alternative descriptions sequentially instead of simultaneously.
-The original subgroup description usually optimizes subgroup quality, while redescription mining has no target variable, i.e., is unsupervised~\cite{ramakrishnan2004turning}.
+Also, the original subgroup description usually optimizes subgroup quality, while redescription mining has no target variable, i.e., is unsupervised~\cite{ramakrishnan2004turning}.
 Further, redescription mining works with different dissimilarity criteria than we do, e.g., having features pre-partitioned into non-overlapping sets~\cite{galbrun2017redescription, gallo2008finding, mihelcic2023complexity} or requiring only one arbitrary part of the description to differ~\cite{parida2005redescription}.
-In contrast, we provide the parameter~$\tau$ to allow users to control the overlap between feature sets. (cf.~Equation~\ref{eq:csd:smt-constraint-dissimilarity}.
+In contrast, we allow users controlling the overlap between feature sets with the parameter~$\tau$ (cf.~Equation~\ref{eq:csd:smt-constraint-dissimilarity}).
 Also, the language for redescriptions may be more complex than for subgroups, e.g., also involve logical negation ($\lnot$) and disjunction ($\lor$)~\cite{galbrun2017redescription, gallo2008finding}, while subgroup descriptions only use the logical AND ($\land$) over features.
-Finally, existing approaches for redescription mining are algorithmic rather than using white-box optimization~\cite{galbrun2017redescription, mihelcic2023complexity}.
+Finally, most existing approaches for redescription mining are algorithmic rather than using white-box optimization~\cite{galbrun2017redescription, mihelcic2023complexity}, though~\cite{guns2013kpattern} provides a constrained-programming formulation of this problem and other pattern-set mining problems.
 Several formulations and parametrizations of the redescription-mining problem are $\mathcal{NP}$-hard; see \cite{mihelcic2023complexity} for a detailed analysis.
 
 \section{Experimental Design}
@@ -1362,7 +1443,7 @@ In practice, however, we set solver timeouts to keep the runtime under control (
 We evaluate three heuristic search methods from related work:
 \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Beam Search} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}), subsequently called \emph{Beam}), and \emph{Best Interval} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:best-interval-subgroup-update}), subsequently called \emph{BI}).
 For all three methods, we use WRAcc (cf.~Equation~\ref{eq:csd:wracc}) as the subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$.
-We set the peeling fraction of \emph{PRIM} to~$\alpha = 0.05$, consistent with other implementations~\cite{arzamasov2021reds, kwakkel2017the} and within the recommended value range proposed by the original authors~\cite{friedman1999bump}.
+We set the peeling fraction of \emph{PRIM} to~$\alpha = 0.05$, consistent with other implementations~\cite{arzamasov2021reds, kwakkel2017exploratory} and within the recommended value range proposed by the original authors~\cite{friedman1999bump}.
 Further, we set the support threshold to~$\beta_0 = 0$, so the shrinking of the subgroup is solely limited by WRAcc improvement and not the subgroup size.
 For \emph{Beam} and \emph{BI}, we choose a beam width of $w=10$, falling between default values used in other implementations~\cite{arzamasov2021reds, lemmerich2019pysubgroup}.
 
@@ -1530,10 +1611,9 @@ In this section, we recap our article (cf.~Section~\ref{sec:csd:conclusion:concl
 \label{sec:csd:conclusion:conclusion}
 
 Subgroup-discovery methods constitute an important category of interpretable machine-learning models.
-However, they often lack the support of user-defined or user-parameterized constraints.
-In this article, we analyzed constrained subgroup discovery.
+In this article, we analyzed constrained subgroup discovery as another step to improve interpretability.
 First, we formalized subgroup discovery as an SMT optimization problem.
-This formulation gives way to a variety of user constraints and enables solver-based search for subgroups.
+This formulation supports a variety of user constraints and enables solver-based search for subgroups.
 In particular, we studied two constraint types, i.e., limiting the number of features used in subgroups and searching for alternative subgroup descriptions.
 For the latter constraint type, we let users control the number of alternatives and a dissimilarity threshold.
 We showed how to integrate these constraint types into our SMT formulation as well as existing heuristic search methods for subgroup discovery.
@@ -1798,7 +1878,8 @@ Otherwise, this expression is linear as well, so no further auxiliary variables 
 
 Our published code contains a MILP implementation for unconstrained and feature-cardinality-constrained subgroup discovery.
 We use the package \emph{OR-Tools}~\cite{perron2022or-tools} with \emph{SCIP}~\cite{bestuzheva2021scip} as the optimizer.
-However, this implementation was (on average) slower than the SMT implementation in preliminary experiments, so we stuck to the latter for our main experiments (cf.~Section~\ref{sec:csd:experimental-design:methods}).
+However, in preliminary experiments, this implementation was (on average) slower than the SMT implementation or yielded worse subgroup quality in the same runtime, sometimes finished considerably after the prescribed timeout, and sometimes ran out of memory after consuming dozens of gigabytes.
+Thus, we stuck to the SMT implementation for our main experiments (cf.~Section~\ref{sec:csd:experimental-design:methods}).
 
 \subsubsection{Maximum Satisfiability (MaxSAT)}
 \label{sec:csd:appendix:further-encodings:max-sat}

@@ -870,6 +870,12 @@ In particular, we can rephrase Equation~\ref{eq:csd:wracc} as follows:
 Thus, maximizing WRAcc corresponds to minimizing~$m_b / m$, i.e., the relative frequency of the data objects in the subgroup.
 Since the number of positive data objects in the subgroup is fixed, this objective amounts to including as few negative data objects as possible into the subgroup, i.e., minimizing the number of false negatives, which is what our univariate heuristic does as well.
 
+The proposed heuristic only entails a linear runtime in the number of features, like the unconstrained \emph{MORS}, since it evaluates each feature independently.
+With quadratic runtime, one can also consider interactions between features and thereby potentially increase subgroup quality.
+In particular, one could select features sequentially instead of simultaneously.
+In each iteration, one would select the feature whose \emph{MORS} bounds, combined with the \emph{MORS} bounds of all features selected in previous iterations, yield the lowest number of false positives.
+This sequential procedure mimics an existing greedy heuristic for the \textsc{Maximum Coverage} problem~\cite{chekuri2004maximum} (cf.~Sections~\ref{sec:csd:appendix:proofs:complexity-cardinality-np-perfect-subgroup} and~\ref{sec:csd:appendix:proofs:complexity-cardinality-np}).
+
 \paragraph{Random Search}
 
 \emph{Random Search} calls \emph{get\_permissible\_feature\_idxs(\dots)} in Line~\ref{al:csd:random-search:line:permissible-features} of Algorithm~\ref{al:csd:random-search}).
@@ -1373,7 +1379,7 @@ A requirements file in our repository specifies the versions of all Python packa
 The solver \emph{Z3}~\cite{bjorner2015nuz, deMoura2008z3} carries out the SMT optimization.
 The experimental pipeline parallelizes over datasets, cross-validation folds, and subgroup-discovery methods, while each of these experimental tasks runs single-threaded.
 We ran the pipeline on a server with 128~GB RAM and an \emph{AMD EPYC 7551} CPU, having 32~physical cores and a base clock of 2.0~GHz.
-With this hardware, the parallelized pipeline run took approximately 39~hours.
+With this hardware, the parallelized pipeline run took approximately 36~hours.
 
 \section{Evaluation}
 \label{sec:csd:evaluation}
@@ -1385,13 +1391,131 @@ Finally, we summarize key experimental results (cf.~Section~\ref{sec:csd:evaluat
 \subsection{Unconstrained Subgroup Discovery}
 \label{sec:csd:evaluation:unconstrained}
 
-\paragraph{Training-set quality}
+In this section, we compare all six subgroup-discovery methods in an experimental scenario without constraints.
+The solver-based search method \emph{SMT} uses its default maximum timeout of 2048~s.
 
-\paragraph{Test-set quality}
+\begin{figure}[t]
+	\centering
+	\begin{subfigure}[t]{0.48\textwidth}
+		\centering
+		\includegraphics[width=\textwidth, trim=20 60 15 15, clip]{plots/csd-methods-unconstrained-nwracc-all-datasets.pdf}
+		\caption{All datasets.}
+		\label{fig:csd:methods-unconstrained-nwracc-all-datasets}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[t]{0.48\textwidth}
+		\centering
+		\includegraphics[width=\textwidth, trim=20 60 15 15, clip]{plots/csd-methods-unconstrained-nwracc-no-timeout-datasets.pdf}
+		\caption{Datasets without \emph{SMT} timeouts.}
+		\label{fig:csd:methods-unconstrained-nwracc-no-timeout-datasets}
+	\end{subfigure}
+	\\ \vspace{\baselineskip}
+	\caption{
+		Subgroup quality (nWRAcc, cf.~Equation~\ref{eq:csd:wracc-normalized}) over datasets and cross-validation folds, by subgroup-discovery method.
+		Results from the unconstrained experimental scenario.
+	}
+	\label{fig:csd:methods-unconstrained-nwracc}
+\end{figure}
 
-\paragraph{Overfitting}
+\paragraph{Subgroup quality}
+
+Figure~\ref{fig:csd:methods-unconstrained-nwracc-all-datasets} compares subgroup quality on the training set and test set for the six subgroup-discovery methods.
+On the training set, the two heuristic search methods \emph{Beam} and \emph{BI} have roughly the same median nWRAcc as the solver-based search method \emph{SMT}.
+In particular, the heuristics are even better than \emph{SMT} on some datasets but worse on others.
+The former can only happen because \emph{SMT} may run into timeouts and therefore not yield the exact optimum, as we analyze later (cf.~Section~\ref{sec:csd:evaluation:timeouts}).
+However, even if we limit our analysis to the datasets without \emph{SMT} timeouts, \emph{Beam} and \emph{BI} are still remarkably close to the optimum quality (cf.~Figure~\ref{fig:csd:methods-unconstrained-nwracc-no-timeout-datasets}).
+Note that this result is not specific to \emph{SMT} but also holds for any other exhaustive search method.
+On the test set, \emph{Beam} and \emph{BI} are even better than \emph{SMT} on median, also excluding timeout datasets, since their training-test nWRAcc difference is lower.
+This result indicates that \emph{Beam} and \emph{BI} are less susceptible to overfitting and their solutions generalize better.
+In detail, the average difference between training-set nWRAcc and test-set nWRAcc is 0.125 for \emph{SMT}, 0.101 for \emph{BI}, 0.095 for \emph{Beam}, 0.094 for \emph{MORS}, 0.068 for \emph{PRIM}, and 0.001 for \emph{Random}.
+
+The heuristic search method \emph{PRIM} yields slightly worse subgroup quality than \emph{Beam} and \emph{BI}.
+Although it follows an iterative subgroup-refinement procedure like the latter two methods, it is more limited regarding its refinement options.
+In particular, \emph{PRIM} always has to remove a fixed fraction~$\alpha$ of data objects from the subgroup, while \emph{Beam} and \emph{BI} can remove more or less data objects.
+On the test, \emph{PRIM} yields a median nWRAcc only slightly worse than \emph{SMT}, on all datasets as well as after excluding timeout datasets.
+
+All three heuristic search methods clearly beat the two baselines \emph{MORS} and \emph{Random}.
+While \emph{Random} yields the same quality as not restricting the subgroup at all, i.e. an nWRACC of~0, \emph{MORS} is considerably better and therefore a suitable baseline for future studies comparing subgroup-discovery methods.
+
+\begin{table}
+	\centering
+	\begin{subtable}{\textwidth}
+		\begin{tabular}{l|rrrrrr}
+			\toprule
+			Runtime & SMT & Beam & BI & PRIM & MORS & Random \\
+			\midrule
+			Mean & 855.45~s & 33.03~s & 34.95~s & 1.27~s & 0.01~s & 0.91~s \\
+			Standard dev. & 931.85~s & 97.06~s & 103.25~s & 1.54~s & 0.00~s & 1.05~s \\
+			Median & 248.88~s & 2.53~s & 2.40~s & 0.69~s & 0.01~s & 0.49~s \\
+			\bottomrule
+		\end{tabular}
+		\caption{
+			All datasets.
+		}
+		\label{tab:csd:methods-unconstrained-runtime-all-datasets}
+	\end{subtable}
+	\\ \vspace{\baselineskip}
+	\begin{subtable}{\textwidth}
+		\centering
+		\begin{tabular}{l|rrrrrr}
+			\toprule
+			Runtime & SMT & Beam & BI & PRIM & MORS & Random \\
+			\midrule
+			Mean & 179.18~s & 11.39~s & 12.36~s & 1.32~s & 0.01~s & 0.86~s \\
+			Standard dev. & 295.20~s & 19.82~s & 21.37~s & 1.70~s & 0.00~s & 1.08~s \\
+			Median & 57.02~s & 2.53~s & 2.40~s & 0.80~s & 0.01~s & 0.55~s \\
+			\bottomrule
+		\end{tabular}
+		\caption{
+			Datasets without \emph{SMT} timeouts.
+		}
+		\label{tab:csd:methods-unconstrained-runtime-no-timeout-datasets}
+	\end{subtable}
+	\caption{
+		Aggregated runtime over datasets and cross-validation folds, by subgroup-discovery method.
+		Results from the unconstrained experimental scenario.
+	}
+	\label{tab:csd:methods-unconstrained-runtime}
+\end{table}
 
 \paragraph{Runtime}
+
+Table~\ref{tab:csd:methods-unconstrained-runtime} summarizes the runtimes of the subgroup-discovery methods.
+On average, \emph{SMT} is an order of magnitude slower than \emph{Beam} and \emph{BI}, which are an order of magnitude slower than \emph{PRIM} and the baseline \emph{Random}.
+The baseline \emph{MORS} runs in negligible time and therefore is a good tool to obtain a lower bound on subgroup quality instantaneously.
+Taking subgroup-quality into consideration, the heuristic search methods offer a reasonable quality in a reasonable time, while \emph{SMT} incurs a high cost for its optimal solutions.
+Among the three heuristics, \emph{PRIM} is fastest but also yields the lowest subgroup quality, so users should decide which runtime is acceptable.
+
+For \emph{SMT}, the overall runtime not only comprises optimization but also formulating the optimization problem.
+Since the latter depends on the dataset size, e.g., involves $O(m)$ constraints with length $O(n)$ each to define the subgroup-membership variables~$b_i$ (cf.~Equation~\ref{eq:csd:smt-constraint-subgroup-membership}), the preparation time can become considerable for large datasets.
+In our experiments, formulating the \emph{SMT} problem took 41.4~s on average, with a maximum of 317.6~s.
+This average preparation time already is higher than the average total runtime of the heuristics.
+
+\begin{table}
+	\centering
+	\begin{tabular}{lrrrr}
+		\toprule
+		Method & $\Sigma n^u$ & $m \cdot n$ & $m$ & $n$ \\
+		\midrule
+		SMT & 0.40 & 0.72 & 0.69 & 0.22 \\
+		Beam & 0.96 & 0.48 & 0.29 & 0.66 \\
+		BI & 0.96 & 0.52 & 0.33 & 0.67 \\
+		PRIM & 0.84 & 0.57 & 0.31 & 0.76 \\
+		MORS & 0.54 & 0.52 & 0.41 & 0.46 \\
+		Random & 0.60 & 0.71 & 0.44 & 0.76 \\
+		\bottomrule
+	\end{tabular}
+	\caption{
+		Spearman correlation between runtime and metrics for dataset size,
+		over datasets and cross-validation folds, by subgroup-discovery method.
+		Results from the unconstrained experimental scenario, using datasets without \emph{SMT} timeouts.
+	}
+	\label{tab:csd:methods-unconstrained-runtime-correlation}
+\end{table}
+
+To determine which factors influence runtime, we analyze the Spearman correlation between runtime and four simple metrics for dataset size.
+In particular, Table~\ref{tab:csd:methods-unconstrained-runtime-correlation} considers the number of data objects~$m$, the number of features~$n$, the product of these two quantities~$m \cdot n$, and the number of unique values per feature summed over the features~$\Sigma n^u$.
+For the three heuristic search methods, the latter metric shows a high correlation to runtime, while \emph{SMT} exhibits the highest runtime correlation to~$m \cdot n$.
 
 \subsection{Solver Timeouts}
 \label{sec:csd:evaluation:timeouts}
@@ -1414,6 +1538,12 @@ Finally, we summarize key experimental results (cf.~Section~\ref{sec:csd:evaluat
 \label{sec:csd:evaluation:summary}
 
 \paragraph{Unconstrained subgroup discovery (cf.~Section~\ref{sec:csd:evaluation:unconstrained})}
+
+We recommend using heuristic search methods rather than solver-based search.
+\emph{Beam} and \emph{BI} are an order of magnitude faster than \emph{SMT} and still yield higher test-set subgroup quality since they are less prone to overfitting.
+The latter result also impedes any exhaustive algorithmic search method.
+\emph{PRIM} is even faster than \emph{Beam} and \emph{BI} but yields lower subgroup quality.
+The same insights applies even more to our novel baseline \emph{MORS}, which can provide an instantaneous non-trivial lower bound for optimal subgroup quality.
 
 \paragraph{Solver timeouts (cf.~Section~\ref{sec:csd:evaluation:timeouts})}
 
@@ -2101,8 +2231,10 @@ This proof idea is strongly related to the proof for Proposition~\ref{prop:csd:c
 In contrast to \textsc{Set Covering}, the $k \in \mathbb{N}$~selected subsets in \textsc{Maximum Coverage} need not cover all elements but should cover as many elements as possible.
 In the terminology of subgroup discovery, the latter objective corresponds to a particular notion of subgroup quality:
 maximizing the number of true negatives or minimizing the number of false positives, i.e., excluding as many negative data objects from the subgroup as possible.
-We introduced this problem as minimal-optimal-recall-subgroup discovery (cf.~Definition~\ref{def:csd:minimal-optimal-recall-subgroup-discovery}), which resides in~$\mathcal{P}$ without a feature-cardinality constraint (cf.~Proposition~\ref{prop:csd:complexity-unconstrained-minimal-optimal-recall-subgroup-discovery}).
-However, this objective is simpler than WRAcc (cf.~Equation~\ref{eq:csd:wracc}), which we focus on in this article.
+We introduced this problem as minimal-optimal-recall-subgroup discovery (cf.~Definition~\ref{def:csd:minimal-optimal-recall-subgroup-discovery}), which resides in~$\mathcal{P}$ without a feature-cardinality constraint (cf.~Proposition~\ref{prop:csd:complexity-unconstrained-minimal-optimal-recall-subgroup-discovery}) due the baseline \emph{MORS} (cf.~Algorithm~\ref{al:csd:mors}).
+When equipping \emph{MORS} with feature-cardinality constraints (cf.~Section~\ref{sec:csd:approach:cardinality:baselines}), existing heuristics for the \textsc{Maximum Coverage} problem may provide approximation guarantees.
+
+However, minimizing the number of false positives is a simpler objective than WRAcc (cf.~Equation~\ref{eq:csd:wracc}), which we focus on in this article.
 Our proof approach chosen above is more general regarding the notion of subgroup quality, but more narrow in the sense that it reduces from a search problem, assuming a particular value of the objective function, instead of an optimization problem.
 
 \subsubsection{Proof of Proposition~\ref{prop:csd:complexity-perfect-alternatives-np-perfect-subgroup}}

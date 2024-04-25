@@ -1294,7 +1294,9 @@ This comparison allows us to assess the effectiveness of the solver-based search
 
 Our second experimental scenario (cf.~Section~\ref{sec:csd:evaluation:timeouts} for results) takes a deeper dive into \emph{SMT} as subgroup-discovery method.
 In particular, we analyze whether setting solver timeouts enables finding solutions with reasonable quality in a shorter time frame.
-If the solver does not finish within a given timeout, we record the currently best solution at this time, which may be suboptimal.
+If the solver does not finish optimization within a given timeout, we record the currently best solution at this time, which may be suboptimal.
+Note that the timeout only applies to the optimization procedure itself, while our runtime measurements also include the time for formulating the optimization problem.
+
 We evaluate twelve exponentially scaled timeout values, i.e., \{1~s, 2~s, 4~s, $\dots$, 2048~s\}.
 In the three other experimental scenarios, we employ the maximum timeout of 2048~s for \emph{SMT}.
 Since the heuristic search methods and baselines are significantly faster, we do not conduct a timeout analysis for them.
@@ -1336,7 +1338,7 @@ Since each dataset has $n \geq 20$ features (cf.~Section~\ref{sec:csd:experiment
 		Hill\_Valley\_with\_noise & 1212 & 100 & Yes & Yes \\
 		horse\_colic & 368 & 22 & No & No \\
 		hypothyroid & 3163 & 25 & No & No \\
-		ionosphere & 351 & 34 & Yes & Yes \\
+		ionosphere & 351 & 34 & No & Yes \\
 		molecular\_biology\_promoters & 106 & 57 & No & No \\
 		mushroom & 8124 & 22 & No & No \\
 		ring & 7400 & 20 & Yes & Yes \\
@@ -1409,7 +1411,6 @@ The solver-based search method \emph{SMT} uses its default maximum timeout of 20
 		\caption{Datasets without \emph{SMT} timeouts.}
 		\label{fig:csd:methods-unconstrained-nwracc-no-timeout-datasets}
 	\end{subfigure}
-	\\ \vspace{\baselineskip}
 	\caption{
 		Subgroup quality (nWRAcc, cf.~Equation~\ref{eq:csd:wracc-normalized}) over datasets and cross-validation folds, by subgroup-discovery method.
 		Results from the unconstrained experimental scenario.
@@ -1520,6 +1521,57 @@ For the three heuristic search methods, the latter metric shows a high correlati
 \subsection{Solver Timeouts}
 \label{sec:csd:evaluation:timeouts}
 
+In this section, we evaluate the impact of solver timeouts for \emph{SMT} search.
+
+\begin{figure}[t]
+	\centering
+	\begin{subfigure}[t]{0.48\textwidth}
+		\centering
+		\includegraphics[width=\textwidth, trim=15 25 15 10, clip]{plots/csd-timeouts-finished-tasks.pdf}
+		\caption{
+			Frequency of finished \emph{SMT} tasks by feature-cardinality threshold~$k$.
+		}
+		\label{fig:csd:timeouts-finished-tasks}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[t]{0.48\textwidth}
+		\centering
+		\includegraphics[width=\textwidth, trim=15 25 15 10, clip]{plots/csd-timeouts-nwracc.pdf}
+		\caption{
+			Mean subgroup quality with 95\% confidence intervals.
+			Results from the unconstrained experimental scenario.
+		}
+		\label{fig:csd:timeouts-nwracc}
+	\end{subfigure}
+	\caption{
+		Impact of solver timeouts over datasets and cross-validation folds, for \emph{SMT} as the subgroup-discovery method.
+	}
+	\label{fig:csd:timeouts}
+\end{figure}
+
+\paragraph{Finished tasks}
+
+Figure~\ref{fig:csd:timeouts-finished-tasks} graphs how many of the \emph{SMT} optimization tasks for original subgroups finished within the evaluated solver timeouts.
+Besides the unconstrained tasks, we also consider tasks with different feature-cardinality thresholds, though the overall trend is the same.
+In particular, the number of finished tasks only increases slowly over time and some tasks take orders of magnitude longer than others.
+E.g., in the unconstrained experimental scenario, 19.3\% of the \emph{SMT} tasks finished within 4~s, 25.9\% within 16~s, 36.3\% within 64~s, 55.6\% within 256~s, and 63.0\% within 1024~s.
+For the maximum timeout setting of 2048~s, 68.9\% of the \emph{SMT} tasks finished and 17 out of 27 datasets did not encounter timeouts (cf.~Table~\ref{tab:csd:datasets}).
+
+\paragraph{Subgroup quality}
+
+Figure~\ref{fig:csd:timeouts-nwracc} visualizes the subgroup quality over solver timeouts for unconstrained \emph{SMT} search.
+This plot shows the quality of the optimal solution for finished tasks and of the currently best solution for unfinished tasks.
+As for the number of finished tasks (cf.~Figure~\ref{fig:csd:timeouts-finished-tasks}), the largest gains occur in the first minute.
+E.g., the mean test-set mWRAcc over datasets and cross-validation folds is 0.11 for 1~s, 0.18 for 4~s, 0.25 for 16~s, 0.33 for 64~s, and 0.39 for the maximum timeout of 2024~s.
+The main cause for this trend is that if a task finishes within a certain timeout, its quality cannot improve for higher timeouts, and a considerable number of tasks does finish relatively early indeed (cf.~Figure~\ref{fig:csd:timeouts-finished-tasks}).
+In contrast, if we only consider the tasks where the solver did not finish even within the maximum timeout, the quality increase of the currently best solution over time is marginal.
+
+Further, even \emph{SMT} with a timeout does not compare favorable to fast heuristic search methods.
+E.g., with a solver timeout of 64~s, corresponding to an average overall runtime of 89~s, \emph{SMT} achieves a training-set nWRAcc of 0.44, compared to 0.56 for \emph{Beam} with an average runtime of 33~s (cf.~Table~\ref{tab:csd:methods-unconstrained-runtime-all-datasets}).
+
+Finally, note that setting a lower solver timeout decreases overfitting, i.e., the difference between training-set nWRAcc and test-set nWRAcc increases over time (cf.~Figure~\ref{fig:csd:timeouts-nwracc}).
+However, since the test-set nWRAcc still increases with the timeout as well, choosing lower timeouts does not help quality-wise.
+
 \subsection{Feature-Cardinality Constraints}
 \label{sec:csd:evaluation:cardinality}
 
@@ -1546,6 +1598,10 @@ The latter result also impedes any exhaustive algorithmic search method.
 The same insights applies even more to our novel baseline \emph{MORS}, which can provide an instantaneous non-trivial lower bound for optimal subgroup quality.
 
 \paragraph{Solver timeouts (cf.~Section~\ref{sec:csd:evaluation:timeouts})}
+
+The marginal utility of higher solver timeouts for the number of finished \emph{SMT} tasks and on subgroup quality is decreasing, i.e., most gains occur within the first few seconds or dozens of seconds.
+About half the \emph{SMT} tasks that finish at all finish in under a minute.
+However, the average training-set subgroup quality for this solver timeout is less than for a heuristic search method with even lower runtime.
 
 \paragraph{Feature-cardinality constraints (cf.~Section~\ref{sec:csd:evaluation:cardinality})}
 

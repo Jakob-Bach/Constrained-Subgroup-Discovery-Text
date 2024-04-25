@@ -1426,7 +1426,7 @@ In particular, the heuristics are even better than \emph{SMT} on some datasets b
 The former can only happen because \emph{SMT} may run into timeouts and therefore not yield the exact optimum, as we analyze later (cf.~Section~\ref{sec:csd:evaluation:timeouts}).
 However, even if we limit our analysis to the datasets without \emph{SMT} timeouts, \emph{Beam} and \emph{BI} are still remarkably close to the optimum quality (cf.~Figure~\ref{fig:csd:unconstrained-methods-nwracc-no-timeout-datasets}).
 Note that this result is not specific to \emph{SMT} but also holds for any other exhaustive search method.
-On the test set, \emph{Beam} and \emph{BI} are even better than \emph{SMT} on median, also excluding timeout datasets, since their training-test nWRAcc difference is lower.
+On the test set, \emph{Beam} and \emph{BI} are even better than \emph{SMT} on median, also excluding timeout datasets, since their training-test nWRAcc difference is smaller.
 This result indicates that \emph{Beam} and \emph{BI} are less susceptible to overfitting and their solutions generalize better.
 In detail, the average difference between training-set nWRAcc and test-set nWRAcc is 0.125 for \emph{SMT}, 0.101 for \emph{BI}, 0.095 for \emph{Beam}, 0.094 for \emph{MORS}, 0.068 for \emph{PRIM}, and 0.001 for \emph{Random}.
 
@@ -1490,7 +1490,7 @@ Among the three heuristics, \emph{PRIM} is fastest but also yields the lowest su
 For \emph{SMT}, the overall runtime not only comprises optimization but also formulating the optimization problem.
 Since the latter depends on the dataset size, e.g., involves $O(m)$ constraints with length $O(n)$ each to define the subgroup-membership variables~$b_i$ (cf.~Equation~\ref{eq:csd:smt-constraint-subgroup-membership}), the preparation time can become considerable for large datasets.
 In our experiments, formulating the \emph{SMT} problem took 41.4~s on average, with a maximum of 317.6~s.
-This average preparation time already is higher than the average total runtime of the heuristics.
+This average preparation time already is greater than the average total runtime of the heuristics.
 
 \begin{table}
 	\centering
@@ -1538,13 +1538,14 @@ In this section, we evaluate the impact of solver timeouts for \emph{SMT} search
 		\centering
 		\includegraphics[width=\textwidth, trim=15 25 15 10, clip]{plots/csd-timeouts-nwracc.pdf}
 		\caption{
-			Mean subgroup quality with 95\% confidence intervals.
+			Mean subgroup quality with 95\% confidence intervals based on datasets and cross-validation folds.
 			Results from the unconstrained experimental scenario.
 		}
 		\label{fig:csd:timeouts-nwracc}
 	\end{subfigure}
 	\caption{
-		Impact of solver timeouts over datasets and cross-validation folds, for \emph{SMT} as the subgroup-discovery method.
+		Impact of solver timeouts for \emph{SMT} as the subgroup-discovery method.
+		Results from the search for original subgroups.
 	}
 	\label{fig:csd:timeouts}
 \end{figure}
@@ -1562,12 +1563,12 @@ For the maximum timeout setting of 2048~s, 68.9\% of the \emph{SMT} tasks finish
 Figure~\ref{fig:csd:timeouts-nwracc} visualizes the subgroup quality over solver timeouts for unconstrained \emph{SMT} search.
 This plot shows the quality of the optimal solution for finished tasks and of the currently best solution for unfinished tasks.
 As for the number of finished tasks (cf.~Figure~\ref{fig:csd:timeouts-finished-tasks}), the largest gains occur in the first minute.
-E.g., the mean test-set mWRAcc over datasets and cross-validation folds is 0.11 for 1~s, 0.18 for 4~s, 0.25 for 16~s, 0.33 for 64~s, and 0.39 for the maximum timeout of 2024~s.
+E.g., the mean test-set nWRAcc over datasets and cross-validation folds is 0.11 for 1~s, 0.18 for 4~s, 0.25 for 16~s, 0.33 for 64~s, and 0.39 for the maximum timeout of 2024~s.
 The main cause for this trend is that if a task finishes within a certain timeout, its quality cannot improve for higher timeouts, and a considerable number of tasks does finish relatively early indeed (cf.~Figure~\ref{fig:csd:timeouts-finished-tasks}).
 In contrast, if we only consider the tasks where the solver did not finish even within the maximum timeout, the quality increase of the currently best solution over time is marginal.
 
 Further, even \emph{SMT} with a timeout does not compare favorable to fast heuristic search methods.
-E.g., with a solver timeout of 64~s, corresponding to an average overall runtime of 89~s, \emph{SMT} achieves a training-set nWRAcc of 0.44, compared to 0.56 for \emph{Beam} with an average runtime of 33~s (cf.~Table~\ref{tab:csd:unconstrained-methods-runtime-all-datasets}).
+E.g., with a solver timeout of 64~s, corresponding to an average overall runtime of 89~s, \emph{SMT} achieves a mean training-set nWRAcc of 0.44, compared to 0.56 for \emph{Beam} with an average runtime of 33~s (cf.~Table~\ref{tab:csd:unconstrained-methods-runtime-all-datasets}).
 
 Finally, note that setting a lower solver timeout decreases overfitting, i.e., the difference between training-set nWRAcc and test-set nWRAcc increases over time (cf.~Figure~\ref{fig:csd:timeouts-nwracc}).
 However, since the test-set nWRAcc still increases with the timeout as well, choosing lower timeouts does not help quality-wise.
@@ -1575,9 +1576,84 @@ However, since the test-set nWRAcc still increases with the timeout as well, cho
 \subsection{Feature-Cardinality Constraints}
 \label{sec:csd:evaluation:cardinality}
 
-\paragraph{Quality}
+In this section, we compare all six subgroup-discovery methods in an experimental scenario with feature-cardinality constraints.
+The solver-based search method \emph{SMT} uses its default maximum timeout of 2048~s.
+
+\begin{figure}[t]
+	\centering
+	\begin{subfigure}[t]{0.48\textwidth}
+		\centering
+		\includegraphics[width=\textwidth, trim=20 60 15 15, clip]{plots/csd-cardinality-methods-train-nwracc.pdf}
+		\caption{Training set.}
+		\label{fig:csd:cardinality-methods-train-nwracc}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[t]{0.48\textwidth}
+		\centering
+		\includegraphics[width=\textwidth, trim=20 60 15 15, clip]{plots/csd-cardinality-methods-test-nwracc.pdf}
+		\caption{Test set.}
+		\label{fig:csd:cardinality-methods-test-nwracc}
+	\end{subfigure}
+	\caption{
+		Mean subgroup quality with 95\% confidence intervals based on datasets and cross-validation folds, over feature-cardinality threshold~$k$, by subgroup-discovery method.
+		Results from the search for original subgroups.
+	}
+	\label{fig:csd:cardinality-methods-nwracc}
+\end{figure}
+
+\paragraph{Subgroup quality}
+
+Figure~\ref{fig:csd:cardinality-methods-nwracc} displays the mean subgroup quality, averaging over datasets and cross-validation folds, for different values of the feature-cardinality threshold~$k$.
+For most subgroup-discovery methods, mean training-set nWRACC increases with~$k$, though the marginal utility decreases.
+In particular, even with $k=1$, the mean nWRAcc is already clearly above 50\% of the nWRAcc achieved without a feature-cardinality constraint.
+Further, the quality increase between $k=1$ and $k=2$ is usually the largest.
+On the test set, the benefit of setting a larger~$k$ is even smaller.
+E.g., the mean test-set nWRAcc of \emph{Beam}, \emph{BI}, and \emph{SMT} barely improves beyond $k=2$.
+These results indicate that sparse subgroup descriptions, which tend to be more interpretable, already yield a high subgroup quality.
+
+The baseline \emph{Random} differs from the other subgroup-discovery methods since its subgroup quality clearly decreases over~$k$.
+This behavior results from \emph{Random}'s design (cf.~Algorithm~\ref{al:csd:random-search}).
+In particular, it randomly samples bounds independently for each feature.
+Thus, each feature excludes a certain fraction of data objects from the subgroup.
+The more features are used in the subgroup description, the smaller becomes the expected number of data objects in the subgroup.
+Since the number of subgroup members is one factor in WRAcc (cf.~Equation~\ref{eq:csd:wracc}), quality naturally decreases for smaller subgroups.
+
+Figure~\ref{fig:csd:cardinality-methods-nwracc} also reveals that the heuristic search methods \emph{Beam} and \emph{BI} still yield higher average subgroup quality than the solver-based search \emph{SMT} with timeouts, for any feature-cardinality setting.
+Further, the heuristic \emph{PRIM} exhibits a larger increase of subgroup quality over~$k$ than \emph{Beam} and \emph{BI}, thereby narrowing the quality gap to the latter.
+The baseline \emph{MORS} displays the least effect of~$k$ on mean test-set nWRAcc, showing very stable subgroup quality.
+
+Finally, the results indicate that limiting~$k$ reduces overfitting.
+For example, for \emph{Beam}, the mean difference between training-set and test-set nWRAcc is 0.095 without a feature-cardinality constraint, 0.073 for $k=3$, and 0.045 for $k=1$.
+The increasing tendency to overfit with larger~$k$ explains why mean training-set nWRAcc increases more than mean test-set nWRAcc over~$k$ in Figure~\ref{fig:csd:cardinality-methods-nwracc}.
+From the six subgroup-discovery methods, \emph{PRIM} shows the smallest increase of overfitting over~$k$, \emph{MORS} and \emph{SMT} the largest.
+
+\begin{table}
+	\centering
+	\begin{tabular}{lrrrrrr}
+		\toprule
+		$k$ & BI & Beam & MORS & PRIM & Random & SMT \\
+		\midrule
+		1 & 8.02~s & 7.12~s & 0.01~s & 0.08~s & 0.66~s & 640.79~s \\
+		2 & 11.89~s & 10.44~s & 0.01~s & 0.17~s & 0.66~s & 911.66~s \\
+		3 & 14.53~s & 13.23~s & 0.01~s & 0.25~s & 0.68~s & 1079.53~s \\
+		4 & 16.88~s & 15.21~s & 0.01~s & 0.35~s & 0.68~s & 1128.76~s \\
+		5 & 18.82~s & 16.87~s & 0.01~s & 0.46~s & 0.70~s & 1128.38~s \\
+		no & 34.95~s & 33.03~s & 0.01~s & 1.27~s & 0.91~s & 855.45~s \\
+		\bottomrule
+	\end{tabular}
+	\caption{
+		Mean runtime over datasets and cross-validation folds, by subgroup-discovery method and feature-cardinality threshold~$k$.
+		Results from the search for original subgroups.
+	}
+	\label{tab:csd:cardinality-methods-runtime}
+\end{table}
 
 \paragraph{Runtime}
+
+As Table~\ref{tab:csd:cardinality-methods-runtime} displays, the heuristic search methods \emph{Beam}, \emph{BI}, and \emph{PRIM} become faster the smaller~$k$ is.
+The baseline \emph{Random} shows a similar trend, though less prominent, while \emph{MORS} yields results instantaneously in any case.
+In contrast, the picture for the solver-based search method \emph{SMT} is less clear.
+While its average runtime clearly increases over~$k$ till $k=4$, it remains constant for $k=5$ and even decreases without a feature-cardinality constraint, though remaining higher than for $k \leq 2$.
 
 \subsection{Alternative Subgroup Descriptions}
 \label{sec:csd:evaluation:alternatives}
@@ -1592,18 +1668,23 @@ However, since the test-set nWRAcc still increases with the timeout as well, cho
 \paragraph{Unconstrained subgroup discovery (cf.~Section~\ref{sec:csd:evaluation:unconstrained})}
 
 We recommend using heuristic search methods rather than solver-based search.
-\emph{Beam} and \emph{BI} are an order of magnitude faster than \emph{SMT} and still yield higher test-set subgroup quality since they are less prone to overfitting.
-The latter result also impedes any exhaustive algorithmic search method.
-\emph{PRIM} is even faster than \emph{Beam} and \emph{BI} but yields lower subgroup quality.
-The same insights applies even more to our novel baseline \emph{MORS}, which can provide an instantaneous non-trivial lower bound for optimal subgroup quality.
+In particular, \emph{Beam} and \emph{BI} were an order of magnitude faster than \emph{SMT} and still yielded higher test-set subgroup quality since they were less prone to overfitting.
+The latter result not only impedes \emph{SMT} but exhaustive algorithmic search methods as well.
+\emph{PRIM} was faster than \emph{Beam} and \emph{BI} but yielded lower subgroup quality.
+The same insights applied even more to our novel baseline \emph{MORS}, which provided instantaneous, non-trivial lower bounds for subgroup quality.
 
 \paragraph{Solver timeouts (cf.~Section~\ref{sec:csd:evaluation:timeouts})}
 
-The marginal utility of higher solver timeouts for the number of finished \emph{SMT} tasks and on subgroup quality is decreasing, i.e., most gains occur within the first few seconds or dozens of seconds.
-About half the \emph{SMT} tasks that finish at all finish in under a minute.
-However, the average training-set subgroup quality for this solver timeout is less than for a heuristic search method with even lower runtime.
+Setting larger solver timeouts showed a decreasing marginal utility regarding the number of finished \emph{SMT} tasks and subgroup quality i.e., most gains occurred within the first few seconds or dozens of seconds.
+About half the \emph{SMT} tasks that finished at all finished in under a minute.
+However, the average training-set subgroup quality for this solver timeout was lower than for heuristic search methods with even lower runtime.
 
 \paragraph{Feature-cardinality constraints (cf.~Section~\ref{sec:csd:evaluation:cardinality})}
+
+Using more features in subgroup descriptions showed a decreasing marginal utility regarding subgroup quality.
+For \emph{Beam}, \emph{BI}, and \emph{SMT}, test-set subgroup-quality was already close to the unconstrained scenario at $k=2$, while \emph{PRIM} benefited more from larger~$k$.
+A smaller~$k$ made the heuristic search methods faster and generally reduced overfitting.
+The baseline \emph{MORS} showed stable test-set subgroup quality regarding~$k$, while \emph{Random} even increased subgroup quality with smaller~$k$.
 
 \paragraph{Alternative subgroup descriptions (cf.~Section~\ref{sec:csd:evaluation:alternatives})}
 

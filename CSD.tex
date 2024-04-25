@@ -1400,31 +1400,31 @@ The solver-based search method \emph{SMT} uses its default maximum timeout of 20
 	\centering
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim=20 60 15 15, clip]{plots/csd-methods-unconstrained-nwracc-all-datasets.pdf}
+		\includegraphics[width=\textwidth, trim=20 60 15 15, clip]{plots/csd-unconstrained-methods-nwracc-all-datasets.pdf}
 		\caption{All datasets.}
-		\label{fig:csd:methods-unconstrained-nwracc-all-datasets}
+		\label{fig:csd:unconstrained-methods-nwracc-all-datasets}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim=20 60 15 15, clip]{plots/csd-methods-unconstrained-nwracc-no-timeout-datasets.pdf}
+		\includegraphics[width=\textwidth, trim=20 60 15 15, clip]{plots/csd-unconstrained-methods-nwracc-no-timeout-datasets.pdf}
 		\caption{Datasets without \emph{SMT} timeouts.}
-		\label{fig:csd:methods-unconstrained-nwracc-no-timeout-datasets}
+		\label{fig:csd:unconstrained-methods-nwracc-no-timeout-datasets}
 	\end{subfigure}
 	\caption{
 		Subgroup quality (nWRAcc, cf.~Equation~\ref{eq:csd:wracc-normalized}) over datasets and cross-validation folds, by subgroup-discovery method.
 		Results from the unconstrained experimental scenario.
 	}
-	\label{fig:csd:methods-unconstrained-nwracc}
+	\label{fig:csd:unconstrained-methods-nwracc}
 \end{figure}
 
 \paragraph{Subgroup quality}
 
-Figure~\ref{fig:csd:methods-unconstrained-nwracc-all-datasets} compares subgroup quality on the training set and test set for the six subgroup-discovery methods.
+Figure~\ref{fig:csd:unconstrained-methods-nwracc-all-datasets} compares subgroup quality on the training set and test set for the six subgroup-discovery methods.
 On the training set, the two heuristic search methods \emph{Beam} and \emph{BI} have roughly the same median nWRAcc as the solver-based search method \emph{SMT}.
 In particular, the heuristics are even better than \emph{SMT} on some datasets but worse on others.
 The former can only happen because \emph{SMT} may run into timeouts and therefore not yield the exact optimum, as we analyze later (cf.~Section~\ref{sec:csd:evaluation:timeouts}).
-However, even if we limit our analysis to the datasets without \emph{SMT} timeouts, \emph{Beam} and \emph{BI} are still remarkably close to the optimum quality (cf.~Figure~\ref{fig:csd:methods-unconstrained-nwracc-no-timeout-datasets}).
+However, even if we limit our analysis to the datasets without \emph{SMT} timeouts, \emph{Beam} and \emph{BI} are still remarkably close to the optimum quality (cf.~Figure~\ref{fig:csd:unconstrained-methods-nwracc-no-timeout-datasets}).
 Note that this result is not specific to \emph{SMT} but also holds for any other exhaustive search method.
 On the test set, \emph{Beam} and \emph{BI} are even better than \emph{SMT} on median, also excluding timeout datasets, since their training-test nWRAcc difference is lower.
 This result indicates that \emph{Beam} and \emph{BI} are less susceptible to overfitting and their solutions generalize better.
@@ -1453,7 +1453,7 @@ While \emph{Random} yields the same quality as not restricting the subgroup at a
 		\caption{
 			All datasets.
 		}
-		\label{tab:csd:methods-unconstrained-runtime-all-datasets}
+		\label{tab:csd:unconstrained-methods-runtime-all-datasets}
 	\end{subtable}
 	\\ \vspace{\baselineskip}
 	\begin{subtable}{\textwidth}
@@ -1470,18 +1470,18 @@ While \emph{Random} yields the same quality as not restricting the subgroup at a
 		\caption{
 			Datasets without \emph{SMT} timeouts.
 		}
-		\label{tab:csd:methods-unconstrained-runtime-no-timeout-datasets}
+		\label{tab:csd:unconstrained-methods-runtime-no-timeout-datasets}
 	\end{subtable}
 	\caption{
 		Aggregated runtime over datasets and cross-validation folds, by subgroup-discovery method.
 		Results from the unconstrained experimental scenario.
 	}
-	\label{tab:csd:methods-unconstrained-runtime}
+	\label{tab:csd:unconstrained-methods-runtime}
 \end{table}
 
 \paragraph{Runtime}
 
-Table~\ref{tab:csd:methods-unconstrained-runtime} summarizes the runtimes of the subgroup-discovery methods.
+Table~\ref{tab:csd:unconstrained-methods-runtime} summarizes the runtimes of the subgroup-discovery methods.
 On average, \emph{SMT} is an order of magnitude slower than \emph{Beam} and \emph{BI}, which are an order of magnitude slower than \emph{PRIM} and the baseline \emph{Random}.
 The baseline \emph{MORS} runs in negligible time and therefore is a good tool to obtain a lower bound on subgroup quality instantaneously.
 Taking subgroup-quality into consideration, the heuristic search methods offer a reasonable quality in a reasonable time, while \emph{SMT} incurs a high cost for its optimal solutions.
@@ -1511,11 +1511,11 @@ This average preparation time already is higher than the average total runtime o
 		over datasets and cross-validation folds, by subgroup-discovery method.
 		Results from the unconstrained experimental scenario, using datasets without \emph{SMT} timeouts.
 	}
-	\label{tab:csd:methods-unconstrained-runtime-correlation}
+	\label{tab:csd:unconstrained-methods-runtime-correlation}
 \end{table}
 
 To determine which factors influence runtime, we analyze the Spearman correlation between runtime and four simple metrics for dataset size.
-In particular, Table~\ref{tab:csd:methods-unconstrained-runtime-correlation} considers the number of data objects~$m$, the number of features~$n$, the product of these two quantities~$m \cdot n$, and the number of unique values per feature summed over the features~$\Sigma n^u$.
+In particular, Table~\ref{tab:csd:unconstrained-methods-runtime-correlation} considers the number of data objects~$m$, the number of features~$n$, the product of these two quantities~$m \cdot n$, and the number of unique values per feature summed over the features~$\Sigma n^u$.
 For the three heuristic search methods, the latter metric shows a high correlation to runtime, while \emph{SMT} exhibits the highest runtime correlation to~$m \cdot n$.
 
 \subsection{Solver Timeouts}
@@ -1567,7 +1567,7 @@ The main cause for this trend is that if a task finishes within a certain timeou
 In contrast, if we only consider the tasks where the solver did not finish even within the maximum timeout, the quality increase of the currently best solution over time is marginal.
 
 Further, even \emph{SMT} with a timeout does not compare favorable to fast heuristic search methods.
-E.g., with a solver timeout of 64~s, corresponding to an average overall runtime of 89~s, \emph{SMT} achieves a training-set nWRAcc of 0.44, compared to 0.56 for \emph{Beam} with an average runtime of 33~s (cf.~Table~\ref{tab:csd:methods-unconstrained-runtime-all-datasets}).
+E.g., with a solver timeout of 64~s, corresponding to an average overall runtime of 89~s, \emph{SMT} achieves a training-set nWRAcc of 0.44, compared to 0.56 for \emph{Beam} with an average runtime of 33~s (cf.~Table~\ref{tab:csd:unconstrained-methods-runtime-all-datasets}).
 
 Finally, note that setting a lower solver timeout decreases overfitting, i.e., the difference between training-set nWRAcc and test-set nWRAcc increases over time (cf.~Figure~\ref{fig:csd:timeouts-nwracc}).
 However, since the test-set nWRAcc still increases with the timeout as well, choosing lower timeouts does not help quality-wise.

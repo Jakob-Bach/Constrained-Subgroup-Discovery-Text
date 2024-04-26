@@ -1241,8 +1241,8 @@ Based on this membership information and the true class labels~$y$, we compute \
 
 \paragraph{Subgroup similarity}
 
-For evaluating alternative subgroup descriptions, we not only consider their quality but also their similarity to the original subgroup.
-To this end, we use \emph{normalized Hamming similarity} (cf.~Equation~\ref{eq:csd:hamming-general}) and \emph{Jaccard similarity} (cf.~Equation~\ref{eq:csd:jaccard}) to compare subgroup membership of data objects between the original subgroup and an alternative subgroup description.
+For evaluating alternative subgroup descriptions, we not only consider their quality but also their induced subgroup's similarity to the original subgroup.
+To this end, we use \emph{normalized Hamming similarity} (cf.~Equation~\ref{eq:csd:hamming-general}) and \emph{Jaccard similarity} (cf.~Equation~\ref{eq:csd:jaccard}) to compare subgroup membership of data objects between the original and the alternative.
 
 \paragraph{Runtime}
 
@@ -1441,9 +1441,9 @@ While \emph{Random} yields the same quality as not restricting the subgroup at a
 \begin{table}
 	\centering
 	\begin{subtable}{\textwidth}
-		\begin{tabular}{l|rrrrrr}
+		\begin{tabular}{lrrrrrr}
 			\toprule
-			Runtime & SMT & Beam & BI & PRIM & MORS & Random \\
+			Aggregate & SMT & Beam & BI & PRIM & MORS & Random \\
 			\midrule
 			Mean & 855.45~s & 33.03~s & 34.95~s & 1.27~s & 0.01~s & 0.91~s \\
 			Standard dev. & 931.85~s & 97.06~s & 103.25~s & 1.54~s & 0.00~s & 1.05~s \\
@@ -1453,14 +1453,14 @@ While \emph{Random} yields the same quality as not restricting the subgroup at a
 		\caption{
 			All datasets.
 		}
-		\label{tab:csd:unconstrained-methods-runtime-all-datasets}
+		\label{tab:csd:unconstrained-runtime-all-datasets}
 	\end{subtable}
 	\\ \vspace{\baselineskip}
 	\begin{subtable}{\textwidth}
 		\centering
-		\begin{tabular}{l|rrrrrr}
+		\begin{tabular}{lrrrrrr}
 			\toprule
-			Runtime & SMT & Beam & BI & PRIM & MORS & Random \\
+			Aggregate & SMT & Beam & BI & PRIM & MORS & Random \\
 			\midrule
 			Mean & 179.18~s & 11.39~s & 12.36~s & 1.32~s & 0.01~s & 0.86~s \\
 			Standard dev. & 295.20~s & 19.82~s & 21.37~s & 1.70~s & 0.00~s & 1.08~s \\
@@ -1470,18 +1470,18 @@ While \emph{Random} yields the same quality as not restricting the subgroup at a
 		\caption{
 			Datasets without \emph{SMT} timeouts.
 		}
-		\label{tab:csd:unconstrained-methods-runtime-no-timeout-datasets}
+		\label{tab:csd:unconstrained-runtime-no-timeout-datasets}
 	\end{subtable}
 	\caption{
 		Aggregated runtime over datasets and cross-validation folds, by subgroup-discovery method.
 		Results from the unconstrained experimental scenario.
 	}
-	\label{tab:csd:unconstrained-methods-runtime}
+	\label{tab:csd:unconstrained-runtime}
 \end{table}
 
 \paragraph{Runtime}
 
-Table~\ref{tab:csd:unconstrained-methods-runtime} summarizes the runtimes of the subgroup-discovery methods.
+Table~\ref{tab:csd:unconstrained-runtime} summarizes the runtimes of the subgroup-discovery methods.
 On average, \emph{SMT} is an order of magnitude slower than \emph{Beam} and \emph{BI}, which are an order of magnitude slower than \emph{PRIM} and the baseline \emph{Random}.
 The baseline \emph{MORS} runs in negligible time and therefore is a good tool to obtain a lower bound on subgroup quality instantaneously.
 Taking subgroup-quality into consideration, the heuristic search methods offer a reasonable quality in a reasonable time, while \emph{SMT} incurs a high cost for its optimal solutions.
@@ -1511,11 +1511,11 @@ This average preparation time already is greater than the average total runtime 
 		over datasets and cross-validation folds, by subgroup-discovery method.
 		Results from the unconstrained experimental scenario, using datasets without \emph{SMT} timeouts.
 	}
-	\label{tab:csd:unconstrained-methods-runtime-correlation}
+	\label{tab:csd:unconstrained-runtime-correlation}
 \end{table}
 
 To determine which factors influence runtime, we analyze the Spearman correlation between runtime and four simple metrics for dataset size.
-In particular, Table~\ref{tab:csd:unconstrained-methods-runtime-correlation} considers the number of data objects~$m$, the number of features~$n$, the product of these two quantities~$m \cdot n$, and the number of unique values per feature summed over the features~$\Sigma n^u$.
+In particular, Table~\ref{tab:csd:unconstrained-runtime-correlation} considers the number of data objects~$m$, the number of features~$n$, the product of these two quantities~$m \cdot n$, and the number of unique values per feature summed over the features~$\Sigma n^u$.
 For the three heuristic search methods, the latter metric shows a high correlation to runtime, while \emph{SMT} exhibits the highest runtime correlation to~$m \cdot n$.
 
 \subsection{Solver Timeouts}
@@ -1568,7 +1568,7 @@ The main cause for this trend is that if a task finishes within a certain timeou
 In contrast, if we only consider the tasks where the solver did not finish even within the maximum timeout, the quality increase of the currently best solution over time is marginal.
 
 Further, even \emph{SMT} with a timeout does not compare favorable to fast heuristic search methods.
-E.g., with a solver timeout of 64~s, corresponding to an average overall runtime of 89~s, \emph{SMT} achieves a mean training-set nWRAcc of 0.44, compared to 0.56 for \emph{Beam} with an average runtime of 33~s (cf.~Table~\ref{tab:csd:unconstrained-methods-runtime-all-datasets}).
+E.g., with a solver timeout of 64~s, corresponding to an average overall runtime of 89~s, \emph{SMT} achieves a mean training-set nWRAcc of 0.44, compared to 0.56 for \emph{Beam} with an average runtime of 33~s (cf.~Table~\ref{tab:csd:unconstrained-runtime-all-datasets}).
 
 Finally, note that setting a lower solver timeout decreases overfitting, i.e., the difference between training-set nWRAcc and test-set nWRAcc increases over time (cf.~Figure~\ref{fig:csd:timeouts-nwracc}).
 However, since the test-set nWRAcc still increases with the timeout as well, choosing lower timeouts does not help quality-wise.
@@ -1604,10 +1604,10 @@ The solver-based search method \emph{SMT} uses its default maximum timeout of 20
 \paragraph{Subgroup quality}
 
 Figure~\ref{fig:csd:cardinality-methods-nwracc} displays the mean subgroup quality, averaging over datasets and cross-validation folds, for different values of the feature-cardinality threshold~$k$.
-For most subgroup-discovery methods, mean training-set nWRACC increases with~$k$, though the marginal utility decreases.
+For most subgroup-discovery methods, mean training-set nWRACC (cf.~Figure~\ref{fig:csd:cardinality-methods-train-nwracc}) increases with~$k$, though the marginal utility decreases.
 In particular, even with $k=1$, the mean nWRAcc is already clearly above 50\% of the nWRAcc achieved without a feature-cardinality constraint.
 Further, the quality increase between $k=1$ and $k=2$ is usually the largest.
-On the test set, the benefit of setting a larger~$k$ is even smaller.
+On the test set (cf.~Figure~\ref{fig:csd:cardinality-methods-test-nwracc}), the benefit of setting a larger~$k$ is even smaller.
 E.g., the mean test-set nWRAcc of \emph{Beam}, \emph{BI}, and \emph{SMT} barely improves beyond $k=2$.
 These results indicate that sparse subgroup descriptions, which tend to be more interpretable, already yield a high subgroup quality.
 
@@ -1645,12 +1645,12 @@ From the six subgroup-discovery methods, \emph{PRIM} shows the smallest increase
 		Mean runtime over datasets and cross-validation folds, by subgroup-discovery method and feature-cardinality threshold~$k$.
 		Results from the search for original subgroups.
 	}
-	\label{tab:csd:cardinality-methods-runtime}
+	\label{tab:csd:cardinality-runtime}
 \end{table}
 
 \paragraph{Runtime}
 
-As Table~\ref{tab:csd:cardinality-methods-runtime} displays, the heuristic search methods \emph{Beam}, \emph{BI}, and \emph{PRIM} become faster the smaller~$k$ is.
+As Table~\ref{tab:csd:cardinality-runtime} displays, the heuristic search methods \emph{Beam}, \emph{BI}, and \emph{PRIM} become faster the smaller~$k$ is.
 The baseline \emph{Random} shows a similar trend, though less prominent, while \emph{MORS} yields results instantaneously in any case.
 In contrast, the picture for the solver-based search method \emph{SMT} is less clear.
 While its average runtime clearly increases over~$k$ till $k=4$, it remains constant for $k=5$ and even decreases without a feature-cardinality constraint, though remaining higher than for $k \leq 2$.
@@ -1658,9 +1658,108 @@ While its average runtime clearly increases over~$k$ till $k=4$, it remains cons
 \subsection{Alternative Subgroup Descriptions}
 \label{sec:csd:evaluation:alternatives}
 
-\paragraph{Quality}
+In this section, we analyze alternative subgroup descriptions for the subgroup-discovery methods \emph{Beam} and \emph{SMT}.
+The solver-based search method \emph{SMT} uses its default maximum timeout of 2048~s.
+Both search methods employ a feature-cardinality threshold of~$k=3$.
+
+
+\begin{figure}[t]
+	\centering
+	\begin{subfigure}[t]{0.48\textwidth}
+		\centering
+		\includegraphics[width=\textwidth, trim=20 50 15 15, clip]{plots/csd-alternatives-similarity-hamming.pdf}
+		\caption{Normalized Hamming similarity.}
+		\label{fig:csd:alternatives-similarity-hamming}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[t]{0.48\textwidth}
+		\centering
+		\includegraphics[width=\textwidth, trim=20 50 15 15, clip]{plots/csd-alternatives-similarity-jaccard.pdf}
+		\caption{Jaccard similarity.}
+		\label{fig:csd:alternatives-similarity-jaccard}
+	\end{subfigure}
+	\caption{
+		Mean subgroup similarity of alternative subgroup descriptions to the original subgroup with 95\% confidence intervals based on datasets and cross-validation folds, over the number of alternatives, by subgroup-discovery method and dissimilarity threshold~$\tau_{\text{abs}}$.
+	}
+	\label{fig:csd:alternatives-similarity}
+\end{figure}
+
+\paragraph{Subgroup similarity}
+
+Figure~\ref{fig:csd:alternatives-similarity} visualizes the average similarity between the original subgroup and the subgroups induced by alternative subgroup descriptions.
+As one would expect, the subgroup similarity decreases the more alternatives one desires and the more the selected features in subgroup descriptions should differ.
+Further, the decrease is strongest from the original subgroup, i.e., the zeroth alternative, to the first alternative but smaller beyond.
+This observation indicates that one may find several alternative subgroup descriptions of comparable similarity to the original.
+
+These trends holds for both similarity measures, i.e., the normalized Hamming similarity we use as optimization objective (cf.~Equation~\ref{eq:csd:hamming-general} and Figure~\ref{fig:csd:alternatives-similarity-hamming}) as well as the Jaccard similarity (cf.~Equation~\ref{eq:csd:jaccard} and Figure~\ref{fig:csd:alternatives-similarity-jaccard}).
+The latter yields lower similarity values than the former since it ignores data objects that are not contained in either of the two compared subgroups.
+Further, the observed trends exist for the solver-based search method~\emph{SMT} as well as the heuristic search method~\emph{Beam}.
+\emph{SMT} yields clearly more similar subgroups than \emph{Beam} for the Jaccard similarity, while the normalized Hamming similarity does not show a clear winner.
+
+\begin{figure}[t]
+	\centering
+	\begin{subfigure}[t]{0.48\textwidth}
+		\centering
+		\includegraphics[width=\textwidth, trim=20 50 15 15, clip]{plots/csd-alternatives-train-nwracc.pdf}
+		\caption{Training set.}
+		\label{fig:csd:alternatives-train-nwracc}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[t]{0.48\textwidth}
+		\centering
+		\includegraphics[width=\textwidth, trim=20 50 15 15, clip]{plots/csd-alternatives-test-nwracc.pdf}
+		\caption{Test set.}
+		\label{fig:csd:alternatives-test-nwracc}
+	\end{subfigure}
+	\caption{
+		Mean subgroup quality with 95\% confidence intervals based on datasets and cross-validation folds, over the number of alternatives, by subgroup-discovery method and dissimilarity threshold~$\tau_{\text{abs}}$.
+		Results from the search for alternative subgroup descriptions.
+	}
+	\label{fig:csd:alternatives-nwracc}
+\end{figure}
+
+\paragraph{Subgroup quality}
+
+The average subgroup quality of alternative subgroup descriptions (cf.~Figure~\ref{fig:csd:alternatives-nwracc}) shows similar trends as subgroup similarity (cf.~Figure~\ref{fig:csd:alternatives-similarity}).
+In particular, quality decreases over the dissimilarity threshold~$\tau_{\text{abs}}$ and over the number of alternatives~$a$, with the largest decrease to the first alternative.
+For the highest dissimilarity threshold~$\tau_{\text{abs}} = 3$, \emph{Beam} consistently yields higher average quality than \emph{SMT} for the original subgroup and each alternative, while the other two values of the dissimilarity threshold do not clearly favor either subgroup-discovery method.
+The observed trends on the test set (cf.~Figure~\ref{fig:csd:alternatives-test-nwracc}) are very similar to those on the training set (cf.~Figure~\ref{fig:csd:alternatives-train-nwracc}).
+For both subgroup discovery methods, overfitting as measured by the train-test difference in nWRAcc is lower for the alternative subgroup descriptions than for the original subgroups.
+This may be a consequence of the alternative subgroup descriptions not directly optimizing subgroup quality.
+
+\begin{table}
+	\centering
+	\begin{tabular}{llrrrrrr}
+		\toprule
+		\multirow{2}{*}{Method} & \multirow{2}{*}{$\tau_{\text{abs}}$} & \multicolumn{6}{c}{Number of alternative} \\
+		\cmidrule(lr){3-8}
+		& &  0 & 1 & 2 & 3 & 4 & 5 \\
+		\midrule
+		\multirow[t]{3}{*}{Beam} & 1 & 13.2~s & 8.3~s & 7.9~s & 7.9~s & 7.7~s & 7.6~s \\
+		& 2 & 13.3~s & 7.9~s & 7.6~s & 7.5~s & 7.2~s & 7.0~s \\
+		& 3 & 13.4~s & 6.1~s & 5.2~s & 4.8~s & 4.1~s & 3.5~s \\
+		\multirow[t]{3}{*}{SMT} & 1 & 1079.5~s & 158.7~s & 198.7~s & 219.3~s & 237.2~s & 283.0~s \\
+		& 2 & 1100.3~s & 410.8~s & 477.2~s & 527.9~s & 637.2~s & 662.4~s \\
+		& 3 & 1104.2~s & 913.4~s & 693.2~s & 629.2~s & 616.7~s & 577.9~s \\
+		\bottomrule
+	\end{tabular}
+	\caption{
+		Mean runtime over datasets and cross-validation folds, by subgroup-discovery method, dissimilarity threshold~$\tau_{\text{abs}}$, and number of alternative.
+		Results from the search for alternative subgroup descriptions.
+	}
+	\label{tab:csd:alteratives-runtime}
+\end{table}
 
 \paragraph{Runtime}
+
+Table~\ref{tab:csd:alteratives-runtime} displays the average runtime for searching original subgroups and alternative subgroup descriptions.
+The search for alternatives is faster for both analyzed search methods, i.e., \emph{Beam} and \emph{SMT}.
+As for the original subgroups, \emph{Beam} search for alternative subgroup descriptions is one to two orders magnitude faster than the solver-based \emph{SMT} search.
+For \emph{Beam}, runtime tends to decrease over the number of alternatives, while \emph{SMT} shows less clear behavior.
+In particular, its runtime increases over alternatives for~$\tau_{\text{abs}} \in \{1, 2\}$, i.e., settings that allow reusing features from previous subgroup descriptions.
+In contrast, runtime decreases over alternatives for $\tau_{\text{abs}} = k = 3$, which forbids selecting any feature used in a previous subgroup description.
+Finally, the number of \emph{SMT} tasks finished within the solver timeout shows trends corresponding to the runtime.
+In particular, there are more finished tasks when searching for alternative subgroup descriptions rather than original subgroups.
 
 \subsection{Summary}
 \label{sec:csd:evaluation:summary}
@@ -1687,6 +1786,10 @@ A smaller~$k$ made the heuristic search methods faster and generally reduced ove
 The baseline \emph{MORS} showed stable test-set subgroup quality regarding~$k$, while \emph{Random} even increased subgroup quality with smaller~$k$.
 
 \paragraph{Alternative subgroup descriptions (cf.~Section~\ref{sec:csd:evaluation:alternatives})}
+
+The heuristic \emph{Beam} was one to two orders of magnitude faster than solver-based \emph{SMT} when searching for alternative subgroup descriptions, while both search methods found alternatives faster than original subgroups.
+The quality and similarity of alternative subgroup descriptions strongly depended on two user parameters, i.e., the number of alternatives~$a$ and the dissimilarity threshold on feature selection~$\tau_{\text{abs}}$.
+The quality and similarity difference between the original and the first alternative was higher than among the first few alternatives.
 
 \section{Related Work}
 \label{sec:csd:related-work}

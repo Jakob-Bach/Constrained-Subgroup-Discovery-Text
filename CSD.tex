@@ -53,27 +53,40 @@ We observe that heuristic search methods often yield subgroups of high quality w
 
 \paragraph{Motivation}
 
-Interpretability of prediction models has significantly gained importance in the last few years~\cite{carvalho2019machine, molnar2020interpretable}.
+The interpretability of prediction models has significantly gained importance in recent years~\cite{carvalho2019machine, molnar2020interpretable}.
 There are various ways to foster interpretability in machine-learning pipelines.
 In particular, some machine-learning models are simple enough to be intrinsically interpretable~\cite{carvalho2019machine}.
 Subgroup-discovery methods fall into this category~\cite{atzmueller2015subgroup}.
-The goal of subgroup discovery is to find `interesting' subgroups, i.e., subsets of the dataset, e.g., data objects where the prediction target takes a particular value.
+The goal of subgroup discovery is to find `interesting' subgroups, i.e., subsets of a dataset, e.g., data objects where the prediction target takes a particular value.
 Further, such subgroups should be described with a combination of simple conditions on feature values.
-While these subgroup descriptions may already be understandable for users, we see further potential to increase interpretability with the help of constraints.
+E.g., Figure~\ref{fig:csd:exemplary-subgroup} displays a rectangle-shaped subgroup description for a two-dimensional, real-valued dataset with a binary prediction target.
+This subgroup is defined by $(\mathit{Feature\_1} \in [3.0, 5.1]) \land (\mathit{Feature\_2} \in [1.0, 1.8])$ and contains a considerably higher fraction of data objects with $\mathit{Target} = 1$ than the complete dataset.
+While such subgroup descriptions already tend to be understandable for users, we see further potential to increase interpretability with the help of constraints.
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=\textwidth, trim=15 20 15 15, clip]{plots/csd-exemplary-subgroup.pdf}
+	\caption{
+		Exemplary subgroup description in the form a rectangle for a dataset with two real-valued features and a binary prediction target.
+	}
+	\label{fig:csd:exemplary-subgroup}
+\end{figure}
 
 \paragraph{Problem statement}
 
 This article addresses the problem of constrained subgroup discovery.
-In particular, we focus on two types of constraints:
+In particular, we focus on two types of constraints related to the features used in subgroup descriptions:
 
 First, \emph{feature-cardinality constraints} limit the number of selected features, i.e., features used in subgroup descriptions.
-Thus, the subgroup descriptions become \emph{sparse}, which increases their interpretability.
+E.g., in Figure~\ref{fig:csd:exemplary-subgroup}, one may use only either feature to define a subgroup with $\mathit{Target} = 1$ instead of using both features, thereby simplifying the subgroup description but inevitably capturing more data objects with $\mathit{Target} = 0$.
+With feature selection, the subgroup descriptions become \emph{sparse}, which increases their interpretability.
 In particular, even intrinsically interpretable model may loose interpretability if they involve too many features~\cite{molnar2020interpretable}.
 This constraint type resembles feature selection~\cite{guyon2003introduction, li2017feature}, which is a common task in machine-learning pipelines.
 
 Second, we formulate constraints to search \emph{alternative subgroup descriptions}:
-Given an \emph{original} subgroup, we search for further subgroups that reproduce the set of covered data objects as closely as possible but use different features in their subgroup description.
-Thus, users obtain different explanations for the same subgroup.
+Given an \emph{original} subgroup, an alternative subgroup should reproduce the set of contained data objects as closely as possible but use different features in its subgroup description.
+E.g., in Figure~\ref{fig:csd:exemplary-subgroup}, one may define a subgroup with an interval one feature and then try to capture a similar set of data objects with the other feature.
+With alternative subgroup descriptions, users obtain different explanations for the same subgroup.
 Such alternative explanations are also popular in other explainable-AI techniques like counterfactuals~\cite{mothilal2020explaining, russell2019efficient}, e.g., to enable users to develop and test multiple hypotheses or foster trust in the predictions~\cite{kim2021multi, wang2019designing}.
 
 \paragraph{Related work}
@@ -82,7 +95,7 @@ There are various search methods for subgroup discovery, exact~\cite{atzmueller2
 We see research gaps in three aspects:
 First, all widely used subgroup-discovery methods are algorithmic in nature and only support a limited set of constraints, as the search routines need to be specifically adapted to particular constraint types.
 Second, the number of features used in a subgroup description is a well-known measure for subgroup complexity~\cite{helal2016subgroup, herrera2011overview, ventura2018subgroup}.
-However, there is a lack of systematic evaluations of this constraint type, particularly regarding different cardinality thresholds and comparing multiple subgroup-discovery methods.
+However, there is a lack of systematic evaluations of this constraint type, particularly evaluations with different cardinality thresholds and comparing multiple subgroup-discovery methods.
 Third, various subgroup-discovery methods yield a diverse set of subgroups rather than only one subgroup, thereby providing alternative solutions~\cite{belfodil2019fssd, bosc2018anytime, leeuwen2012diverse, lemmerich2010fast, lucas2018ssdp+, proencca2022robust}.
 However, this notion of alternatives targets at capturing different subsets of data objects from the dataset.
 In contrast, our notion of alternative subgroup descriptions tries to capture the same data objects as in the original subgroup but with different features in the description.
@@ -96,19 +109,18 @@ This novel white-box formulation admits solver-based search for subgroups and al
 
 Second, we formalize two constraint types for this optimization problem, i.e., feature-cardinality constraints and alternative subgroup descriptions.
 For the latter, we allow users to control alternatives with two parameters, i.e., the number of alternatives and a dissimilarity threshold.
-Both constraint types can be combined with our white-box formulation of subgroup discovery.
+We integrate both constraint types into our white-box formulation of subgroup discovery.
 
 Third, we describe how to integrate these two constraint types into three existing heuristic search methods and two novel baselines for subgroup discovery.
+The latter are faster and simpler than the former, so they may serve as additional reference points for future experimental studies on subgroup discovery.
 
 Fourth, we analyze the computational complexity of the subgroup-discovery problem with each of these two constraint types.
-In particular, we prove several $\mathcal{NP}$-hardness results.
+In particular, prove several $\mathcal{NP}$-hardness results and thereby show that finding optimal solutions under these constrain types is not trivial.
 
 Fifth, we conduct comprehensive experiments with 27 binary-classification datasets from the Penn Machine Learning Benchmarks (PMLB)~\cite{olson2017pmlb, romano2021pmlb}.
 We evaluate the runtime of subgroup discovery and the quality of the discovered subgroups.
-In particular, we compare solver-based and heuristic subgroup-discovery methods in three experimental scenarios:
-without constraints, with a feature-cardinality constraint, and searching alternative subgroup descriptions.
-For the latter, we vary the two user parameters for alternatives.
-In a fourth experimental scenario, we analyze how the subgroup quality in solver-based search for alternatives depends on the timeout of the solver.
+In particular, we compare solver-based and heuristic subgroup-discovery methods without constraints, with a feature-cardinality constraint, and for searching alternative subgroup descriptions.
+We also analyze how the subgroup quality in solver-based search depends on the timeout of the solver.
 We publish all code\footnote{\url{https://github.com/Jakob-Bach/Constrained-Subgroup-Discovery}} and experimental data\footnote{TODO} online.
 
 \paragraph{Experimental results}
@@ -1908,7 +1920,7 @@ In contrast, we search for alternative descriptions sequentially, optimize simil
 \paragraph{Diverse top-k characteristics lists}
 
 \cite{lopez2023discovering}~introduces the notion of \emph{diverse top-k characteristic lists}, which is a set of lists each containing multiple patterns, e.g., subgroups.
-Within each list, the subgroups should be alternative to each other in terms of data objects covered.
+Within each list, the subgroups should be alternative to each other in terms of data objects contained.
 Between lists, subgroup descriptions should be diverse.
 However, the latter goal is implemented with a very simple notion of diversity, i.e., exactly the same subgroup description must not appear in two lists but any other overlap is allowed.
 

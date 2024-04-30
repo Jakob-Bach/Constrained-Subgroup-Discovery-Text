@@ -37,8 +37,8 @@
 Subgroup-discovery methods allow users to obtain simple descriptions of interesting regions in a dataset.
 Using constraints in subgroup discovery can enhance interpretability even further.
 In this article, we focus on two types of constraints:
-First, we limit the number of features used in subgroups, making the subgroups sparse.
-Second, we propose a novel optimization problem of finding alternative subgroup descriptions, which cover similar data objects as a given subgroup but use different features.
+First, we limit the number of features used in subgroup descriptions, making the latter sparse.
+Second, we propose the novel optimization problem of finding alternative subgroup descriptions, which cover similar data objects as a given subgroup but use different features.
 For both constraint types, we describe how to integrate them into heuristic search methods for subgroups.
 Further, we propose a novel Satisfiability Module Theories (SMT) formulation of subgroup discovery as a white-box optimization problem, which allows solver-based search and is open for a variety of constraint types.
 Additionally, we prove that both constraint types lead to an $\mathcal{NP}$-hard optimization problem.
@@ -314,7 +314,7 @@ Algorithm~\ref{al:csd:prim} outlines the peeling phase for finding one subgroup,
 Pasting may have little effect on the subgroup quality and is often left out~\cite{arzamasov2021reds}.
 Further, we do not discuss extensions of PRIM like bumping~\cite{friedman1999bump, kwakkel2016improving}, which uses bagging of multiple PRIM runs to improve subgroup quality, or covering~\cite{friedman1999bump}, which returns a sequence of subgroups.
 
-The algorithm \emph{PRIM} starts with a subgroup containing all data objects, which is the initial solution candidate (Lines~\ref{al:csd:prim:line:initialization-start}-\ref{al:csd:prim:line:initialization-end}), 
+The algorithm \emph{PRIM} starts with a subgroup containing all data objects, which is the initial solution candidate (Lines~\ref{al:csd:prim:line:initialization-start}-\ref{al:csd:prim:line:initialization-end}).
 It continues peeling until the current solution candidate contains at most a fraction~$\beta_0$ of data objects (Line~\ref{al:csd:prim:line:stop}).
 The support threshold~$\beta_0 \in [0, 1]$ is a user parameter.
 The returned subgroup is the optimal solution candidate over all peeling iterations.
@@ -460,9 +460,9 @@ Each solution candidate that improves upon the minimum subgroup quality from the
 
 \emph{Best Interval}~\cite{mampaey2012efficient} offers an update procedure for subgroups (cf.~Algorithm~\ref{al:csd:best-interval-subgroup-update}) that is tailored towards WRAcc (cf.~Equation~\ref{eq:csd:wracc}) as the evaluation metric.
 This update procedure can be used within a generic beam-search strategy (cf.~Algorithm~\ref{al:csd:generic-beam-search}).
-As before, the best new solution candidate becomes part of the beam if it improves upon the worst subgroup quality there and is not a duplicate (Lines~\ref{al:csd:best-interval-subgroup-update:line:replace-start}-\ref{al:csd:best-interval-subgroup-update:line:replace-end})
+As before, the best new solution candidate becomes part of the beam if it improves upon the worst subgroup quality there and is not a duplicate (Lines~\ref{al:csd:best-interval-subgroup-update:line:replace-start}-\ref{al:csd:best-interval-subgroup-update:line:replace-end}).
 
-However, solution candidates are generated differently than in the update procedure \emph{Beam Search} (cf.~Algorithm~\ref{al:csd:beam-search-subgroup-update}),
+However, solution candidates are generated differently than in the update procedure \emph{Beam Search} (cf.~Algorithm~\ref{al:csd:beam-search-subgroup-update}).
 In particular, \emph{Best Interval} updates lower and upper bounds for a given Feature~$j$ simultaneously rather than separately (Lines~\ref{al:csd:best-interval-subgroup-update:line:main-start}-\ref{al:csd:best-interval-subgroup-update:line:main-end}).
 Thus, this procedure optimizes over all potential combinations of lower and upper bounds.
 However, it still only requires one pass over the unique values of Feature~$j$ rather than quadratic cost, due to theoretical properties of the WRAcc function~\cite{mampaey2012efficient}.
@@ -701,7 +701,7 @@ We refer to this optimization problem as \emph{unconstrained subgroup discovery}
 \label{sec:csd:approach:constraint-types}
 
 A white-box formulation of subgroup discovery, like our SMT encoding, supports directly integrating a variety of constraint types in a declarative manner.
-In contrast, algorithmic search methods for subgroup need to explicitly check constraints or need to implicitly ensure that generated solution candidates satisfy constraints.
+In contrast, algorithmic search methods for subgroups need to explicitly check constraints or need to implicitly ensure that generated solution candidates satisfy constraints.
 Such implicit guarantees may only hold for particular constraint types or may require adapting the search method accordingly.
 
 \paragraph{Domain knowledge}
@@ -1450,9 +1450,10 @@ On the test, \emph{PRIM} yields a median nWRAcc only slightly worse than \emph{S
 All three heuristic search methods clearly beat the two baselines \emph{MORS} and \emph{Random}.
 While \emph{Random} yields the same quality as not restricting the subgroup at all, i.e. an nWRACC of~0, \emph{MORS} is considerably better and therefore a suitable baseline for future studies comparing subgroup-discovery methods.
 
-\begin{table}
+\begin{table}[t]
 	\centering
 	\begin{subtable}{\textwidth}
+		\centering
 		\begin{tabular}{lrrrrrr}
 			\toprule
 			Aggregate & SMT & Beam & BI & PRIM & MORS & Random \\
@@ -1504,7 +1505,7 @@ Since the latter depends on the dataset size, e.g., involves $O(m)$ constraints 
 In our experiments, formulating the \emph{SMT} problem took 41.4~s on average, with a maximum of 317.6~s.
 This average preparation time already is greater than the average total runtime of the heuristics.
 
-\begin{table}
+\begin{table}[t]
 	\centering
 	\begin{tabular}{lrrrr}
 		\toprule
@@ -1639,7 +1640,7 @@ For example, for \emph{Beam}, the mean difference between training-set and test-
 The increasing tendency to overfit with larger~$k$ explains why mean training-set nWRAcc increases more than mean test-set nWRAcc over~$k$ in Figure~\ref{fig:csd:cardinality-methods-nwracc}.
 From the six subgroup-discovery methods, \emph{PRIM} shows the smallest increase of overfitting over~$k$, \emph{MORS} and \emph{SMT} the largest.
 
-\begin{table}
+\begin{table}[t]
 	\centering
 	\begin{tabular}{lrrrrrr}
 		\toprule
@@ -1739,7 +1740,7 @@ The observed trends on the test set (cf.~Figure~\ref{fig:csd:alternatives-test-n
 For both subgroup discovery methods, overfitting as measured by the train-test difference in nWRAcc is lower for the alternative subgroup descriptions than for the original subgroups.
 This may be a consequence of the alternative subgroup descriptions not directly optimizing subgroup quality.
 
-\begin{table}
+\begin{table}[t]
 	\centering
 	\begin{tabular}{llrrrrrr}
 		\toprule
@@ -1981,7 +1982,7 @@ Also, the original subgroup description usually optimizes subgroup quality, whil
 Further, redescription mining works with different dissimilarity criteria than we do, e.g., having features pre-partitioned into non-overlapping sets~\cite{galbrun2017redescription, gallo2008finding, mihelcic2023complexity} or requiring only one arbitrary part of the description to differ~\cite{parida2005redescription}.
 In contrast, we allow users controlling the overlap between feature sets with the parameter~$\tau$ (cf.~Equation~\ref{eq:csd:smt-constraint-dissimilarity}).
 Also, the language for redescriptions may be more complex than for subgroups, e.g., also involve logical negation ($\lnot$) and disjunction ($\lor$)~\cite{galbrun2017redescription, gallo2008finding}, while subgroup descriptions only use the logical AND ($\land$) over features.
-Finally, most existing approaches for redescription mining are algorithmic rather than using white-box optimization~\cite{galbrun2017redescription, mihelcic2023complexity}, though~\cite{guns2013kpattern} provides a constrained-programming formulation of this problem and other pattern-set mining problems.
+Finally, most existing approaches for redescription mining are algorithmic rather than using white-box optimization~\cite{galbrun2017redescription, mihelcic2023complexity}, though~\cite{guns2013kpattern} provides a constraint-programming formulation of this problem and other pattern-set mining problems.
 Several formulations and parametrizations of the redescription-mining problem are $\mathcal{NP}$-hard; see \cite{mihelcic2023complexity} for a detailed analysis.
 
 \section{Conclusions and Future Work}

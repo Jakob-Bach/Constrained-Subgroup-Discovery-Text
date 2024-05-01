@@ -175,7 +175,7 @@ We assume that categorical features have already been made numeric, e.g., via on
 There are also many subgroup-discovery methods that only process categorical data and require continuous features to be discretized~\cite{herrera2011overview, meeng2021real}.
 $X_{i \cdot} \in \mathbb{R}^n$ denotes the values of all features for the $i$-th data object,
 while $X_{\cdot j} \in \mathbb{R}^m$ denotes the values of the $j$-th feature for all data objects.
-$y \in Y^m$ represents the prediction target with domain $Y$, e.g., $Y=\{0,1\}$ for binary classification or $Y=\mathbb{R}$ for regression.
+$y \in Y^n$ represents the prediction target with domain $Y$, e.g., $Y=\{0,1\}$ for binary classification or $Y=\mathbb{R}$ for regression.
 Thus, we are in a supervised-learning scenario.
 In this article, we focus on binary-classification scenarios in our formalization and evaluation.
 In general, one may also conduct subgroup discovery in multi-class, multi-target, or regression scenarios~\cite{atzmueller2015subgroup}.
@@ -403,7 +403,7 @@ Having tested two new bounds for each feature, the algorithm takes the subgroup 
 \paragraph{Beam Search}
 
 Beam search is a generic search strategy that maintains a set of currently best solution candidates, i.e., the beam, and iteratively updates it.
-The number of solution candidates, i.e., subgroups, in the beam is a user parameter, i.e., the beam width~$w$.
+The number of solution candidates, i.e., subgroups, in the beam is a user parameter, i.e., the beam width~$w \in \mathbb{N}$.
 This strategy is common in heuristic search for subgroups~\cite{atzmueller2005exploiting}.
 One way to implement this strategy is outlined in Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}, which we refer to as \emph{Beam Search} in the following.
 It is an adapted version of the beam-search implementation in the Python package \emph{pysubgroup}~\cite{lemmerich2019pysubgroup}.

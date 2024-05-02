@@ -597,7 +597,7 @@ In particular, the bounds found by \emph{MORS} cannot be made tighter to exclude
 \label{sec:csd:baselines:random-search}
 
 Algorithm~\ref{al:csd:random-search} shows the randomized search procedure that constitutes the second baseline.
-\emph{Random Search} generates and evaluates subgroups for a fixed number of iterations, which the user controls with the parameter~$\mathit{n\_iters}$.
+\emph{Random Search} generates and evaluates subgroups for a fixed number of iterations, which the user controls with the parameter~$\mathit{n\_iters} \in \mathbb{N}$.
 Hereby, subgroup generation samples a pair of lower and upper bound uniformly random from the unique values for each permissible feature, leaving the remaining features unrestricted (Lines~\ref{al:csd:random-search:line:sampling-start}-\ref{al:csd:random-search:line:sampling-end}).
 The algorithm tracks the best generated subgroup so far over the iterations (Lines~\ref{al:csd:random-search:line:optimum-update-start}-\ref{al:csd:random-search:line:optimum-update-end}) and finally returns the subgroup with the highest quality.
 As for \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Random Search} replaces all non-excluding bounds with infinity (Lines~\ref{al:csd:random-search:line:bounds-infty-start}-\ref{al:csd:random-search:line:bounds-infty-end}).

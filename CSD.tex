@@ -189,9 +189,9 @@ In particular, the subgroup description comprises a lower bound and an upper bou
 The bounds for a feature may also be infinite to leave it unrestricted.
 A data object resides in the subgroup if all its feature values are in the intervals formed by lower and upper bounds:
 %
-\begin{definition}[Subgroup]
-	Given a dataset~$X \in \mathbb{R}^{m \times n}$, a \emph{subgroup} is defined by lower bounds~$\mathit{lb} \in \mathbb{R}^n$ and upper bounds~$\mathit{ub} \in \mathbb{R}^n$.
-	A data object $X_{i \cdot}$ is a \emph{member} of the subgroup if $\forall j \in \{1, \dots, n\}:~ \left( X_{ij} \geq \mathit{lb}_j \right) \land \left( X_{ij} \leq \mathit{ub}_j \right)$.
+\begin{definition}[Subgroup (description)]
+	Given a dataset~$X \in \mathbb{R}^{m \times n}$, a \emph{subgroup} is described by its lower bounds~$\mathit{lb} \in \mathbb{R}^n$ and upper bounds~$\mathit{ub} \in \mathbb{R}^n$.
+	Data object $X_{i \cdot}$ is a \emph{member} of this subgroup if $\forall j \in \{1, \dots, n\}:~ \left( X_{ij} \geq \mathit{lb}_j \right) \land \left( X_{ij} \leq \mathit{ub}_j \right)$.
 	\label{def:csd:subgroup}
 \end{definition}
 %
@@ -502,7 +502,8 @@ While they technically also are heuristics, we use the term \emph{baselines} to 
 This baseline builds on the following definition:
 %
 \begin{definition}[Minimal Optimal-Recall Subgroup (MORS)]
-	The \emph{Minimal Op\-timal-Recall Subgroup (MORS)} is the subgroup (cf.~Definition~\ref{def:csd:subgroup}) whose lower and upper bounds of each feature correspond to the minimum and maximum value of that feature for all positive data objects in the dataset.
+	Given a dataset~$X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^n$,
+	the \emph{Minimal Optimal-Recall Subgroup (MORS)} is the subgroup (cf.~Definition~\ref{def:csd:subgroup}) whose lower and upper bounds of each feature correspond to the minimum and maximum value of that feature for all positive data objects (i.e., with $y_i = 1$) from the dataset~$X$.
 	\label{def:csd:mors}
 \end{definition}
 %
@@ -514,7 +515,7 @@ The corresponding subgroup is unique and implicitly solves the following variant
 %
 \begin{definition}[Minimal-optimal-recall-subgroup discovery]
 	Given a dataset $X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^n$,
-	\emph{minimal-optimal-recall-subgroup discovery} is the problem of finding a subgroup (cf.~Definition~\ref{def:csd:subgroup}) containing as few negative data objects (i.e., with $y_i = 0$) as possible but all positive data objects (i.e., with $y_i = 1$).
+	\emph{minimal-optimal-recall-subgroup discovery} is the problem of finding a subgroup (cf.~Definition~\ref{def:csd:subgroup}) that contains as few negative data objects (i.e., with $y_i = 0$) as possible but all positive data objects (i.e., with $y_i = 1$) from the dataset~$X$.
 	\label{def:csd:minimal-optimal-recall-subgroup-discovery}
 \end{definition}
 %
@@ -536,7 +537,7 @@ For complexity proofs later in our article, we define another variant of the sub
 %
 \begin{definition}[Perfect subgroup]
 	Given a dataset~$X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^n$,
-	a \emph{perfect subgroup} is a subgroup (cf.~Definition~\ref{def:csd:subgroup}) that contains all positive data objects (i.e., with $y_i = 1$) but zero negative data objects (i.e., with $y_i = 0$) from the dataset.
+	a \emph{perfect subgroup} is a subgroup (cf.~Definition~\ref{def:csd:subgroup}) that contains all positive data objects (i.e., with $y_i = 1$) but zero negative data objects (i.e., with $y_i = 0$) from the dataset~$X$.
 	\label{def:csd:perfect-subgroup}
 \end{definition}
 %
@@ -544,7 +545,8 @@ Perfect subgroups reach the theoretical maximum WRAcc for a dataset (cf.~Equatio
 Next, we define a corresponding search problem:
 %
 \begin{definition}[Perfect-subgroup discovery]
-	\emph{Perfect-subgroup discovery} is the problem of finding a perfect subgroup (cf.~Definition~\ref{def:csd:perfect-subgroup}) if it exists or determining that it does not exist.
+	Given a dataset~$X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^n$,
+	\emph{perfect-subgroup discovery} is the problem of finding a perfect subgroup (cf.~Definition~\ref{def:csd:perfect-subgroup}) if it exists or determining that it does not exist.
 	\label{def:csd:perfect-subgroup-discovery}
 \end{definition}
 %
@@ -785,7 +787,7 @@ To formalize this constraint type, we define the concept of feature selection~\c
 %
 \begin{definition}[Feature selection in subgroups]
 	Given a dataset~$X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^n$ and a subgroup (cf.~Definition~\ref{def:csd:subgroup}) with bounds~$\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$,
-	Feature~$j$ is \emph{selected} in the subgroup if the bounds exclude at least one data object, i.e., $\exists i \in \{1, \dots, m\}:~ \left( X_{ij} < \mathit{lb}_j \right) \lor \left( X_{ij} > \mathit{ub}_j \right)$.
+	Feature~$j$ is \emph{selected} if the bounds exclude at least one data object of~$X$ from the subgroup, i.e., $\exists i \in \{1, \dots, m\}:~ \left( X_{ij} < \mathit{lb}_j \right) \lor \left( X_{ij} > \mathit{ub}_j \right)$.
 	\label{def:csd:feature-selection}
 \end{definition}
 %
@@ -807,7 +809,7 @@ Adding this constraint to the subgroup-discovery problem (cf.~Definition~\ref{de
 \begin{definition}[Feature-cardinality-constrained subgroup discovery]
 	Given a dataset $X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^n$
 	and a cardinality threshold~$k \in \mathbb{N}$,
-	\emph{feature-cardinality-constrained subgroup discovery} is the problem of finding a subgroup (cf.~Definition~\ref{def:csd:subgroup}) with bounds~$\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$ that maximize a given notion of subgroup quality~$Q(\mathit{lb}, \mathit{ub}, X, y)$ while satisfying a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}).
+	\emph{feature-cardinality-constrained subgroup discovery} is the problem of finding a subgroup (cf.~Definition~\ref{def:csd:subgroup}) with bounds~$\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$ that maximizes a given notion of subgroup quality~$Q(\mathit{lb}, \mathit{ub}, X, y)$ while satisfying a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}).
 	\label{def:csd:feature-cardinality-constrained-subgroup-discovery}
 \end{definition}
 %
@@ -1193,7 +1195,14 @@ Similar to perfect subgroups (cf.~Definition~\ref{def:csd:perfect-subgroup}), pe
 Next, we define a corresponding search problem:
 %
 \begin{definition}[Perfect-alternative-subgroup-description discovery]
-	\emph{Perfect-alternative-subgroup-description discovery} is the problem of finding a perfect alternative subgroup description (cf.~Definition~\ref{def:csd:perfect-alternative}) if it exists or determining that it does not exist.
+	Given
+	\begin{itemize}[noitemsep]
+		\item a dataset $X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^n$,
+		\item an original subgroup with subgroup membership~$b^{(0)} \in \{0, 1\}^m$ and feature selection~$s^{(0)} \in \{0, 1\}^n$,
+		\item a dissimilarity measure $\text{dis}(\cdot)$ for feature-selection vectors of subgroups,
+		\item and a dissimilarity threshold~$\tau \in \mathbb{R}_{\geq 0}$,
+	\end{itemize}
+	\emph{perfect-alternative-subgroup-description discovery} is the problem of finding a perfect alternative subgroup description (cf.~Definition~\ref{def:csd:perfect-alternative}) if it exists or determining that it does not exist.
 	\label{def:csd:perfect-alternative-subgroup-description-discovery}
 \end{definition}
 %

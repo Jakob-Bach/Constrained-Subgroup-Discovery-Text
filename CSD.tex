@@ -1497,7 +1497,7 @@ While \emph{Random} yields the same quality as not restricting the subgroup at a
 Table~\ref{tab:csd:unconstrained-runtime} summarizes the runtimes of the subgroup-discovery methods.
 On average, \emph{SMT} is an order of magnitude slower than \emph{Beam} and \emph{BI}, which are an order of magnitude slower than \emph{PRIM} and the baseline \emph{Random}.
 The baseline \emph{MORS} runs in negligible time and therefore is a good tool to obtain a lower bound on subgroup quality instantaneously.
-Taking subgroup-quality into consideration, the heuristic search methods offer a reasonable quality in a reasonable time, while \emph{SMT} incurs a high cost for its optimal solutions.
+Taking subgroup quality into consideration, the heuristic search methods offer a reasonable quality in a reasonable time, while \emph{SMT} incurs a high cost for its optimal solutions.
 Among the three heuristics, \emph{PRIM} is fastest but also yields the lowest subgroup quality, so users should decide which runtime is acceptable.
 
 For \emph{SMT}, the overall runtime not only comprises optimization but also formulating the optimization problem.
@@ -1706,7 +1706,7 @@ This observation indicates that one may find several alternative subgroup descri
 
 These trends holds for both similarity measures, i.e., the normalized Hamming similarity we use as optimization objective (cf.~Equation~\ref{eq:csd:hamming-general} and Figure~\ref{fig:csd:alternatives-similarity-hamming}) as well as the Jaccard similarity (cf.~Equation~\ref{eq:csd:jaccard} and Figure~\ref{fig:csd:alternatives-similarity-jaccard}).
 The latter yields lower similarity values than the former since it ignores data objects that are not contained in either of the two compared subgroups.
-Further, the observed trends exist for the solver-based search method~\emph{SMT} as well as the heuristic search method~\emph{Beam}.
+Further, the observed trends exist for the solver-based search method \emph{SMT} as well as the heuristic search method \emph{Beam}.
 \emph{SMT} yields clearly more similar subgroups than \emph{Beam} for the Jaccard similarity, while the normalized Hamming similarity does not show a clear winner.
 
 \begin{figure}[t]
@@ -1737,7 +1737,7 @@ The average subgroup quality of alternative subgroup descriptions (cf.~Figure~\r
 In particular, quality decreases over the dissimilarity threshold~$\tau_{\text{abs}}$ and over the number of alternatives~$a$, with the largest decrease to the first alternative.
 For the highest dissimilarity threshold~$\tau_{\text{abs}} = 3$, \emph{Beam} consistently yields higher average quality than \emph{SMT} for the original subgroup and each alternative, while the other two values of the dissimilarity threshold do not clearly favor either subgroup-discovery method.
 The observed trends on the test set (cf.~Figure~\ref{fig:csd:alternatives-test-nwracc}) are very similar to those on the training set (cf.~Figure~\ref{fig:csd:alternatives-train-nwracc}).
-For both subgroup discovery methods, overfitting as measured by the train-test difference in nWRAcc is lower for the alternative subgroup descriptions than for the original subgroups.
+For both subgroup-discovery methods, overfitting as measured by the train-test difference in nWRAcc is lower for the alternative subgroup descriptions than for the original subgroups.
 This may be a consequence of the alternative subgroup descriptions not directly optimizing subgroup quality.
 
 \begin{table}[t]

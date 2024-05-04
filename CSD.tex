@@ -855,7 +855,7 @@ If a set of selected features satisfies the constraint, all its subsets also sat
 Vice versa, if a feature set violates the constraint, all its supersets also violate the constraint.
 This property allows to easily integrate the constraint into the three presented heuristic search methods, i.e., \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Beam Search} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}), and \emph{Best Interval} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:best-interval-subgroup-update}), which all iteratively enlarge the set of selected features.
 In particular, these search methods start with unrestricted subgroup bounds, i.e., an empty of selected features, which satisfies the feature-cardinality constraint for any~$k \geq 0$.
-Each iteration may either add bounds on one further feature or refines the bounds on an already selected feature.
+Each iteration may either add bounds on one further feature or refine the bounds on an already selected feature.
 Thus, we can prevent generation of invalid solution candidates by defining the function \emph{get\_permissible\_feature\_idxs(\dots)} (cf.~Line~\ref{al:csd:prim:line:permissible-features} in Algorithm~\ref{al:csd:prim} and Line~\ref{al:csd:generic-beam-search:line:permissible-features} in Algorithm~\ref{al:csd:generic-beam-search}) as follows:
 If already $k$~features are selected, then only these features are permissible, i.e., may be refined.
 Due to antimonotonicity, all feature supersets that could be formed in future iterations are invalid.
@@ -867,7 +867,7 @@ If less than $k$~features are selected, all features are permissible, as in the 
 \paragraph{MORS}
 
 \emph{MORS} calls the function \emph{get\_permissible\_feature\_idxs(\dots)} in Line~\ref{al:csd:mors:line:permissible-features} of Algorithm~\ref{al:csd:mors}.
-To instantiate this function, we employ an univariate, quality-based heuristic for feature selection:
+To instantiate this function, we employ a univariate, quality-based heuristic for feature selection:
 For each feature, we evaluate what happens if only this feature is restricted according to \emph{MORS} (cf.~Definition~\ref{def:csd:mors}).
 In particular, we determine the number of negative data objects in the subgroup defined by the feature's \emph{MORS} bounds (Lines~\ref{al:csd:mors:line:bounds-start}-\ref{al:csd:mors:line:bounds-end}).
 We select the $k$~features with the lowest number of false negatives.
@@ -1084,7 +1084,7 @@ We only need to slightly reformulate Equation~\ref{eq:csd:hamming-general} to ob
 %
 \begin{equation}
 	\begin{aligned}
-		\text{sim}_{\text{nHamm}}(b^{(a)}, b^{(0)}) &= \frac{1}{m} \cdot \sum_{i=1}^m \left( b_i^{(a)} \leftrightarrow b_i^{(0)} \right) \\
+		\max \quad \text{sim}_{\text{nHamm}}(b^{(a)}, b^{(0)}) &= \frac{1}{m} \cdot \sum_{i=1}^m \left( b_i^{(a)} \leftrightarrow b_i^{(0)} \right) \\
 		&= \frac{1}{m} \cdot \left( \sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 1}} b_i^{(a)} + \sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 0}} \lnot b_i^{(a)} \right)
 	\end{aligned}
 	\label{eq:csd:smt-hamming}
@@ -1186,7 +1186,7 @@ To this end, we introduce the following definition:
 		\item a dissimilarity measure $\text{dis}(\cdot)$ for feature-selection vectors of subgroups,
 		\item and a dissimilarity threshold~$\tau \in \mathbb{R}_{\geq 0}$,
 	\end{itemize}
-	a \emph{perfect alternative subgroup description} is a subgroup (cf.~Definition~\ref{def:csd:subgroup}) with membership~$b^{(a)} \in \{0, 1\}^m$ and feature selection~$s^{(a)}$ that exactly replicates the subgroup membership of the original subgroup, i.e., $b^{(a)} = b^{(0)}$, while being dissimilar regarding the feature selection, i.e. $\text{dis}(s^{(a)}, s^{(0)}) \geq \tau$.
+	a \emph{perfect alternative subgroup description} is a subgroup (cf.~Definition~\ref{def:csd:subgroup}) with membership~$b^{(a)} \in \{0, 1\}^m$ and feature selection~$s^{(a)} \in \{0, 1\}^n$ that exactly replicates the subgroup membership of the original subgroup, i.e., $b^{(a)} = b^{(0)}$, while being dissimilar regarding the feature selection, i.e., $\text{dis}(s^{(a)}, s^{(0)}) \geq \tau$.
 	\label{def:csd:perfect-alternative}
 \end{definition}
 %
@@ -1228,7 +1228,7 @@ Finally, we drop the assumption of perfect alternatives and establish $\mathcal{
 	\label{prop:csd:complexity-alternatives-np}
 \end{proposition}
 %
-Normalized Hamming similarity (cf.~Equation~\ref{eq:csd:hamming-general}) as~$\text{sim}(\cdot)$ satisfies this assumption since only perfect alternative subgroup descriptions yields the theoretical maximum similarity of~1 to the original subgroup description.
+Normalized Hamming similarity (cf.~Equation~\ref{eq:csd:hamming-general}) as~$\text{sim}(\cdot)$ satisfies this assumption since only perfect alternative subgroup descriptions yield the theoretical maximum similarity of~1 to the original subgroup description.
 
 \section{Experimental Design}
 \label{sec:csd:experimental-design}
@@ -2481,9 +2481,9 @@ We transform~$I$ into a problem instance~$I'$ of the feature-cardinality-constra
 In particular, we define the objective as optimizing a subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$ rather than searching for a perfect subgroup (cf.~Definition~\ref{def:csd:perfect-subgroup}) that may or may not exist.
 The other inputs of the problem instance remain the same.
 
-Based on the assumption we made on~$Q(\mathit{lb}, \mathit{ub}, X, y)$ in Proposition~\ref{prop:csd:complexity-cardinality-np}, the algorithm for~$I'$ returns a perfect subgroup as optimal solution if it exists.
-Thus, if the algorithm for~$I'$ returns a subgroup that is not perfect as optimum, then a perfect subgroup does not exists.
-Checking whether the returned subgroup is perfect entails a cost of $O(n \cdot m)$, i.e., computing subgroup membership of all data objects and checking whether there are no false positives and no false negatives.
+Based on the assumption we made on~$Q(\mathit{lb}, \mathit{ub}, X, y)$ in Proposition~\ref{prop:csd:complexity-cardinality-np}, the optimal solution for~$I'$ is a perfect subgroup if the latter exists.
+Thus, if the optimal subgroup for~$I'$ is not perfect, then a perfect subgroup does not exist at all.
+Checking whether a subgroup is perfect entails a cost of $O(n \cdot m)$, i.e., computing subgroup membership of all data objects and checking whether there are no false positives and no false negatives.
 Overall, an algorithm for feature-cardinality-constrained subgroup-discovery (cf.~Definition~\ref{def:csd:feature-cardinality-constrained-subgroup-discovery}) solves perfect-subgroup discovery (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) with negligible overhead.
 Since the latter problem is $\mathcal{NP}$-complete (cf.~Proposition~\ref{prop:csd:complexity-cardinality-np-perfect-subgroup}) and the former resides in complexity class $\mathcal{NP}$, the former is $\mathcal{NP}$-complete as well.
 \end{proof}
@@ -2493,7 +2493,7 @@ This proof idea is strongly related to the proof for Proposition~\ref{prop:csd:c
 In contrast to \textsc{Set Covering}, the $k \in \mathbb{N}$~selected subsets in \textsc{Maximum Coverage} need not cover all elements but should cover as many elements as possible.
 In the terminology of subgroup discovery, the latter objective corresponds to a particular notion of subgroup quality:
 maximizing the number of true negatives or minimizing the number of false positives, i.e., excluding as many negative data objects from the subgroup as possible.
-We introduced this problem as minimal-optimal-recall-subgroup discovery (cf.~Definition~\ref{def:csd:minimal-optimal-recall-subgroup-discovery}), which resides in~$\mathcal{P}$ without a feature-cardinality constraint (cf.~Proposition~\ref{prop:csd:complexity-unconstrained-minimal-optimal-recall-subgroup-discovery}) due the baseline \emph{MORS} (cf.~Algorithm~\ref{al:csd:mors}).
+We introduced this problem as minimal-optimal-recall-subgroup discovery (cf.~Definition~\ref{def:csd:minimal-optimal-recall-subgroup-discovery}), which resides in~$\mathcal{P}$ without a feature-cardinality constraint (cf.~Proposition~\ref{prop:csd:complexity-unconstrained-minimal-optimal-recall-subgroup-discovery}) due to the baseline \emph{MORS} (cf.~Algorithm~\ref{al:csd:mors}).
 When equipping \emph{MORS} with feature-cardinality constraints (cf.~Section~\ref{sec:csd:approach:cardinality:baselines}), existing heuristics for the \textsc{Maximum Coverage} problem may provide approximation guarantees.
 
 However, minimizing the number of false positives is a simpler objective than WRAcc (cf.~Equation~\ref{eq:csd:wracc}), which we focus on in this article.
@@ -2564,10 +2564,10 @@ The following proof is similar to the proof of Proposition~\ref{prop:csd:complex
 Let an arbitrary problem instance~$I$ of the perfect-alternative-subgroup-description-discovery problem (cf.~Definition~\ref{def:csd:perfect-alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) be given.
 We transform~$I$ into a problem instance~$I'$ of the alternative-subgroup-description-discovery problem (cf.~Definition~\ref{def:csd:alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}).
 In particular, we define the objective as optimizing subgroup-membership similarity~$\text{sim}(\cdot)$ rather than asking for a perfect alternative subgroup description (cf.~Definition~\ref{def:csd:perfect-alternative}) that may or may not exist.
-The remaining inputs of the problem instance remain the same.
+The other inputs of the problem instance remain the same.
 
-Based on the assumption we made on~$\text{sim}(\cdot)$ in Proposition~\ref{prop:csd:complexity-alternatives-np}, the algorithm for~$I'$ returns a perfect alternative subgroup description as optimal solution if it exists.
-Thus, if the algorithm for~$I'$ returns a subgroup description that is not a perfect alternative subgroup description as optimum, then a perfect alternative subgroup description does not exists.
+Based on the assumption we made on~$\text{sim}(\cdot)$ in Proposition~\ref{prop:csd:complexity-alternatives-np}, the optimal solution for~$I'$ is a perfect alternative subgroup description if the latter exists.
+Thus, if the optimal alternative subgroup description for~$I'$ is not a perfect alternative, then a perfect alternative subgroup description does not exists at all.
 Overall, an algorithm for alternative-subgroup-description discovery (cf.~Definition~\ref{def:csd:alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) solves perfect-alternative-subgroup-description discovery (cf.~Definition~\ref{def:csd:perfect-alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) with negligible overhead.
 Since the latter problem is $\mathcal{NP}$-complete (cf.~Propositions~\ref{prop:csd:complexity-perfect-alternatives-np-perfect-subgroup} and~\ref{prop:csd:complexity-perfect-alternatives-np-imperfect-subgroup}) and the former resides in complexity class $\mathcal{NP}$, the former is $\mathcal{NP}$-complete as well.
 \end{proof}

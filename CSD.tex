@@ -115,7 +115,7 @@ Third, we describe how to integrate these two constraint types into three existi
 The latter are faster and simpler than the former, so they may serve as additional reference points for future experimental studies on subgroup discovery.
 
 Fourth, we analyze the computational complexity of the subgroup-discovery problem with each of these two constraint types.
-In particular, prove several $\mathcal{NP}$-hardness results and thereby show that finding optimal solutions under these constrain types is not trivial.
+In particular, prove several $\mathcal{NP}$-hardness results and thereby show that finding optimal solutions under these constraint types is not trivial.
 
 Fifth, we conduct comprehensive experiments with 27 binary-classification datasets from the Penn Machine Learning Benchmarks (PMLB)~\cite{olson2017pmlb, romano2021pmlb}.
 We evaluate the runtime of subgroup discovery and the quality of the discovered subgroups.
@@ -175,7 +175,7 @@ We assume that categorical features have already been made numeric, e.g., via on
 There are also many subgroup-discovery methods that only process categorical data and require continuous features to be discretized~\cite{herrera2011overview, meeng2021real}.
 $X_{i \cdot} \in \mathbb{R}^n$ denotes the values of all features for the $i$-th data object,
 while $X_{\cdot j} \in \mathbb{R}^m$ denotes the values of the $j$-th feature for all data objects.
-$y \in Y^n$ represents the prediction target with domain $Y$, e.g., $Y=\{0,1\}$ for binary classification or $Y=\mathbb{R}$ for regression.
+$y \in Y^m$ represents the prediction target with domain $Y$, e.g., $Y=\{0,1\}$ for binary classification or $Y=\mathbb{R}$ for regression.
 Thus, we are in a supervised-learning scenario.
 In this article, we focus on binary-classification scenarios in our formalization and evaluation.
 In general, one may also conduct subgroup discovery in multi-class, multi-target, or regression scenarios~\cite{atzmueller2015subgroup}.
@@ -184,13 +184,13 @@ In general, one may also conduct subgroup discovery in multi-class, multi-target
 
 A Subgroup description typically comprises a conjunction of conditions on individual features~\cite{meeng2021real}.
 For real-valued data, the conditions constitute intervals.
-Thus, a subgroup description is a hyperrectangle in~$\mathbb{R}^n$.
+Thus, a subgroup description is a hyperrectangle.
 In particular, the subgroup description comprises a lower bound and an upper bound for each feature.
 The bounds for a feature may also be infinite to leave it unrestricted.
 A data object resides in the subgroup if all its feature values are in the intervals formed by lower and upper bounds:
 %
 \begin{definition}[Subgroup (description)]
-	Given a dataset~$X \in \mathbb{R}^{m \times n}$, a \emph{subgroup} is described by its lower bounds~$\mathit{lb} \in \mathbb{R}^n$ and upper bounds~$\mathit{ub} \in \mathbb{R}^n$.
+	Given a dataset~$X \in \mathbb{R}^{m \times n}$, a \emph{subgroup} is described by its lower bounds~$\mathit{lb} \in \{\mathbb{R} \cup \{-\infty, +\infty\}\}^n$ and upper bounds~$\mathit{ub} \in \{\mathbb{R} \cup \{-\infty, +\infty\}\}^n$.
 	Data object $X_{i \cdot}$ is a \emph{member} of this subgroup if $\forall j \in \{1, \dots, n\}:~ \left( X_{ij} \geq \mathit{lb}_j \right) \land \left( X_{ij} \leq \mathit{ub}_j \right)$.
 	\label{def:csd:subgroup}
 \end{definition}
@@ -207,8 +207,8 @@ A function $Q(\mathit{lb}, \mathit{ub}, X, y)$ shall return the quality of a sub
 Without loss of generality, we assume that this function should be maximized:
 %
 \begin{definition}[Subgroup discovery]
-	Given a dataset~$X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^n$,
-	\emph{subgroup discovery} is the problem of finding a subgroup (cf.~Definition~\ref{def:csd:subgroup}) with bounds~$\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$ that maximizes a given notion of subgroup quality~$Q(\mathit{lb}, \mathit{ub}, X, y)$.
+	Given a dataset~$X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^m$,
+	\emph{subgroup discovery} is the problem of finding a subgroup (cf.~Definition~\ref{def:csd:subgroup}) with bounds~$\mathit{lb}, \mathit{ub} \in \{\mathbb{R} \cup \{-\infty, +\infty\}\}^n$ that maximizes a given notion of subgroup quality~$Q(\mathit{lb}, \mathit{ub}, X, y)$.
 	\label{def:csd:subgroup-discovery}
 \end{definition}
 %
@@ -263,12 +263,12 @@ All three methods are well-established and originate from related work.
 \begin{algorithm}[p]
 	\DontPrintSemicolon
 	\KwIn{Dataset~$X \in \mathbb{R}^{m \times n}$, \newline
-		Prediction target~$y \in \{0, 1\}^n$, \newline
+		Prediction target~$y \in \{0, 1\}^m$, \newline
 		Subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$, \newline
 		Peeling fraction~$\alpha \in (0, 1)$, \newline
 		Support threshold~$\beta_0 \in [0, 1]$
 	}
-	\KwOut{Subgroup bounds~$\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$}
+	\KwOut{Subgroup bounds~$\mathit{lb}, \mathit{ub} \in \{\mathbb{R} \cup \{-\infty, +\infty\}\}^n$}
 	\BlankLine
 	\For(\tcp*[f]{Start with unrestricted subgroup}){$j \leftarrow 1$ \KwTo $n$}{ \label{al:csd:prim:line:initialization-start}
 		$(\mathit{lb}^{\text{opt}}_j,~ \mathit{ub}^{\text{opt}}_j) \leftarrow (-\infty, +\infty)$\;
@@ -333,11 +333,11 @@ Having tested two new bounds for each feature, the algorithm takes the subgroup 
 \begin{algorithm}[p]
 	\DontPrintSemicolon
 	\KwIn{Dataset~$X \in \mathbb{R}^{m \times n}$, \newline
-		Prediction target~$y \in \{0, 1\}^n$, \newline
+		Prediction target~$y \in \{0, 1\}^m$, \newline
 		Subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$, \newline
 		Beam width~$w \in \mathbb{N}$
 	}
-	\KwOut{Subgroup bounds~$\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$}
+	\KwOut{Subgroup bounds~$\mathit{lb}, \mathit{ub} \in \{\mathbb{R} \cup \{-\infty, +\infty\}\}^n$}
 	\BlankLine
 	\For(\tcp*[f]{Initialize beam}){$l \leftarrow 1$ \KwTo $w$}{ \label{al:csd:generic-beam-search:line:initialization-start}
 		\For{$j \leftarrow 1$ \KwTo $n$}{
@@ -477,9 +477,9 @@ While they technically also are heuristics, we use the term \emph{baselines} to 
 \begin{algorithm}[t]
 	\DontPrintSemicolon
 	\KwIn{Dataset~$X \in \mathbb{R}^{m \times n}$, \newline
-		Prediction target~$y \in \{0, 1\}^n$
+		Prediction target~$y \in \{0, 1\}^m$
 	}
-	\KwOut{Subgroup bounds~$\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$}
+	\KwOut{Subgroup bounds~$\mathit{lb}, \mathit{ub} \in \{\mathbb{R} \cup \{-\infty, +\infty\}\}^n$}
 	\BlankLine
 	\For{$j \leftarrow 1$ \KwTo $n$}{
 		$\mathit{lb}_j \leftarrow \min\limits_{\substack{i \in \{1, \dots, m\} \\ y_i = 1}} X_{ij}$\; \label{al:csd:mors:line:bounds-start}
@@ -502,7 +502,7 @@ While they technically also are heuristics, we use the term \emph{baselines} to 
 This baseline builds on the following definition:
 %
 \begin{definition}[Minimal Optimal-Recall Subgroup (MORS)]
-	Given a dataset~$X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^n$,
+	Given a dataset~$X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^m$,
 	the \emph{Minimal Optimal-Recall Subgroup (MORS)} is the subgroup (cf.~Definition~\ref{def:csd:subgroup}) whose lower and upper bounds of each feature correspond to the minimum and maximum value of that feature for all positive data objects (i.e., with $y_i = 1$) from the dataset~$X$.
 	\label{def:csd:mors}
 \end{definition}
@@ -514,7 +514,7 @@ In this sense, the bounds are minimal.
 The corresponding subgroup is unique and implicitly solves the following variant of the subgroup-discovery problem:
 %
 \begin{definition}[Minimal-optimal-recall-subgroup discovery]
-	Given a dataset $X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^n$,
+	Given a dataset $X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^m$,
 	\emph{minimal-optimal-recall-subgroup discovery} is the problem of finding a subgroup (cf.~Definition~\ref{def:csd:subgroup}) that contains as few negative data objects (i.e., with $y_i = 0$) as possible but all positive data objects (i.e., with $y_i = 1$) from the dataset~$X$.
 	\label{def:csd:minimal-optimal-recall-subgroup-discovery}
 \end{definition}
@@ -536,7 +536,7 @@ This places minimal-optimal-recall-subgroup discovery in complexity class~$\math
 For complexity proofs later in our article, we define another variant of the subgroup-discovery problem based on another special type of subgroups:
 %
 \begin{definition}[Perfect subgroup]
-	Given a dataset~$X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^n$,
+	Given a dataset~$X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^m$,
 	a \emph{perfect subgroup} is a subgroup (cf.~Definition~\ref{def:csd:subgroup}) that contains all positive data objects (i.e., with $y_i = 1$) but zero negative data objects (i.e., with $y_i = 0$) from the dataset~$X$.
 	\label{def:csd:perfect-subgroup}
 \end{definition}
@@ -545,7 +545,7 @@ Perfect subgroups reach the theoretical maximum WRAcc for a dataset (cf.~Equatio
 Next, we define a corresponding search problem:
 %
 \begin{definition}[Perfect-subgroup discovery]
-	Given a dataset~$X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^n$,
+	Given a dataset~$X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^m$,
 	\emph{perfect-subgroup discovery} is the problem of finding a perfect subgroup (cf.~Definition~\ref{def:csd:perfect-subgroup}) if it exists or determining that it does not exist.
 	\label{def:csd:perfect-subgroup-discovery}
 \end{definition}
@@ -565,11 +565,11 @@ In particular, the bounds found by \emph{MORS} cannot be made tighter to exclude
 \begin{algorithm}[t]
 	\DontPrintSemicolon
 	\KwIn{Dataset~$X \in \mathbb{R}^{m \times n}$, \newline
-		Prediction target~$y \in \{0, 1\}^n$, \newline
+		Prediction target~$y \in \{0, 1\}^m$, \newline
 		Subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$, \newline
 		Number of iterations~$\mathit{n\_iters} \in \mathbb{N}$
 	}
-	\KwOut{Subgroup bounds~$\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$}
+	\KwOut{Subgroup bounds~$\mathit{lb}, \mathit{ub} \in \{\mathbb{R} \cup \{-\infty, +\infty\}\}^n$}
 	\BlankLine
 	$Q^{\text{opt}} \leftarrow - \infty$\;
 	\For{$iters \leftarrow 1$ \KwTo $\mathit{n\_iters}$}{
@@ -660,7 +660,7 @@ The formula for nWRAcc (cf.~Equation~\ref{eq:csd:wracc-normalized}) is linear as
 \paragraph{Constraints}
 
 The subgroup membership~$b_i$ of a data object depends on the bounds of the subgroup (cf.~Definition~\ref{def:csd:subgroup}).
-Thus, we define real-valued decision variables $\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$ for the latter.
+Thus, we define real-valued decision variables $\mathit{lb}, \mathit{ub} \in \{\mathbb{R} \cup \{-\infty, +\infty\}\}^n$ for the latter.
 In particular, there is one lower bound and one upper bound for each of the $n$~features.
 The upper bounds naturally need to be at least as high as the lower bounds:
 %
@@ -692,7 +692,7 @@ Combining all prior definitions of decision variables, constraints, and the obje
 		&\quad \forall i \in \{1, \dots, m\} & b_i &\leftrightarrow \bigwedge_{j \in \{1, \dots, n\}} \left( \left( X_{ij} \geq \mathit{lb}_j \right) \land \left( X_{ij} \leq \mathit{ub}_j \right) \right) \\
 		&\quad \forall j \in \{1, \dots, n\} & \mathit{lb}_j &\leq \mathit{ub}_j \\
 		&\quad & b &\in \{0, 1\}^m \\
-		&\quad & \mathit{lb}, \mathit{ub} &\in \mathbb{R}^n
+		&\quad & \mathit{lb}, \mathit{ub} &\in \{\mathbb{R} \cup \{-\infty, +\infty\}\}^n
 	\end{aligned}
 	\label{eq:csd:smt-problem-unconstrained-complete}
 \end{equation}
@@ -786,7 +786,7 @@ In particular, this constraint type limits the number of features used in the su
 To formalize this constraint type, we define the concept of feature selection~\cite{guyon2003introduction, li2017feature} in the context of subgroup discovery as follows:
 %
 \begin{definition}[Feature selection in subgroups]
-	Given a dataset~$X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^n$ and a subgroup (cf.~Definition~\ref{def:csd:subgroup}) with bounds~$\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$,
+	Given a dataset~$X \in \mathbb{R}^{m \times n}$ and a subgroup (cf.~Definition~\ref{def:csd:subgroup}) with bounds~$\mathit{lb}, \mathit{ub} \in \{\mathbb{R} \cup \{-\infty, +\infty\}\}^n$,
 	Feature~$j$ is \emph{selected} if the bounds exclude at least one data object of~$X$ from the subgroup, i.e., $\exists i \in \{1, \dots, m\}:~ \left( X_{ij} < \mathit{lb}_j \right) \lor \left( X_{ij} > \mathit{ub}_j \right)$.
 	\label{def:csd:feature-selection}
 \end{definition}
@@ -807,9 +807,9 @@ To formulate a feature-cardinality constraint, users provide an upper bound on t
 Adding this constraint to the subgroup-discovery problem (cf.~Definition~\ref{def:csd:subgroup-discovery}), we obtain the following optimization problem:
 %
 \begin{definition}[Feature-cardinality-constrained subgroup discovery]
-	Given a dataset $X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^n$
+	Given a dataset $X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^m$
 	and a cardinality threshold~$k \in \mathbb{N}$,
-	\emph{feature-cardinality-constrained subgroup discovery} is the problem of finding a subgroup (cf.~Definition~\ref{def:csd:subgroup}) with bounds~$\mathit{lb}, \mathit{ub} \in \mathbb{R}^n$ that maximizes a given notion of subgroup quality~$Q(\mathit{lb}, \mathit{ub}, X, y)$ while satisfying a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}).
+	\emph{feature-cardinality-constrained subgroup discovery} is the problem of finding a subgroup (cf.~Definition~\ref{def:csd:subgroup}) with bounds~$\mathit{lb}, \mathit{ub} \in \{\mathbb{R} \cup \{-\infty, +\infty\}\}^n$ that maximizes a given notion of subgroup quality~$Q(\mathit{lb}, \mathit{ub}, X, y)$ while satisfying a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}).
 	\label{def:csd:feature-cardinality-constrained-subgroup-discovery}
 \end{definition}
 %
@@ -916,7 +916,7 @@ Since we need to combine bounds over all $n$~features, the size of the search sp
 	\label{prop:csd:complexity-unconstrained-exhaustive}
 \end{proposition}
 %
-For each subgroup, the cost of evaluating a quality function like WRAcc (cf.~Equation~\ref{eq:csd:wracc}) should be $O(m \cdot n)$, i.e. require a constant number of passes over the dataset and therefore have linear complexity in the dataset size.
+For each subgroup, the cost of evaluating a quality function like WRAcc (cf.~Equation~\ref{eq:csd:wracc}) should be $O(m \cdot n)$, i.e., require a constant number of passes over the dataset and therefore have linear complexity in the dataset size.
 Additionally, the number of potential subgroups should be seen as an upper bound:
 There are also more efficient exhaustive search methods, which employ quality-based pruning to not explicitly evaluate all solution candidates while still implicitly covering the full search space~\cite{atzmueller2015subgroup}.
 
@@ -1013,13 +1013,13 @@ The following definition captures this optimization problem:
 \begin{definition}[Alternative-subgroup-description discovery]
 	Given
 	\begin{itemize}[noitemsep]
-		\item a dataset $X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^n$,
+		\item a dataset $X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^m$,
 		\item $a-1 \in \mathbb{N}$ existing subgroups with subgroup membership~$b^{(l)} \in \{0, 1\}^m$ and feature selection~$s^{(l)} \in \{0, 1\}^n$ for $l \in \{0, \dots, a - 1\}$,
 		\item a similarity measure $\text{sim}(\cdot)$ for subgroup-membership vectors,
 		\item a dissimilarity measure $\text{dis}(\cdot)$ for feature-selection vectors of subgroups,
 		\item and a dissimilarity threshold~$\tau \in \mathbb{R}_{\geq 0}$,
 	\end{itemize}
-	\emph{alternative-subgroup-description discovery} is the problem of finding a subgroup (cf.~Definition~\ref{def:csd:subgroup}) with membership~$b^{(a)} \in \{0, 1\}^m$ and feature selection~$s^{(a)} \in \{0, 1\}^n$ that maximizes the subgroup-membership similarity $\text{sim}(b^{(a)}, b^{(0)})$ to the original subgroup while being dissimilar to all existing subgroups regarding the feature selection, i.e. $\forall l \in \{0, \dots, a-1\}:~\text{dis}(s^{(a)}, s^{(l)}) \geq \tau$.
+	\emph{alternative-subgroup-description discovery} is the problem of finding a subgroup (cf.~Definition~\ref{def:csd:subgroup}) with membership~$b^{(a)} \in \{0, 1\}^m$ and feature selection~$s^{(a)} \in \{0, 1\}^n$ that maximizes the subgroup-membership similarity $\text{sim}(b^{(a)}, b^{(0)})$ to the original subgroup while being dissimilar to all existing subgroups regarding the feature selection, i.e., $\forall l \in \{0, \dots, a-1\}:~\text{dis}(s^{(a)}, s^{(l)}) \geq \tau$.
 	\label{def:csd:alternative-subgroup-description-discovery}
 \end{definition}
 %
@@ -1122,19 +1122,24 @@ In particular, once $k^{(l)} - \tau_{\text{abs}}$~features from an existing subg
 \subsubsection{Integration into Baselines}
 \label{sec:csd:approach:alternatives:baselines}
 
-Adapting our two baselines to alternative subgroup descriptions is less straightforward than to feature-cardinality constraints (cf.~Section~\ref{sec:csd:approach:cardinality:baselines}) since the search space under the dissimilarity constraint (cf.~Equation~\ref{eq:csd:constraint-dissimilarity}) is harder to describe.
+Adapting our two baselines to alternative subgroup descriptions is less straightforward than to feature-cardinality constraints (cf.~Section~\ref{sec:csd:approach:cardinality:baselines}) since the optimization objective changes and the search space under the dissimilarity constraint (cf.~Equation~\ref{eq:csd:constraint-dissimilarity}) is harder to describe.
 Thus, we did not implement and evaluate concrete adaptations but still discuss possible ideas in the following.
 
 \paragraph{MORS}
 
-For \emph{MORS}, we would like to enforce a valid feature set by implementing the function \emph{get\_permissible\_feature\_idxs(\dots)} in Line~\ref{al:csd:mors:line:permissible-features} of Algorithm~\ref{al:csd:mors} appropriately.
+A major issue for adapting \emph{MORS} is that \emph{MORS} is tailored to a particular objective, i.e., achieving perfect subgroup quality in terms of recall.
+In contrast, alternative subgroup descriptions should optimize subgroup-membership similarity to an original subgroup.
+Also, the normalized Hamming similarity (cf.~Equation~\ref{eq:csd:hamming-general}) we optimize measures accuracy rather than recall, i.e., it considers all data objects rather than only the positive ones.
+
+For the dissimilarity constraint, we would like to enforce a valid feature set by implementing the function \emph{get\_permissible\_feature\_idxs(\dots)} in Line~\ref{al:csd:mors:line:permissible-features} of Algorithm~\ref{al:csd:mors} appropriately.
 The univariate, quality-based selection heuristic we proposed for feature-cardinality constraints (cf.~Section~\ref{sec:csd:approach:cardinality:baselines}) may produce an invalid solution.
 To alleviate this issue, we could adapt this heuristic as follows:
 Still order the features by their univariate quality and iteratively select them in this order, but check the dissimilarity constraint in each iteration and skip over features that violate it.
 
 \paragraph{Random Search}
 
-For \emph{Random Search}, we would like uniformly sample from the constrained search space to implement \emph{get\_permissible\_feature\_idxs(\dots)} in Line~\ref{al:csd:random-search:line:permissible-features} of Algorithm~\ref{al:csd:random-search}).
+For \emph{Random Search}, changing the optimization objective from subgroup quality to subgroup-membership similarity is not an issue since the objective is treated as a black-box function when being evaluated for each randomly generated subgroup (cf.~Line~\ref{al:csd:random-search:line:optimum-update-start} of Algorithm~\ref{al:csd:random-search}).
+For the dissimilarity constraint, we would like to implement \emph{get\_permissible\_feature\_idxs(\dots)} in Line~\ref{al:csd:random-search:line:permissible-features} of Algorithm~\ref{al:csd:random-search}) by uniformly sampling from the constrained search space.
 In general, uniform sampling from a constrained space is a computationally hard problem~\cite{ermon2012uniform}, though it may be feasible for the particular constraint type.
 We could also sample from the unconstrained space and then check the dissimilarity constraint, repeating sampling till a valid feature set is found.
 However, this strategy may produce a high fraction of invalid solution candidates, depending on how strong the constraint is for the particular dataset and user parameters.
@@ -1181,7 +1186,7 @@ To this end, we introduce the following definition:
 \begin{definition}[Perfect alternative subgroup description]
 	Given
 	\begin{itemize}[noitemsep]
-		\item a dataset $X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^n$,
+		\item a dataset $X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^m$,
 		\item an original subgroup with subgroup membership~$b^{(0)} \in \{0, 1\}^m$ and feature selection~$s^{(0)} \in \{0, 1\}^n$,
 		\item a dissimilarity measure $\text{dis}(\cdot)$ for feature-selection vectors of subgroups,
 		\item and a dissimilarity threshold~$\tau \in \mathbb{R}_{\geq 0}$,
@@ -1197,7 +1202,7 @@ Next, we define a corresponding search problem:
 \begin{definition}[Perfect-alternative-subgroup-description discovery]
 	Given
 	\begin{itemize}[noitemsep]
-		\item a dataset $X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^n$,
+		\item a dataset $X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^m$,
 		\item an original subgroup with subgroup membership~$b^{(0)} \in \{0, 1\}^m$ and feature selection~$s^{(0)} \in \{0, 1\}^n$,
 		\item a dissimilarity measure $\text{dis}(\cdot)$ for feature-selection vectors of subgroups,
 		\item and a dissimilarity threshold~$\tau \in \mathbb{R}_{\geq 0}$,
@@ -1457,7 +1462,7 @@ In particular, \emph{PRIM} always has to remove a fixed fraction~$\alpha$ of dat
 On the test, \emph{PRIM} yields a median nWRAcc only slightly worse than \emph{SMT}, on all datasets as well as after excluding timeout datasets.
 
 All three heuristic search methods clearly beat the two baselines \emph{MORS} and \emph{Random}.
-While \emph{Random} yields the same quality as not restricting the subgroup at all, i.e. an nWRACC of~0, \emph{MORS} is considerably better and therefore a suitable baseline for future studies comparing subgroup-discovery methods.
+While \emph{Random} yields the same quality as not restricting the subgroup at all, i.e., an nWRACC of~0, \emph{MORS} is considerably better and therefore a suitable baseline for future studies comparing subgroup-discovery methods.
 
 \begin{table}[t]
 	\centering
@@ -2111,7 +2116,7 @@ Thus, this encoding cannot directly express that a set of categories is included
 
 (Case 2) $\mathit{lb}_j = \mathit{ub}_j = 0$ means that data objects that do \emph{not} assume the corresponding category for Feature~$j$ are members of the subgroup.
 I.e., data objects assuming the corresponding category are not members of the subgroup.
-Other than Case~1, this case can apply to multiple categories of each feature, i.e. the subgroup may directly exclude multiple categories.
+Other than Case~1, this case can apply to multiple categories of each feature, i.e., the subgroup may directly exclude multiple categories.
 Further, if one category is actively included in the subgroup, i.e., falls into Case~1, then Case-2 bounds on other categories are redundant since they are implied by the former.
 
 (Case 3) $\mathit{lb}_j = 0,~\mathit{ub}_j = 1$ explicitly deselects a binary feature, i.e., both binary values do not restrict subgroup membership.
@@ -2175,7 +2180,7 @@ the binary variables~$b_i$ for subgroup membership and the real-valued bound var
 The bound constraints (cf.~Equation~\ref{eq:csd:smt-constraint-bounds-monotonic}) remain unchanged as well.
 Further, we retain the optimization objective, which already is linear in~$b_i$ (cf.~Equations~\ref{eq:csd:smt-wracc} and~\ref{eq:csd:smt-constraint-m-as-sum}).
 However, we need to linearize the logical AND operators ($\land$) in the definition of subgroup membership~$b_i$ (cf.~Equation~\ref{eq:csd:smt-constraint-subgroup-membership}) by introducing auxiliary variables and further constraints.
-In particular, we supplement the variables~$b \in \{0, 1\}^n$ by $b^{\text{lb}} \in \{0, 1\}^{n \times m}$ and $b^{\text{ub}} \in \{0, 1\}^{n \times m}$.
+In particular, we supplement the variables~$b \in \{0, 1\}^m$ by $b^{\text{lb}} \in \{0, 1\}^{n \times m}$ and $b^{\text{ub}} \in \{0, 1\}^{n \times m}$.
 These new binary variables indicate whether a particular data object satisfies the lower respectively upper bound for a particular feature.
 Using linearization techniques for constraint satisfaction and AND operators from~\cite{mosek2022modeling}, we obtain the following set of constraints to replace Equation~\ref{eq:csd:smt-constraint-subgroup-membership}:
 %

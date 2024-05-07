@@ -520,6 +520,7 @@ The corresponding subgroup is unique and implicitly solves the following variant
 \end{definition}
 %
 I.e., the problem targets at minimizing the number of false positives subject to producing no false negatives.
+Given the constraint on the positive data objects, minimizing the number of false positives is equivalent to maximizing the number of true negatives.
 
 Algorithm~\ref{al:csd:mors} outlines the procedure to determine the \emph{MORS} bounds.
 Slightly deviating from Definition~\ref{def:csd:mors}, but consistent to \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), the \emph{MORS} algorithm replaces all non-excluding bounds with infinity (Lines~\ref{al:csd:random-search:line:bounds-infty-start}-\ref{al:csd:random-search:line:bounds-infty-end}).
@@ -869,8 +870,8 @@ If less than $k$~features are selected, all features are permissible, as in the 
 \emph{MORS} calls the function \emph{get\_permissible\_feature\_idxs(\dots)} in Line~\ref{al:csd:mors:line:permissible-features} of Algorithm~\ref{al:csd:mors}.
 To instantiate this function, we employ a univariate, quality-based heuristic for feature selection:
 For each feature, we evaluate what happens if only this feature is restricted according to \emph{MORS} (cf.~Definition~\ref{def:csd:mors}).
-In particular, we determine the number of negative data objects in the subgroup defined by the feature's \emph{MORS} bounds (Lines~\ref{al:csd:mors:line:bounds-start}-\ref{al:csd:mors:line:bounds-end}).
-We select the $k$~features with the lowest number of false negatives.
+In particular, we determine the number of false positives, i.e., negative data objects in the subgroup, defined by the feature's \emph{MORS} bounds (Lines~\ref{al:csd:mors:line:bounds-start}-\ref{al:csd:mors:line:bounds-end}).
+We select the $k$~features with the lowest number of false positives.
 
 This heuristic is equivalent to selecting the features with the highest individual WRAcc for \emph{MORS} bounds:
 Due to \emph{MORS}, not only~$m$ and~$m^+$ are constant in Equation~\ref{eq:csd:wracc} but also the number of positive data objects in the subgroup~$m_b^+$, which equals~$m^+$.
@@ -882,7 +883,7 @@ In particular, we can rephrase Equation~\ref{eq:csd:wracc} as follows:
 \end{equation}
 %
 Thus, maximizing WRAcc corresponds to minimizing~$m_b / m$, i.e., the relative frequency of the data objects in the subgroup.
-Since the number of positive data objects in the subgroup is fixed, this objective amounts to including as few negative data objects as possible into the subgroup, i.e., minimizing the number of false negatives, which is what our univariate heuristic does as well.
+Since the number of positive data objects in the subgroup is fixed, this objective amounts to including as few negative data objects as possible into the subgroup, i.e., minimizing the number of false positives, which is what our univariate heuristic does as well.
 
 The proposed heuristic only entails a linear runtime in the number of features, like the unconstrained \emph{MORS}, since it evaluates each feature independently.
 With quadratic runtime, one can also consider interactions between features and thereby potentially increase subgroup quality.
@@ -2180,7 +2181,7 @@ the binary variables~$b_i$ for subgroup membership and the real-valued bound var
 The bound constraints (cf.~Equation~\ref{eq:csd:smt-constraint-bounds-monotonic}) remain unchanged as well.
 Further, we retain the optimization objective, which already is linear in~$b_i$ (cf.~Equations~\ref{eq:csd:smt-wracc} and~\ref{eq:csd:smt-constraint-m-as-sum}).
 However, we need to linearize the logical AND operators ($\land$) in the definition of subgroup membership~$b_i$ (cf.~Equation~\ref{eq:csd:smt-constraint-subgroup-membership}) by introducing auxiliary variables and further constraints.
-In particular, we supplement the variables~$b \in \{0, 1\}^m$ by $b^{\text{lb}} \in \{0, 1\}^{n \times m}$ and $b^{\text{ub}} \in \{0, 1\}^{n \times m}$.
+In particular, we supplement the variables~$b \in \{0, 1\}^m$ by $b^{\text{lb}} \in \{0, 1\}^{m \times n}$ and $b^{\text{ub}} \in \{0, 1\}^{m \times n}$.
 These new binary variables indicate whether a particular data object satisfies the lower respectively upper bound for a particular feature.
 Using linearization techniques for constraint satisfaction and AND operators from~\cite{mosek2022modeling}, we obtain the following set of constraints to replace Equation~\ref{eq:csd:smt-constraint-subgroup-membership}:
 %

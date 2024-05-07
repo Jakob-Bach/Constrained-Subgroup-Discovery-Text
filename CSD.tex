@@ -1381,7 +1381,7 @@ Since each dataset has $n \geq 20$ features (cf.~Section~\ref{sec:csd:experiment
 		Datasets from PMLB used in our experiments.
 		$m$~denotes the number of data objects and $n$~the number of features.
 		In dataset names, we replaced \emph{GAMETES\_Epistasis} with  \emph{GE\_} and \emph{GAMETES\_Heterogeneity} with \emph{GH\_} to reduce the table's width.
-		The column \emph{Timeouts} indicates whether at least one timeout occurred with \emph{SMT} as the subgroup-discovery method and the highest timeout (2048~s), optimizing the original subgroup without cardinality constraints (\emph{Max~$k$}) or in any cardinality setting (\emph{Any~$k$}).
+		\emph{Timeouts} indicates whether at least one timeout occurred with \emph{SMT} as the subgroup-discovery method and the highest timeout (2048~s), optimizing the original subgroup without cardinality constraints (\emph{Max~$k$}) or in any cardinality setting (\emph{Any~$k$}).
 	}
 	\label{tab:csd:datasets}
 \end{table}
@@ -1426,31 +1426,31 @@ The solver-based search method \emph{SMT} uses its default maximum timeout of 20
 	\centering
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim=20 60 15 15, clip]{plots/csd-unconstrained-methods-nwracc-all-datasets.pdf}
+		\includegraphics[width=\textwidth, trim=20 60 15 15, clip]{plots/csd-unconstrained-nwracc-all-datasets.pdf}
 		\caption{All datasets.}
-		\label{fig:csd:unconstrained-methods-nwracc-all-datasets}
+		\label{fig:csd:unconstrained-nwracc-all-datasets}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim=20 60 15 15, clip]{plots/csd-unconstrained-methods-nwracc-no-timeout-datasets.pdf}
+		\includegraphics[width=\textwidth, trim=20 60 15 15, clip]{plots/csd-unconstrained-nwracc-no-timeout-datasets.pdf}
 		\caption{Datasets without \emph{SMT} timeouts.}
-		\label{fig:csd:unconstrained-methods-nwracc-no-timeout-datasets}
+		\label{fig:csd:unconstrained-nwracc-no-timeout-datasets}
 	\end{subfigure}
 	\caption{
 		Subgroup quality (nWRAcc, cf.~Equation~\ref{eq:csd:wracc-normalized}) over datasets and cross-validation folds, by subgroup-discovery method.
 		Results from the unconstrained experimental scenario.
 	}
-	\label{fig:csd:unconstrained-methods-nwracc}
+	\label{fig:csd:unconstrained-nwracc}
 \end{figure}
 
 \paragraph{Subgroup quality}
 
-Figure~\ref{fig:csd:unconstrained-methods-nwracc-all-datasets} compares subgroup quality on the training set and test set for the six subgroup-discovery methods.
+Figure~\ref{fig:csd:unconstrained-nwracc-all-datasets} compares subgroup quality on the training set and test set for the six subgroup-discovery methods.
 On the training set, the two heuristic search methods \emph{Beam} and \emph{BI} have roughly the same median nWRAcc as the solver-based search method \emph{SMT}.
 In particular, the heuristics are even better than \emph{SMT} on some datasets but worse on others.
 The former can only happen because \emph{SMT} may run into timeouts and therefore not yield the exact optimum, as we analyze later (cf.~Section~\ref{sec:csd:evaluation:timeouts}).
-However, even if we limit our analysis to the datasets without \emph{SMT} timeouts, \emph{Beam} and \emph{BI} are still remarkably close to the optimum quality (cf.~Figure~\ref{fig:csd:unconstrained-methods-nwracc-no-timeout-datasets}).
+However, even if we limit our analysis to the datasets without \emph{SMT} timeouts, \emph{Beam} and \emph{BI} are still remarkably close to the optimum quality (cf.~Figure~\ref{fig:csd:unconstrained-nwracc-no-timeout-datasets}).
 Note that this result is not specific to \emph{SMT} but also holds for any other exhaustive search method.
 On the test set, \emph{Beam} and \emph{BI} are even better than \emph{SMT} on median, also excluding timeout datasets, since their training-test nWRAcc difference is smaller.
 This result indicates that \emph{Beam} and \emph{BI} are less susceptible to overfitting and their solutions generalize better.
@@ -1610,31 +1610,31 @@ The solver-based search method \emph{SMT} uses its default maximum timeout of 20
 	\centering
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim=20 60 15 15, clip]{plots/csd-cardinality-methods-train-nwracc.pdf}
+		\includegraphics[width=\textwidth, trim=20 60 15 15, clip]{plots/csd-cardinality-train-nwracc.pdf}
 		\caption{Training set.}
-		\label{fig:csd:cardinality-methods-train-nwracc}
+		\label{fig:csd:cardinality-train-nwracc}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim=20 60 15 15, clip]{plots/csd-cardinality-methods-test-nwracc.pdf}
+		\includegraphics[width=\textwidth, trim=20 60 15 15, clip]{plots/csd-cardinality-test-nwracc.pdf}
 		\caption{Test set.}
-		\label{fig:csd:cardinality-methods-test-nwracc}
+		\label{fig:csd:cardinality-test-nwracc}
 	\end{subfigure}
 	\caption{
 		Mean subgroup quality with 95\% confidence intervals based on datasets and cross-validation folds, over feature-cardinality threshold~$k$, by subgroup-discovery method.
 		Results from the search for original subgroups.
 	}
-	\label{fig:csd:cardinality-methods-nwracc}
+	\label{fig:csd:cardinality-nwracc}
 \end{figure}
 
 \paragraph{Subgroup quality}
 
-Figure~\ref{fig:csd:cardinality-methods-nwracc} displays the mean subgroup quality, averaging over datasets and cross-validation folds, for different values of the feature-cardinality threshold~$k$.
-For most subgroup-discovery methods, mean training-set nWRACC (cf.~Figure~\ref{fig:csd:cardinality-methods-train-nwracc}) increases with~$k$, though the marginal utility decreases.
+Figure~\ref{fig:csd:cardinality-nwracc} displays the mean subgroup quality, averaging over datasets and cross-validation folds, for different values of the feature-cardinality threshold~$k$.
+For most subgroup-discovery methods, mean training-set nWRACC (cf.~Figure~\ref{fig:csd:cardinality-train-nwracc}) increases with~$k$, though the marginal utility decreases.
 In particular, even with $k=1$, the mean nWRAcc is already clearly above 50\% of the nWRAcc achieved without a feature-cardinality constraint.
 Further, the quality increase between $k=1$ and $k=2$ is usually the largest.
-On the test set (cf.~Figure~\ref{fig:csd:cardinality-methods-test-nwracc}), the benefit of setting a larger~$k$ is even smaller.
+On the test set (cf.~Figure~\ref{fig:csd:cardinality-test-nwracc}), the benefit of setting a larger~$k$ is even smaller.
 E.g., the mean test-set nWRAcc of \emph{Beam}, \emph{BI}, and \emph{SMT} barely improves beyond $k=2$.
 These results indicate that sparse subgroup descriptions, which tend to be more interpretable, already yield a high subgroup quality.
 
@@ -1645,13 +1645,13 @@ Thus, each feature excludes a certain fraction of data objects from the subgroup
 The more features are used in the subgroup description, the smaller becomes the expected number of data objects in the subgroup.
 Since the number of subgroup members is one factor in WRAcc (cf.~Equation~\ref{eq:csd:wracc}), quality naturally decreases for smaller subgroups.
 
-Figure~\ref{fig:csd:cardinality-methods-nwracc} also reveals that the heuristic search methods \emph{Beam} and \emph{BI} still yield higher average subgroup quality than the solver-based search \emph{SMT} with timeouts, for any feature-cardinality setting.
+Figure~\ref{fig:csd:cardinality-nwracc} also reveals that the heuristic search methods \emph{Beam} and \emph{BI} still yield higher average subgroup quality than the solver-based search \emph{SMT} with timeouts, for any feature-cardinality setting.
 Further, the heuristic \emph{PRIM} exhibits a larger increase of subgroup quality over~$k$ than \emph{Beam} and \emph{BI}, thereby narrowing the quality gap to the latter.
 The baseline \emph{MORS} displays the least effect of~$k$ on mean test-set nWRAcc, showing very stable subgroup quality.
 
 Finally, the results indicate that limiting~$k$ reduces overfitting.
 For example, for \emph{Beam}, the mean difference between training-set and test-set nWRAcc is 0.095 without a feature-cardinality constraint, 0.073 for $k=3$, and 0.045 for $k=1$.
-The increasing tendency to overfit with larger~$k$ explains why mean training-set nWRAcc increases more than mean test-set nWRAcc over~$k$ in Figure~\ref{fig:csd:cardinality-methods-nwracc}.
+The increasing tendency to overfit with larger~$k$ explains why mean training-set nWRAcc increases more than mean test-set nWRAcc over~$k$ in Figure~\ref{fig:csd:cardinality-nwracc}.
 From the six subgroup-discovery methods, \emph{PRIM} shows the smallest increase of overfitting over~$k$, \emph{MORS} and \emph{SMT} the largest.
 
 \begin{table}[t]
@@ -1694,16 +1694,16 @@ Both search methods employ a feature-cardinality threshold of~$k=3$.
 	\centering
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim=20 50 15 15, clip]{plots/csd-alternatives-similarity-hamming.pdf}
+		\includegraphics[width=\textwidth, trim=20 50 15 15, clip]{plots/csd-alternatives-hamming.pdf}
 		\caption{Normalized Hamming similarity.}
-		\label{fig:csd:alternatives-similarity-hamming}
+		\label{fig:csd:alternatives-hamming}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim=20 50 15 15, clip]{plots/csd-alternatives-similarity-jaccard.pdf}
+		\includegraphics[width=\textwidth, trim=20 50 15 15, clip]{plots/csd-alternatives-jaccard.pdf}
 		\caption{Jaccard similarity.}
-		\label{fig:csd:alternatives-similarity-jaccard}
+		\label{fig:csd:alternatives-jaccard}
 	\end{subfigure}
 	\caption{
 		Mean subgroup similarity of alternative subgroup descriptions to the original subgroup with 95\% confidence intervals based on datasets and cross-validation folds, over the number of alternatives, by subgroup-discovery method and dissimilarity threshold~$\tau_{\text{abs}}$.
@@ -1718,7 +1718,7 @@ As one would expect, the subgroup similarity decreases the more alternatives one
 Further, the decrease is strongest from the original subgroup, i.e., the zeroth alternative, to the first alternative but smaller beyond.
 This observation indicates that one may find several alternative subgroup descriptions of comparable similarity to the original.
 
-These trends holds for both similarity measures, i.e., the normalized Hamming similarity we use as optimization objective (cf.~Equation~\ref{eq:csd:hamming-general} and Figure~\ref{fig:csd:alternatives-similarity-hamming}) as well as the Jaccard similarity (cf.~Equation~\ref{eq:csd:jaccard} and Figure~\ref{fig:csd:alternatives-similarity-jaccard}).
+These trends holds for both similarity measures, i.e., the normalized Hamming similarity we use as optimization objective (cf.~Equation~\ref{eq:csd:hamming-general} and Figure~\ref{fig:csd:alternatives-hamming}) as well as the Jaccard similarity (cf.~Equation~\ref{eq:csd:jaccard} and Figure~\ref{fig:csd:alternatives-jaccard}).
 The latter yields lower similarity values than the former since it ignores data objects that are not contained in either of the two compared subgroups.
 Further, the observed trends exist for the solver-based search method \emph{SMT} as well as the heuristic search method \emph{Beam}.
 \emph{SMT} yields clearly more similar subgroups than \emph{Beam} for the Jaccard similarity, while the normalized Hamming similarity does not show a clear winner.

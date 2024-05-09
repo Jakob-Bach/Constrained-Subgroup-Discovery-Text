@@ -700,6 +700,13 @@ Combining all prior definitions of decision variables, constraints, and the obje
 
 We refer to this optimization problem as \emph{unconstrained subgroup discovery} in the following since it only contains constraints that are technically necessary to define subgroup discovery properly but no additional user constraints.
 
+In our implementation, we add a small post-processing step.
+In particular, we do not use the solver-determined values of the variables $\mathit{lb}_j$ and $\mathit{ub}_j$ when evaluating subgroup quality.
+Instead, we set the lower and upper bounds to the minimum and maximum feature values of all data objects in the subgroup (i.e., with $b_i=1$).
+Thus, we ensure that the bounds correspond to actual feature values.
+This guarantee is not formally necessary, but consistent with the subgroup descriptions returned by heuristic search methods and baselines.
+If the subgroup does not contain any data objects, we use invalid bounds (i.e., $\mathit{ub}_j = -\infty < \infty = \mathit{lb}_j$) to ensure that the subgroup remains empty even if evaluated with an arbitrary new set of data objects.
+
 \subsection{Overview of Constraint Types}
 \label{sec:csd:approach:constraint-types}
 
@@ -847,6 +854,9 @@ Instead of explicitly defining decision variables $s_j$, $s^{\text{lb}}_j$, and 
 However, we will use~$s_j$ for alternative subgroup descriptions (cf.~Section~\ref{sec:csd:approach:alternatives:smt}) as well, so we define corresponding variables in our implementation.
 
 The overall SMT encoding of feature-cardinality-constrained subgroup discovery (cf.~Definition~\ref{def:csd:feature-cardinality-constrained-subgroup-discovery}) is the SMT encoding of unconstrained subgroup discovery (cf.~Equation~\ref{eq:csd:smt-problem-unconstrained-complete}) supplemented by the variables and constraints from Equations~\ref{eq:csd:smt-constraint-feature-selection} and~\ref{eq:csd:smt-constraint-feature-cardinalty}.
+
+In our implementation, we also add a post-processing step that sets non-excluding lower bounds (i.e., with $s^{\text{lb}}_j = 0$) to $-\infty$ and non-excluding upper bounds (i.e., with $s^{\text{ub}}_j = 0$) to $+\infty$.
+This step is consistent with the heuristic search methods and baselines (e.g., cf.~Lines~\ref{al:csd:prim:line:bounds-infty-start}-\ref{al:csd:prim:line:bounds-infty-end} in Algorithm~\ref{al:csd:prim}).
 
 \subsubsection{Integration into Heuristic Search Methods}
 \label{sec:csd:approach:cardinality:heuristics}

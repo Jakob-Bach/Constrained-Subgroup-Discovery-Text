@@ -56,8 +56,8 @@ We observe that heuristic search methods often yield subgroups of high quality w
 The interpretability of prediction models has significantly gained importance in recent years~\cite{carvalho2019machine, molnar2020interpretable}.
 There are various ways to foster interpretability in machine-learning pipelines.
 In particular, some machine-learning models are simple enough to be intrinsically interpretable~\cite{carvalho2019machine}.
-Subgroup-discovery methods fall into this category~\cite{atzmueller2015subgroup}.
-The goal of subgroup discovery is to find `interesting' subgroups, i.e., subsets of a dataset, e.g., data objects where the prediction target takes a particular value.
+Subgroup-discovery methods fall into this category.
+The goal of subgroup discovery is to find `interesting' subgroups, i.e., subsets of a dataset, e.g., data objects where the prediction target takes a particular value~\cite{atzmueller2015subgroup}.
 Further, such subgroups should be described with a combination of simple conditions on feature values.
 E.g., Figure~\ref{fig:csd:exemplary-subgroup} displays a rectangle-shaped subgroup description for a two-dimensional, real-valued dataset with a binary prediction target.
 This subgroup is defined by $(\mathit{Feature\_1} \in [3.0, 5.1]) \land (\mathit{Feature\_2} \in [1.0, 1.8])$ and contains a considerably higher fraction of data objects with $\mathit{Target} = 1$ than the complete dataset.
@@ -80,7 +80,7 @@ In particular, we focus on two types of constraints related to the features used
 First, \emph{feature-cardinality constraints} limit the number of selected features, i.e., features used in subgroup descriptions.
 E.g., in Figure~\ref{fig:csd:exemplary-subgroup}, one may use only either feature to define a subgroup with $\mathit{Target} = 1$ instead of using both features, thereby simplifying the subgroup description but inevitably capturing more data objects with $\mathit{Target} = 0$.
 With feature selection, the subgroup descriptions become \emph{sparse}, which increases their interpretability.
-In particular, even intrinsically interpretable model may loose interpretability if they involve too many features~\cite{molnar2020interpretable}.
+In particular, even intrinsically interpretable model may loose interpretability if they involve too many features~\cite{meeng2021real, molnar2020interpretable}.
 This constraint type resembles feature selection~\cite{guyon2003introduction, li2017feature}, which is a common task in machine-learning pipelines.
 
 Second, we formulate constraints to search \emph{alternative subgroup descriptions}:
@@ -105,7 +105,7 @@ In contrast, our notion of alternative subgroup descriptions tries to capture th
 Our contribution is fivefold:
 
 First, we formalize subgroup discovery as a Satisfiability Modulo Theories (SMT) optimization problem.
-This novel white-box formulation admits solver-based search for subgroups and allows integrating a broad range of constraints.
+This novel white-box formulation admits solver-based search for subgroups and allows integrating and combining a variety of constraints in a declarative manner.
 
 Second, we formalize two constraint types for this optimization problem, i.e., feature-cardinality constraints and alternative subgroup descriptions.
 For the latter, we allow users to control alternatives with two parameters, i.e., the number of alternatives and a dissimilarity threshold.
@@ -115,11 +115,11 @@ Third, we describe how to integrate these two constraint types into three existi
 The latter are faster and simpler than the former, so they may serve as additional reference points for future experimental studies on subgroup discovery.
 
 Fourth, we analyze the computational complexity of the subgroup-discovery problem with each of these two constraint types.
-In particular, prove several $\mathcal{NP}$-hardness results and thereby show that finding optimal solutions under these constraint types is not trivial.
+In particular, prove several $\mathcal{NP}$-completeness results and thereby show that finding optimal solutions under these constraint types is computationally hard.
 
 Fifth, we conduct comprehensive experiments with 27 binary-classification datasets from the Penn Machine Learning Benchmarks (PMLB)~\cite{olson2017pmlb, romano2021pmlb}.
-We evaluate the runtime of subgroup discovery and the quality of the discovered subgroups.
-In particular, we compare solver-based and heuristic subgroup-discovery methods without constraints, with a feature-cardinality constraint, and for searching alternative subgroup descriptions.
+We compare solver-based and heuristic subgroup-discovery methods without constraints, with a feature-cardinality constraint, and for searching alternative subgroup descriptions.
+In particular, we evaluate the runtime of subgroup discovery and the quality of the discovered subgroups.
 We also analyze how the subgroup quality in solver-based search depends on the timeout of the solver.
 We publish all code\footnote{\url{https://github.com/Jakob-Bach/Constrained-Subgroup-Discovery}} and experimental data\footnote{TODO} online.
 
@@ -127,7 +127,7 @@ We publish all code\footnote{\url{https://github.com/Jakob-Bach/Constrained-Subg
 
 In our experimental scenario without constraints, the heuristic search methods yield similar subgroup quality as solver-based search.
 On the test set, the heuristics may even be better since they show less overfitting, i.e., a lower gap between training-set quality and test-set quality.
-Additionally, the solver-based search is considerably slower.
+Additionally, the solver-based search is one to two orders of magnitude slower.
 Using a solver timeout, a large fraction of the final subgroup quality can be reached in a fraction of the runtime, though this quality is lower than for equally fast heuristics.
 
 With a feature-cardinality constraint, heuristic search methods still are competitive quality-wise compared to solver-based search.
@@ -601,7 +601,7 @@ In particular, the bounds found by \emph{MORS} cannot be made tighter to exclude
 
 Algorithm~\ref{al:csd:random-search} shows the randomized search procedure that constitutes the second baseline.
 \emph{Random Search} generates and evaluates subgroups for a fixed number of iterations, which the user controls with the parameter~$\mathit{n\_iters} \in \mathbb{N}$.
-Hereby, subgroup generation samples a pair of lower and upper bound uniformly random from the unique values for each permissible feature, leaving the remaining features unrestricted (Lines~\ref{al:csd:random-search:line:sampling-start}-\ref{al:csd:random-search:line:sampling-end}).
+Hereby, subgroup generation samples a lower bound and an upper bound uniformly random from the unique values for each permissible feature, leaving the remaining features unrestricted (Lines~\ref{al:csd:random-search:line:sampling-start}-\ref{al:csd:random-search:line:sampling-end}).
 The algorithm tracks the best generated subgroup so far over the iterations (Lines~\ref{al:csd:random-search:line:optimum-update-start}-\ref{al:csd:random-search:line:optimum-update-end}) and finally returns the subgroup with the highest quality.
 As for \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Random Search} replaces all non-excluding bounds with infinity (Lines~\ref{al:csd:random-search:line:bounds-infty-start}-\ref{al:csd:random-search:line:bounds-infty-end}).
 
@@ -1342,7 +1342,7 @@ This comparison allows us to assess the effectiveness of the solver-based search
 Our second experimental scenario (cf.~Section~\ref{sec:csd:evaluation:timeouts} for results) takes a deeper dive into \emph{SMT} as subgroup-discovery method.
 In particular, we analyze whether setting solver timeouts enables finding solutions with reasonable quality in a shorter time frame.
 If the solver does not finish optimization within a given timeout, we record the currently best solution at this time, which may be suboptimal.
-Note that the timeout only applies to the optimization procedure itself, while our runtime measurements also include the time for formulating the optimization problem.
+Note that the timeout only applies to the optimization procedure itself, while our runtime measurements also include the time for formulating the optimization problem upfront.
 
 We evaluate twelve exponentially scaled timeout values, i.e., \{1~s, 2~s, 4~s, $\dots$, 2048~s\}.
 In the three other experimental scenarios, we employ the maximum timeout of 2048~s for \emph{SMT}.

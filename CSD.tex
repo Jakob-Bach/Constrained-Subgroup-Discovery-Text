@@ -812,15 +812,6 @@ To formulate a feature-cardinality constraint, users provide an upper bound on t
 	\label{def:csd:feature-cardinality-constraint}
 \end{definition}
 %
-Adding this constraint to the subgroup-discovery problem (cf.~Definition~\ref{def:csd:subgroup-discovery}), we obtain the following optimization problem:
-%
-\begin{definition}[Feature-cardinality-constrained subgroup discovery]
-	Given a dataset $X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^m$
-	and a cardinality threshold~$k \in \mathbb{N}$,
-	\emph{feature-cardinality-constrained subgroup discovery} is the problem of finding a subgroup (cf.~Definition~\ref{def:csd:subgroup}) with bounds~$\mathit{lb}, \mathit{ub} \in \{\mathbb{R} \cup \{-\infty, +\infty\}\}^n$ that maximizes a given notion of subgroup quality~$Q(\mathit{lb}, \mathit{ub}, X, y)$ while satisfying a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}).
-	\label{def:csd:feature-cardinality-constrained-subgroup-discovery}
-\end{definition}
-%
 In practice, less than $k$ features may be selected if selecting more features does not improve the subgroup quality.
 I.e., depending on the notion of subgroup quality, selecting more features may decrease quality.
 
@@ -853,7 +844,7 @@ Given the definition of~$s_j$, setting an upper bound on the number of selected 
 Instead of explicitly defining decision variables $s_j$, $s^{\text{lb}}_j$, and $s^{\text{ub}}_j$, one could also insert the corresponding expressions into Equation~\ref{eq:csd:smt-constraint-feature-cardinalty} directly.
 However, we will use~$s_j$ for alternative subgroup descriptions (cf.~Section~\ref{sec:csd:approach:alternatives:smt}) as well, so we define corresponding variables in our implementation.
 
-The overall SMT encoding of feature-cardinality-constrained subgroup discovery (cf.~Definition~\ref{def:csd:feature-cardinality-constrained-subgroup-discovery}) is the SMT encoding of unconstrained subgroup discovery (cf.~Equation~\ref{eq:csd:smt-problem-unconstrained-complete}) supplemented by the variables and constraints from Equations~\ref{eq:csd:smt-constraint-feature-selection} and~\ref{eq:csd:smt-constraint-feature-cardinalty}.
+The overall SMT encoding of subgroup discovery with a feature-cardinality constraint is the SMT encoding of unconstrained subgroup discovery (cf.~Equation~\ref{eq:csd:smt-problem-unconstrained-complete}) supplemented by the variables and constraints from Equations~\ref{eq:csd:smt-constraint-feature-selection} and~\ref{eq:csd:smt-constraint-feature-cardinalty}.
 
 In our implementation, we also add a post-processing step that sets non-excluding lower bounds (i.e., with $s^{\text{lb}}_j = 0$) to $-\infty$ and non-excluding upper bounds (i.e., with $s^{\text{ub}}_j = 0$) to $+\infty$.
 This step is consistent with the heuristic search methods and baselines (e.g., cf.~Lines~\ref{al:csd:prim:line:bounds-infty-start}-\ref{al:csd:prim:line:bounds-infty-end} in Algorithm~\ref{al:csd:prim}).
@@ -931,11 +922,11 @@ For each subgroup, the cost of evaluating a quality function like WRAcc (cf.~Equ
 Additionally, the number of potential subgroups should be seen as an upper bound:
 There are also more efficient exhaustive search methods, which employ quality-based pruning to not explicitly evaluate all solution candidates while still implicitly covering the full search space~\cite{atzmueller2015subgroup}.
 
-We adapt the result from Proposition~\ref{prop:csd:complexity-unconstrained-exhaustive} to feature-cardinality-constrained subgroup discovery.
+Next, we adapt the result from Proposition~\ref{prop:csd:complexity-unconstrained-exhaustive} to feature-cardinality constraints.
 Instead of combining bounds from all $n$~features, there are $\binom{n}{k} \leq n^k$ feature sets of size~$k$ with $O(m^{2k})$ bound candidates each:
 %
-\begin{proposition}[Complexity of exhaustive search for feature-cardinality-constrained subgroup discovery]
-	A naive exhaustive search for feature-cardinality-constrained subgroup discovery (cf.~Definition~\ref{def:csd:feature-cardinality-constrained-subgroup-discovery}) needs to evaluate $O(n^k \cdot m^{2k})$ subgroups.
+\begin{proposition}[Complexity of exhaustive search for subgroup discovery with feature-cardinality constraint]
+	A naive exhaustive search for subgroup discovery (cf.~Definition~\ref{def:csd:subgroup-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) needs to evaluate $O(n^k \cdot m^{2k})$ subgroups.
 	\label{prop:csd:complexity-cardinality-exhaustive}
 \end{proposition}
 %
@@ -961,15 +952,15 @@ I.e., the number of features has an exponential impact, while the number of data
 With a feature-cardinality constraint, the problem retains $\mathcal{XP}$ membership.
 Considering Proposition~\ref{prop:csd:complexity-cardinality-exhaustive}, the parameter is~$k$ instead of~$n$ now:
 %
-\begin{proposition}[Parameterized complexity of feature-cardinality-constrained subgroup discovery]
-	The problem of feature-cardinality-constrained subgroup discovery (cf.~Definition~\ref{def:csd:feature-cardinality-constrained-subgroup-discovery}) resides in the parameterized complexity class~$\mathcal{XP}$ for the parameter~$k$.
+\begin{proposition}[Parameterized complexity of subgroup discovery with feature-cardinality constraint]
+	The problem of subgroup discovery (cf.~Definition~\ref{def:csd:subgroup-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) resides in the parameterized complexity class~$\mathcal{XP}$ for the parameter~$k$.
 	\label{prop:csd:complexity-cardinality-xp}
 \end{proposition}
 
 \paragraph{NP-Hardness}
 
 \cite{boley2009non} showed that it is an $\mathcal{NP}$-hard problem to find a subgroup description with minimum feature cardinality that induces exactly the same subgroup membership as a given subgroup.
-We transfer this result to directly optimizing feature-cardinality-constrained subgroups.
+We transfer this result to directly optimizing subgroup quality under a feature-cardinality constraint.
 First, we tackle the search problem for perfect subgroups (cf.~Appendix~\ref{sec:csd:appendix:proofs:complexity-cardinality-np-perfect-subgroup} for the proof):
 %
 \begin{proposition}[Complexity of perfect-subgroup discovery with feature-cardinality constraint]
@@ -979,11 +970,11 @@ First, we tackle the search problem for perfect subgroups (cf.~Appendix~\ref{sec
 %
 This hardness results under a feature-cardinality constraint contrasts with the polynomial runtime of unconstrained perfect-subgroup discovery (cf.~Proposition~\ref{prop:csd:complexity-unconstrained-perfect-subgroup}), which corresponds to a cardinality constraint with $k = n$.
 
-As a generalization of Proposition~\ref{prop:csd:complexity-cardinality-np-perfect-subgroup}, the optimization problem of feature-cardinality-constrained subgroup discovery is $\mathcal{NP}$-complete under a reasonable assumption on the notion of subgroup quality (cf.~Appendix~\ref{sec:csd:appendix:proofs:complexity-cardinality-np} for the proof):
+As a generalization of Proposition~\ref{prop:csd:complexity-cardinality-np-perfect-subgroup}, the optimization problem of subgroup discovery with a feature-cardinality constraint is $\mathcal{NP}$-complete under a reasonable assumption on the notion of subgroup quality (cf.~Appendix~\ref{sec:csd:appendix:proofs:complexity-cardinality-np} for the proof):
 %
-\begin{proposition}[Complexity of feature-cardinality-constrained subgroup discovery]
+\begin{proposition}[Complexity of subgroup discovery with feature-cardinality constraint]
 	Assuming a subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$ for which only perfect subgroups (cf.~Definition~\ref{def:csd:perfect-subgroup}) reach its maximal value,
-	the problem of feature-cardinality-constrained subgroup discovery (cf.~Definition~\ref{def:csd:feature-cardinality-constrained-subgroup-discovery}) is $\mathcal{NP}$-complete.
+	the problem of subgroup discovery (cf.~Definition~\ref{def:csd:subgroup-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) is $\mathcal{NP}$-complete.
 	\label{prop:csd:complexity-cardinality-np}
 \end{proposition}
 %
@@ -2512,14 +2503,14 @@ Vice versa, being able to use all features in the subgroup description leads to 
 
 \begin{proof}
 Let an arbitrary problem instance~$I$ of the perfect-subgroup-discovery problem (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) be given.
-We transform~$I$ into a problem instance~$I'$ of the feature-cardinality-constrained subgroup-discovery problem (cf.~Definition~\ref{def:csd:feature-cardinality-constrained-subgroup-discovery}).
+We transform~$I$ into a problem instance~$I'$ of the subgroup-discovery problem (cf.~Definition~\ref{def:csd:subgroup-discovery}) with the same constraint.
 In particular, we define the objective as optimizing a subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$ rather than searching for a perfect subgroup (cf.~Definition~\ref{def:csd:perfect-subgroup}) that may or may not exist.
 The other inputs of the problem instance remain the same.
 
 Based on the assumption we made on~$Q(\mathit{lb}, \mathit{ub}, X, y)$ in Proposition~\ref{prop:csd:complexity-cardinality-np}, the optimal solution for~$I'$ is a perfect subgroup if the latter exists.
 Thus, if the optimal subgroup for~$I'$ is not perfect, then a perfect subgroup does not exist at all.
 Checking whether a subgroup is perfect entails a cost of $O(n \cdot m)$, i.e., computing subgroup membership of all data objects and checking whether there are no false positives and no false negatives.
-Overall, an algorithm for feature-cardinality-constrained subgroup-discovery (cf.~Definition~\ref{def:csd:feature-cardinality-constrained-subgroup-discovery}) solves perfect-subgroup discovery (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) with negligible overhead.
+Overall, an algorithm for subgroup discovery (cf.~Definition~\ref{def:csd:subgroup-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) solves perfect-subgroup discovery (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) with the same constraint with negligible overhead.
 Since the latter problem is $\mathcal{NP}$-complete (cf.~Proposition~\ref{prop:csd:complexity-cardinality-np-perfect-subgroup}) and the former resides in complexity class $\mathcal{NP}$, the former is $\mathcal{NP}$-complete as well.
 \end{proof}
 %
@@ -2539,7 +2530,7 @@ Our proof approach chosen above is more general regarding the notion of subgroup
 
 \begin{proof}
 Let an arbitrary problem instance~$I$ of the perfect-subgroup-discovery problem (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) be given.	
-We transform~$I$ into a problem instance~$I'$ of the perfect-alternative-subgroup-description-discovery problem (cf.~Definition~\ref{def:csd:perfect-alternative-subgroup-description-discovery}), also with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}).
+We transform~$I$ into a problem instance~$I'$ of the perfect-alternative-subgroup-description-discovery problem (cf.~Definition~\ref{def:csd:perfect-alternative-subgroup-description-discovery}) with the same constraint.
 In particular, we retain the prediction target~$y \in \{0,1\}^m$ and the feature-cardinality threshold~$k \in \mathbb{N}$.
 We will slightly modify the dataset~$X \in \mathbb{R}^{m \times n}$, as explained later.
 
@@ -2561,7 +2552,7 @@ Finally, both~$I$ and~$I'$ use a feature-cardinality constraint with threshold~$
 Thus, if a perfect alternative subgroup description for~$I'$ exists, it also solves~$I$.
 If it does not exist, then there also is no other perfect subgroup for~$I$.
 
-Thus, an efficient solution algorithm for the perfect-alternative-subgroup-description-discovery problem (cf.~Definition~\ref{def:csd:perfect-alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) would also efficiently solve the problem of perfect subgroup discovery (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}).
+Thus, an efficient solution algorithm for the perfect-alternative-subgroup-description-discovery problem (cf.~Definition~\ref{def:csd:perfect-alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) would also efficiently solve the problem of perfect subgroup discovery (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) with the same constraint.
 However, we already established that the latter problem is $\mathcal{NP}$-complete (cf.~Proposition~\ref{prop:csd:complexity-cardinality-np-perfect-subgroup}).
 Further, evaluating a solution for the former problem entails a polynomial cost of $O(m \cdot n)$ for checking subgroup membership, the bound constraints, the feature-cardinality constraint, and the dissimilarity constraint, placing the problem in complexity class~$\mathcal{NP}$.
 Thus, perfect-alternative-subgroup-description discovery (cf.~Definition~\ref{def:csd:perfect-alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) is $\mathcal{NP}$-complete.
@@ -2592,17 +2583,17 @@ However, we proved that the latter problem is $\mathcal{NP}$-complete (cf.~Propo
 \label{sec:csd:appendix:proofs:complexity-alternatives-np}
 
 The following proof is similar to the proof of Proposition~\ref{prop:csd:complexity-cardinality-np}
-(cf.~Section~\ref{sec:csd:appendix:proofs:complexity-cardinality-np}), which reduced the search problem of perfect-subgroup discovery with a feature-cardinality constraint (cf.~Definitions~\ref{def:csd:perfect-subgroup-discovery} and ~\ref{def:csd:feature-cardinality-constraint}) to the optimization problem of feature-cardinality-constrained subgroup discovery (cf.~Definition~\ref{def:csd:feature-cardinality-constrained-subgroup-discovery}).
+(cf.~Section~\ref{sec:csd:appendix:proofs:complexity-cardinality-np}), which reduced the search problem of perfect-subgroup discovery with a feature-cardinality constraint (cf.~Definitions~\ref{def:csd:perfect-subgroup-discovery} and ~\ref{def:csd:feature-cardinality-constraint}) to the optimization problem of subgroup discovery (cf.~Definition~\ref{def:csd:subgroup-discovery}) with the same constraint.
 %
 \begin{proof}
 Let an arbitrary problem instance~$I$ of the perfect-alternative-subgroup-description-discovery problem (cf.~Definition~\ref{def:csd:perfect-alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) be given.
-We transform~$I$ into a problem instance~$I'$ of the alternative-subgroup-description-discovery problem (cf.~Definition~\ref{def:csd:alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}).
-In particular, we define the objective as optimizing subgroup-membership similarity~$\text{sim}(\cdot)$ rather than asking for a perfect alternative subgroup description (cf.~Definition~\ref{def:csd:perfect-alternative}) that may or may not exist.
+We transform~$I$ into a problem instance~$I'$ of the alternative-subgroup-description-discovery problem (cf.~Definition~\ref{def:csd:alternative-subgroup-description-discovery}) with the same constraint.
+In particular, we define the objective as optimizing the subgroup-membership similarity~$\text{sim}(\cdot)$ rather than asking for a perfect alternative subgroup description (cf.~Definition~\ref{def:csd:perfect-alternative}) that may or may not exist.
 The other inputs of the problem instance remain the same.
 
 Based on the assumption we made on~$\text{sim}(\cdot)$ in Proposition~\ref{prop:csd:complexity-alternatives-np}, the optimal solution for~$I'$ is a perfect alternative subgroup description if the latter exists.
 Thus, if the optimal alternative subgroup description for~$I'$ is not a perfect alternative, then a perfect alternative subgroup description does not exists at all.
-Overall, an algorithm for alternative-subgroup-description discovery (cf.~Definition~\ref{def:csd:alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) solves perfect-alternative-subgroup-description discovery (cf.~Definition~\ref{def:csd:perfect-alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) with negligible overhead.
+Overall, an algorithm for alternative-subgroup-description discovery (cf.~Definition~\ref{def:csd:alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) solves perfect-alternative-subgroup-description discovery (cf.~Definition~\ref{def:csd:perfect-alternative-subgroup-description-discovery}) with the same constraint with negligible overhead.
 Since the latter problem is $\mathcal{NP}$-complete (cf.~Propositions~\ref{prop:csd:complexity-perfect-alternatives-np-perfect-subgroup} and~\ref{prop:csd:complexity-perfect-alternatives-np-imperfect-subgroup}) and the former resides in complexity class $\mathcal{NP}$, the former is $\mathcal{NP}$-complete as well.
 \end{proof}
 

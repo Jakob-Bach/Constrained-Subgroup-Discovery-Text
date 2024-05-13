@@ -502,7 +502,7 @@ While they technically also are heuristics, we use the term \emph{baselines} to 
 This baseline builds on the following definition:
 %
 \begin{definition}[Minimal Optimal-Recall Subgroup (MORS)]
-	Given a dataset~$X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^m$,
+	Given a dataset $X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^m$,
 	the \emph{Minimal Optimal-Recall Subgroup (MORS)} is the subgroup (cf.~Definition~\ref{def:csd:subgroup}) whose lower and upper bounds of each feature correspond to the minimum and maximum value of that feature for all positive data objects (i.e., with $y_i = 1$) from the dataset~$X$.
 	\label{def:csd:mors}
 \end{definition}
@@ -865,7 +865,7 @@ The feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinal
 If a set of selected features satisfies the constraint, all its subsets also satisfy the constraint.
 Vice versa, if a feature set violates the constraint, all its supersets also violate the constraint.
 This property allows to easily integrate the constraint into the three presented heuristic search methods, i.e., \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Beam Search} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}), and \emph{Best Interval} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:best-interval-subgroup-update}), which all iteratively enlarge the set of selected features.
-In particular, these search methods start with unrestricted subgroup bounds, i.e., an empty of selected features, which satisfies the feature-cardinality constraint for any~$k \geq 0$.
+In particular, these search methods start with unrestricted subgroup bounds, i.e., an empty set of selected features, which satisfies the feature-cardinality constraint for any~$k \geq 0$.
 Each iteration may either add bounds on one further feature or refine the bounds on an already selected feature.
 Thus, we can prevent generation of invalid solution candidates by defining the function \emph{get\_permissible\_feature\_idxs(\dots)} (cf.~Line~\ref{al:csd:prim:line:permissible-features} in Algorithm~\ref{al:csd:prim} and Line~\ref{al:csd:generic-beam-search:line:permissible-features} in Algorithm~\ref{al:csd:generic-beam-search}) as follows:
 If already $k$~features are selected, then only these features are permissible, i.e., may be refined.
@@ -987,7 +987,7 @@ As a generalization of Proposition~\ref{prop:csd:complexity-cardinality-np-perfe
 	\label{prop:csd:complexity-cardinality-np}
 \end{proposition}
 %
-WRAcc as subgroup-quality function satisfies this assumption since only perfect subgroups yield the theoretical maximum WRAcc (cf.~Equation~\ref{eq:csd:wracc-max}).
+WRAcc as the subgroup-quality function satisfies this assumption since only perfect subgroups yield the theoretical maximum WRAcc (cf.~Equation~\ref{eq:csd:wracc-max}).
 
 \subsection{Alternative Subgroup Descriptions}
 \label{sec:csd:approach:alternatives}
@@ -1185,7 +1185,7 @@ The latter should entail a cost of~$O(n)$ per existing subgroup description for 
 Due to the similar search space as for original subgroup descriptions, the parameterized-complexity results from Propositions~\ref{prop:csd:complexity-unconstrained-xp} and~\ref{prop:csd:complexity-cardinality-xp} apply to alternative subgroup descriptions as well:
  %
 \begin{proposition}[Parameterized complexity of alternative-subgroup-description discovery]
-	The problem of alternative-subgroup-description discovery (cf.~Definition~\ref{def:csd:alternative-subgroup-description-discovery}) resides in the parameterized complexity class~$\mathcal{XP}$ for the parameter~$n$ in general and for the parameter~$k$ if a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) is employed.
+	The problem of alternative-subgroup-description discovery (cf. Definition~\ref{def:csd:alternative-subgroup-description-discovery}) resides in the parameterized complexity class~$\mathcal{XP}$ for the parameter~$n$ in general and for the parameter~$k$ if a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) is employed.
 	\label{prop:csd:complexity-alternatives-xp}
 \end{proposition}
 
@@ -1206,7 +1206,7 @@ To this end, we introduce the following definition:
 	\label{def:csd:perfect-alternative}
 \end{definition}
 %
-In particular, the subgroup-membership similarity is fixed rather than an optimization objective.
+In particular, the subgroup-membership similarity is fixed here rather than an optimization objective.
 Similar to perfect subgroups (cf.~Definition~\ref{def:csd:perfect-subgroup}), perfect alternative subgroup descriptions only exist in some datasets.
 Next, we define a corresponding search problem:
 %
@@ -1222,29 +1222,48 @@ Next, we define a corresponding search problem:
 	\label{def:csd:perfect-alternative-subgroup-description-discovery}
 \end{definition}
 %
-Next, we prove the following hardness result for a perfect original subgroup in this search problem (cf.~Appendix~\ref{sec:csd:appendix:proofs:complexity-perfect-alternatives-np-perfect-subgroup} for the proof):
+Next, we prove the following hardness result for this search problem with a perfect original subgroup and under a reasonable assumption on the notion of feature-selection dissimilarity (cf.~Appendix~\ref{sec:csd:appendix:proofs:complexity-perfect-alternatives-np-perfect-subgroup} for the proof):
 %
 \begin{proposition}[Complexity of perfect-alternative-subgroup-description discovery with feature-cardinality constraint and perfect original subgroup]
-	The problem of perfect-alternative-subgroup-description discovery (cf.~Definition~\ref{def:csd:perfect-alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) and with the original subgroup being perfect (cf.~Definition~\ref{def:csd:perfect-subgroup}) is $\mathcal{NP}$-complete.
+	Assuming
+	\begin{itemize}[noitemsep]
+		\item a combination of a dissimilarity measure~$\text{dis}(\cdot)$ and a dissimilarity threshold~$\tau \in \mathbb{R}_{\geq 0}$ that prevents selecting any selected feature from the original subgroup description again, and
+		\item the original subgroup being perfect (cf.~Definition~\ref{def:csd:perfect-subgroup}),
+	\end{itemize}
+	the problem of perfect-alternative-subgroup-description discovery (cf.~Definition \ref{def:csd:perfect-alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) is $\mathcal{NP}$-complete.
 	\label{prop:csd:complexity-perfect-alternatives-np-perfect-subgroup}
 \end{proposition}
 %
-Further, we extend this result to the same problem but with an imperfect original subgroup (cf.~Appendix~\ref{sec:csd:appendix:proofs:complexity-perfect-alternatives-np-imperfect-subgroup} for the proof):
+Our deselection dissimilarity (cf.~Equation~\ref{eq:csd:constraint-dissimilarity}) as~$\text{dis}(\cdot)$ satisfies the dissimilarity assumption if we choose a dissimilarity threshold~$\tau_{\text{abs}} \geq k^{\text{old}}$.
+Other dissimilarity measures should typically also have such a threshold value that enforces zero overlap between the sets of selected features.
+
+The problem naturally remains $\mathcal{NP}$-complete when dropping the assumptions in Proposition~\ref{prop:csd:complexity-perfect-alternatives-np-perfect-subgroup}.
+Nevertheless, we explicitly extend this result to imperfect original subgroups (cf.~Appendix~\ref{sec:csd:appendix:proofs:complexity-perfect-alternatives-np-imperfect-subgroup} for the proof):
 %
 \begin{proposition}[Complexity of perfect-alternative-subgroup-description discovery with feature-cardinality constraint and imperfect original subgroup]
-	The problem of perfect-alternative-subgroup-description discovery (cf.~Definition~\ref{def:csd:perfect-alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) and with the original subgroup \emph{not} being perfect (cf.~Definition~\ref{def:csd:perfect-subgroup}) is $\mathcal{NP}$-complete.
+	Assuming
+	\begin{itemize}[noitemsep]
+		\item a combination of a dissimilarity measure~$\text{dis}(\cdot)$ and a dissimilarity threshold~$\tau \in \mathbb{R}_{\geq 0}$ that prevents selecting any selected feature from the original subgroup description again, and
+		\item the original subgroup \emph{not} being perfect (cf.~Definition~\ref{def:csd:perfect-subgroup}),
+	\end{itemize}
+	the problem of perfect-alternative-subgroup-description discovery (cf.~Definition \ref{def:csd:perfect-alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) is $\mathcal{NP}$-complete.
 	\label{prop:csd:complexity-perfect-alternatives-np-imperfect-subgroup}
 \end{proposition}
 %
-Finally, we drop the assumption of perfect alternatives and establish $\mathcal{NP}$-completeness for the optimization problem of alternative-subgroup-description discovery under a reasonable assumption on the notion of subgroup-membership similarity (cf.~Appendix~\ref{sec:csd:appendix:proofs:complexity-alternatives-np} for the proof):
+Finally, we switch from the search problem for perfect alternatives to the optimization problem of alternative-subgroup-description discovery.
+We establish $\mathcal{NP}$-completeness under a reasonable assumption on the notion of subgroup-membership similarity (cf.~Appendix~\ref{sec:csd:appendix:proofs:complexity-alternatives-np} for the proof):
 %
 \begin{proposition}[Complexity of alternative-subgroup-description discovery with feature-cardinality constraint]
-	Assuming a similarity measure~$\text{sim}(\cdot)$ for which only perfect alternative subgroup descriptions (cf.~Definition~\ref{def:csd:perfect-alternative}) reach its maximal similarity to the original subgroup,
+	Assuming
+	\begin{itemize}[noitemsep]
+		\item a combination of a dissimilarity measure~$\text{dis}(\cdot)$ and a dissimilarity threshold~$\tau \in \mathbb{R}_{\geq 0}$ that prevents selecting any selected feature from the original subgroup description again, and
+		\item a similarity measure~$\text{sim}(\cdot)$ for which only perfect alternative subgroup descriptions (cf.~Definition~\ref{def:csd:perfect-alternative}) reach its maximal similarity to the original subgroup,
+	\end{itemize}
 	the problem of alternative-subgroup-description discovery (cf.~Definition~\ref{def:csd:alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf. Definition~\ref{def:csd:feature-cardinality-constraint}) is $\mathcal{NP}$-complete.
 	\label{prop:csd:complexity-alternatives-np}
 \end{proposition}
 %
-Normalized Hamming similarity (cf.~Equation~\ref{eq:csd:hamming-general}) as~$\text{sim}(\cdot)$ satisfies this assumption since only perfect alternative subgroup descriptions yield the theoretical maximum similarity of~1 to the original subgroup description.
+Normalized Hamming similarity (cf.~Equation~\ref{eq:csd:hamming-general}) as~$\text{sim}(\cdot)$ satisfies the similarity assumption since only perfect alternative subgroup descriptions yield the theoretical maximum similarity of~1 to the original subgroup description.
 
 \section{Experimental Design}
 \label{sec:csd:experimental-design}
@@ -1402,7 +1421,7 @@ Since each dataset has $n \geq 20$ features (cf.~Section~\ref{sec:csd:experiment
 
 We use binary-classification datasets from the Penn Machine Learning Benchmarks (PMLB)~\cite{olson2017pmlb, romano2021pmlb}.
 If both classes occur with different frequencies, we encode the minority class as the class of interest, i.e., assign~1 as it class label.
-To avoid prediction scenarios that may be too easy or have not enough features for alternative subgroup descriptions, we only select datasets with at least 100 data objects and 20 features.
+To avoid prediction scenarios that may be too easy or do not have enough features for alternative subgroup descriptions, we only select datasets with at least 100 data objects and 20 features.
 Next, we exclude one dataset with 1000 features, which has a significantly higher dimensionality than all remaining datasets.
 Finally, we manually exclude datasets that seem duplicated or modified versions of other datasets in our experiments.
 
@@ -1417,7 +1436,7 @@ We implemented all subgroup-discovery methods, experiments, and evaluations in P
 A requirements file in our repository specifies the versions of all Python packages.
 The solver \emph{Z3}~\cite{bjorner2015nuz, deMoura2008z3} carries out the SMT optimization.
 The experimental pipeline parallelizes over datasets, cross-validation folds, and subgroup-discovery methods, while each of these experimental tasks runs single-threaded.
-We ran the pipeline on a server with 128~GB RAM and an \emph{AMD EPYC 7551} CPU, having 32~physical cores and a base clock of 2.0~GHz.
+We ran the pipeline on a server with 160~GB RAM and an \emph{AMD EPYC 7551} CPU, having 32~physical cores and a base clock of 2.0~GHz.
 With this hardware, the parallelized pipeline run took approximately 36~hours.
 
 \section{Evaluation}
@@ -2524,10 +2543,9 @@ We transform~$I$ into a problem instance~$I'$ of the perfect-alternative-subgrou
 In particular, we retain the prediction target~$y \in \{0,1\}^m$ and the feature-cardinality threshold~$k \in \mathbb{N}$.
 We will slightly modify the dataset~$X \in \mathbb{R}^{m \times n}$, as explained later.
 
-We define the original subgroup for~$I'$ to be perfect (cf.~Definition~\ref{def:csd:perfect-subgroup}), i.e., having subgroup membership $b^{(0)} = y$.
+Based on the assumptions we made in Proposition~\ref{prop:csd:complexity-perfect-alternatives-np-perfect-subgroup}, we define the original subgroup for~$I'$ to be perfect (cf.~Definition~\ref{def:csd:perfect-subgroup}), i.e., having subgroup membership $b^{(0)} = y$.
 Also, we choose the dissimilarity threshold~$\tau \in \mathbb{R}_{\geq 0}$ high enough such that the alternative subgroup description may not select any features that were selected in the original subgroup description.
 The choice of~$\tau$ therefore depends on the choice of the dissimilarity measure~$\text{dis}(\cdot)$ for feature-selection vectors.
-However, any reasonable dissimilarity measure in this context should have such a threshold that enforces zero overlap between the sets of selected features.
 E.g., we can choose the deselection dissimilarity used in our article (cf.~Equation~\ref{eq:csd:constraint-dissimilarity}) and $\tau_{\text{abs}} = k$.
 Note that we do not even need to explicitly define the actual feature selection for the original subgroup description since we must not select these features in the alternative subgroup description anyway.
 For the sake of completeness, we can define dataset~$X' \in \mathbb{R}^{m \times (n+k)}$ of problem instance~$I'$ as dataset~$X \in \mathbb{R}^{m \times n}$ of problem instance~$I$ with $k$~extra \emph{perfect features} added.

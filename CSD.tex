@@ -65,7 +65,7 @@ While such subgroup descriptions already tend to be understandable for users, we
 
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=\textwidth, trim=15 20 15 15, clip]{plots/csd-exemplary-subgroup.pdf}
+	\includegraphics[width=\textwidth, trim=15 15 15 15, clip]{plots/csd-exemplary-subgroup.pdf}
 	\caption{
 		Exemplary subgroup description in the form a rectangle for a dataset with two real-valued features and a binary prediction target.
 	}
@@ -1385,7 +1385,7 @@ Since each dataset has $n \geq 20$ features (cf.~Section~\ref{sec:csd:experiment
 		Hill\_Valley\_with\_noise & 1212 & 100 & Yes & Yes \\
 		horse\_colic & 368 & 22 & No & No \\
 		hypothyroid & 3163 & 25 & No & No \\
-		ionosphere & 351 & 34 & No & Yes \\
+		ionosphere & 351 & 34 & No & No \\
 		molecular\_biology\_promoters & 106 & 57 & No & No \\
 		mushroom & 8124 & 22 & No & No \\
 		ring & 7400 & 20 & Yes & Yes \\
@@ -1428,7 +1428,7 @@ A requirements file in our repository specifies the versions of all Python packa
 The solver \emph{Z3}~\cite{bjorner2015nuz, deMoura2008z3} carries out the SMT optimization.
 The experimental pipeline parallelizes over datasets, cross-validation folds, and subgroup-discovery methods, while each of these experimental tasks runs single-threaded.
 We ran the pipeline on a server with 160~GB RAM and an \emph{AMD EPYC 7551} CPU, having 32~physical cores and a base clock of 2.0~GHz.
-With this hardware, the parallelized pipeline run took approximately 36~hours.
+With this hardware, the parallelized pipeline run took approximately 34~hours.
 
 \section{Evaluation}
 \label{sec:csd:evaluation}
@@ -1440,21 +1440,21 @@ Finally, we summarize key experimental results (cf.~Section~\ref{sec:csd:evaluat
 \subsection{Unconstrained Subgroup Discovery}
 \label{sec:csd:evaluation:unconstrained}
 
-In this section, we compare all six subgroup-discovery methods in an experimental scenario without constraints.
+In this section, we compare all six subgroup-discovery methods in the experimental scenario without constraints.
 The solver-based search method \emph{SMT} uses its default maximum timeout of 2048~s.
 
 \begin{figure}[t]
 	\centering
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim=20 60 15 15, clip]{plots/csd-unconstrained-nwracc-all-datasets.pdf}
+		\includegraphics[width=\textwidth, trim=15 55 15 15, clip]{plots/csd-unconstrained-nwracc-all-datasets.pdf}
 		\caption{All datasets.}
 		\label{fig:csd:unconstrained-nwracc-all-datasets}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim=20 60 15 15, clip]{plots/csd-unconstrained-nwracc-no-timeout-datasets.pdf}
+		\includegraphics[width=\textwidth, trim=15 55 15 15, clip]{plots/csd-unconstrained-nwracc-no-timeout-datasets.pdf}
 		\caption{Datasets without \emph{SMT} timeouts.}
 		\label{fig:csd:unconstrained-nwracc-no-timeout-datasets}
 	\end{subfigure}
@@ -1475,7 +1475,7 @@ However, even if we limit our analysis to the datasets without \emph{SMT} timeou
 Note that this result is not specific to \emph{SMT} but also holds for any other exhaustive search method.
 On the test set, \emph{Beam} and \emph{BI} are even better than \emph{SMT} on median, also excluding timeout datasets, since their training-test nWRAcc difference is smaller.
 This result indicates that \emph{Beam} and \emph{BI} are less susceptible to overfitting and their solutions generalize better.
-In detail, the average difference between training-set nWRAcc and test-set nWRAcc is 0.125 for \emph{SMT}, 0.101 for \emph{BI}, 0.095 for \emph{Beam}, 0.094 for \emph{MORS}, 0.068 for \emph{PRIM}, and 0.001 for \emph{Random}.
+In detail, the average difference between training-set nWRAcc and test-set nWRAcc is 0.122 for \emph{SMT}, 0.101 for \emph{BI}, 0.095 for \emph{Beam}, 0.094 for \emph{MORS}, 0.068 for \emph{PRIM}, and 0.001 for \emph{Random}.
 
 The heuristic search method \emph{PRIM} yields slightly worse subgroup quality than \emph{Beam} and \emph{BI}.
 Although it follows an iterative subgroup-refinement procedure like the latter two methods, it is more limited regarding its refinement options.
@@ -1491,11 +1491,11 @@ While \emph{Random} yields the same quality as not restricting the subgroup at a
 		\centering
 		\begin{tabular}{lrrrrrr}
 			\toprule
-			Aggregate & SMT & Beam & BI & PRIM & MORS & Random \\
+			Aggregate & BI & Beam & MORS & PRIM & Random & SMT \\
 			\midrule
-			Mean & 855.45~s & 33.03~s & 34.95~s & 1.27~s & 0.01~s & 0.91~s \\
-			Standard dev. & 931.85~s & 97.06~s & 103.25~s & 1.54~s & 0.00~s & 1.05~s \\
-			Median & 248.88~s & 2.53~s & 2.40~s & 0.69~s & 0.01~s & 0.49~s \\
+			Mean & 34.95~s & 30.47~s & 0.01~s & 1.26~s & 0.91~s & 849.02~s \\
+			Standard dev. & 103.61~s & 85.69~s & 0.00~s & 1.51~s & 0.95~s & 929.60~s \\
+			Median & 2.60~s & 2.95~s & 0.01~s & 0.66~s & 0.51~s & 254.21~s \\
 			\bottomrule
 		\end{tabular}
 		\caption{
@@ -1508,11 +1508,11 @@ While \emph{Random} yields the same quality as not restricting the subgroup at a
 		\centering
 		\begin{tabular}{lrrrrrr}
 			\toprule
-			Aggregate & SMT & Beam & BI & PRIM & MORS & Random \\
+			Aggregate & BI & Beam & MORS & PRIM & Random & SMT \\
 			\midrule
-			Mean & 179.18~s & 11.39~s & 12.36~s & 1.32~s & 0.01~s & 0.86~s \\
-			Standard dev. & 295.20~s & 19.82~s & 21.37~s & 1.70~s & 0.00~s & 1.08~s \\
-			Median & 57.02~s & 2.53~s & 2.40~s & 0.80~s & 0.01~s & 0.55~s \\
+			Mean & 12.40~s & 11.77~s & 0.01~s & 1.29~s & 0.82~s & 168.13~s \\
+			Standard dev. & 21.17~s & 20.47~s & 0.00~s & 1.62~s & 0.89~s & 243.11~s \\
+			Median & 2.60~s & 2.95~s & 0.01~s & 0.80~s & 0.56~s & 57.23~s \\
 			\bottomrule
 		\end{tabular}
 		\caption{
@@ -1537,7 +1537,7 @@ Among the three heuristics, \emph{PRIM} is fastest but also yields the lowest su
 
 For \emph{SMT}, the overall runtime not only comprises optimization but also formulating the optimization problem.
 Since the latter depends on the dataset size, e.g., involves $O(m)$ constraints with length $O(n)$ each to define the subgroup-membership variables~$b_i$ (cf.~Equation~\ref{eq:csd:smt-constraint-subgroup-membership}), the preparation time can become considerable for large datasets.
-In our experiments, formulating the \emph{SMT} problem took 41.4~s on average, with a maximum of 317.6~s.
+In our experiments, formulating the \emph{SMT} problem took 45~s on average, with a maximum of 379~s.
 This average preparation time already is greater than the average total runtime of the heuristics.
 
 \begin{table}[t]
@@ -1546,12 +1546,12 @@ This average preparation time already is greater than the average total runtime 
 		\toprule
 		Method & $\Sigma n^u$ & $m \cdot n$ & $m$ & $n$ \\
 		\midrule
-		SMT & 0.40 & 0.72 & 0.69 & 0.22 \\
-		Beam & 0.96 & 0.48 & 0.29 & 0.66 \\
-		BI & 0.96 & 0.52 & 0.33 & 0.67 \\
-		PRIM & 0.84 & 0.57 & 0.31 & 0.76 \\
-		MORS & 0.54 & 0.52 & 0.41 & 0.46 \\
-		Random & 0.60 & 0.71 & 0.44 & 0.76 \\
+		BI & 0.95 & 0.51 & 0.32 & 0.67 \\
+		Beam & 0.96 & 0.49 & 0.30 & 0.66 \\
+		MORS & 0.27 & 0.57 & 0.51 & 0.26 \\
+		PRIM & 0.84 & 0.56 & 0.29 & 0.76 \\
+		Random & 0.58 & 0.69 & 0.42 & 0.77 \\
+		SMT & 0.39 & 0.73 & 0.70 & 0.23 \\
 		\bottomrule
 	\end{tabular}
 	\caption{
@@ -1603,20 +1603,20 @@ In this section, we evaluate the impact of solver timeouts for \emph{SMT} search
 Figure~\ref{fig:csd:timeouts-finished-tasks} graphs how many of the \emph{SMT} optimization tasks for original subgroups finished within the evaluated solver timeouts.
 Besides the unconstrained tasks, we also consider tasks with different feature-cardinality thresholds, though the overall trend is the same.
 In particular, the number of finished tasks only increases slowly over time and some tasks take orders of magnitude longer than others.
-E.g., in the unconstrained experimental scenario, 19.3\% of the \emph{SMT} tasks finished within 4~s, 25.9\% within 16~s, 36.3\% within 64~s, 55.6\% within 256~s, and 63.0\% within 1024~s.
-For the maximum timeout setting of 2048~s, 68.9\% of the \emph{SMT} tasks finished and 17 out of 27 datasets did not encounter timeouts (cf.~Table~\ref{tab:csd:datasets}).
+E.g., in the unconstrained experimental scenario, 21.5\% of the \emph{SMT} tasks finished within 4~s, 24.4\% within 16~s, 37.0\% within 64~s, 54.8\% within 256~s, and 62.2\% within 1024~s.
+For the maximum timeout setting of 2048~s, 67.4\% of the \emph{SMT} tasks finished and 17 out of 27 datasets did not encounter timeouts (cf.~Table~\ref{tab:csd:datasets}).
 
 \paragraph{Subgroup quality}
 
 Figure~\ref{fig:csd:timeouts-nwracc} visualizes the subgroup quality over solver timeouts for unconstrained \emph{SMT} search.
 This plot shows the quality of the optimal solution for finished tasks and of the currently best solution for unfinished tasks.
 As for the number of finished tasks (cf.~Figure~\ref{fig:csd:timeouts-finished-tasks}), the largest gains occur in the first minute.
-E.g., the mean test-set nWRAcc over datasets and cross-validation folds is 0.11 for 1~s, 0.18 for 4~s, 0.25 for 16~s, 0.33 for 64~s, and 0.39 for the maximum timeout of 2024~s.
+E.g., the mean test-set nWRAcc over datasets and cross-validation folds is 0.10 for 1~s, 0.19 for 4~s, 0.24 for 16~s, 0.32 for 64~s, and 0.39 for the maximum timeout of 2024~s.
 The main cause for this trend is that if a task finishes within a certain timeout, its quality cannot improve for higher timeouts, and a considerable number of tasks does finish relatively early indeed (cf.~Figure~\ref{fig:csd:timeouts-finished-tasks}).
 In contrast, if we only consider the tasks where the solver did not finish even within the maximum timeout, the quality increase of the currently best solution over time is marginal.
 
 Further, even \emph{SMT} with a timeout does not compare favorable to fast heuristic search methods.
-E.g., with a solver timeout of 64~s, corresponding to an average overall runtime of 89~s, \emph{SMT} achieves a mean training-set nWRAcc of 0.44, compared to 0.56 for \emph{Beam} with an average runtime of 33~s (cf.~Table~\ref{tab:csd:unconstrained-runtime-all-datasets}).
+E.g., with a solver timeout of 64~s, corresponding to an average overall runtime of 88~s, \emph{SMT} achieves a mean training-set nWRAcc of 0.43, compared to 0.56 for \emph{Beam} with an average runtime of 30~s (cf.~Table~\ref{tab:csd:unconstrained-runtime-all-datasets}).
 
 Finally, note that setting a lower solver timeout decreases overfitting, i.e., the difference between training-set nWRAcc and test-set nWRAcc increases over time (cf.~Figure~\ref{fig:csd:timeouts-nwracc}).
 However, since the test-set nWRAcc still increases with the timeout as well, choosing lower timeouts does not help quality-wise.
@@ -1624,21 +1624,21 @@ However, since the test-set nWRAcc still increases with the timeout as well, cho
 \subsection{Feature-Cardinality Constraints}
 \label{sec:csd:evaluation:cardinality}
 
-In this section, we compare all six subgroup-discovery methods in an experimental scenario with feature-cardinality constraints.
+In this section, we compare all six subgroup-discovery methods in the experimental scenario with feature-cardinality constraints.
 The solver-based search method \emph{SMT} uses its default maximum timeout of 2048~s.
 
 \begin{figure}[t]
 	\centering
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim=20 60 15 15, clip]{plots/csd-cardinality-train-nwracc.pdf}
+		\includegraphics[width=\textwidth, trim=15 55 15 15, clip]{plots/csd-cardinality-train-nwracc.pdf}
 		\caption{Training set.}
 		\label{fig:csd:cardinality-train-nwracc}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim=20 60 15 15, clip]{plots/csd-cardinality-test-nwracc.pdf}
+		\includegraphics[width=\textwidth, trim=15 55 15 15, clip]{plots/csd-cardinality-test-nwracc.pdf}
 		\caption{Test set.}
 		\label{fig:csd:cardinality-test-nwracc}
 	\end{subfigure}
@@ -1681,12 +1681,12 @@ From the six subgroup-discovery methods, \emph{PRIM} shows the smallest increase
 		\toprule
 		$k$ & BI & Beam & MORS & PRIM & Random & SMT \\
 		\midrule
-		1 & 8.02~s & 7.12~s & 0.01~s & 0.08~s & 0.66~s & 640.79~s \\
-		2 & 11.89~s & 10.44~s & 0.01~s & 0.17~s & 0.66~s & 911.66~s \\
-		3 & 14.53~s & 13.23~s & 0.01~s & 0.25~s & 0.68~s & 1079.53~s \\
-		4 & 16.88~s & 15.21~s & 0.01~s & 0.35~s & 0.68~s & 1128.76~s \\
-		5 & 18.82~s & 16.87~s & 0.01~s & 0.46~s & 0.70~s & 1128.38~s \\
-		no & 34.95~s & 33.03~s & 0.01~s & 1.27~s & 0.91~s & 855.45~s \\
+		1 & 7.81~s & 6.81~s & 0.01~s & 0.08~s & 0.63~s & 648.16~s \\
+		2 & 11.74~s & 10.06~s & 0.01~s & 0.17~s & 0.64~s & 911.28~s \\
+		3 & 14.20~s & 12.78~s & 0.01~s & 0.26~s & 0.65~s & 1091.75~s \\
+		4 & 16.68~s & 14.65~s & 0.01~s & 0.35~s & 0.66~s & 1113.40~s \\
+		5 & 18.66~s & 16.12~s & 0.01~s & 0.46~s & 0.66~s & 1117.39~s \\
+		no & 34.95~s & 30.47~s & 0.01~s & 1.26~s & 0.91~s & 849.02~s \\
 		\bottomrule
 	\end{tabular}
 	\caption{
@@ -1701,7 +1701,7 @@ From the six subgroup-discovery methods, \emph{PRIM} shows the smallest increase
 As Table~\ref{tab:csd:cardinality-runtime} displays, the heuristic search methods \emph{Beam}, \emph{BI}, and \emph{PRIM} become faster the smaller~$k$ is.
 The baseline \emph{Random} shows a similar trend, though less prominent, while \emph{MORS} yields results instantaneously in any case.
 In contrast, the picture for the solver-based search method \emph{SMT} is less clear.
-While its average runtime clearly increases over~$k$ till $k=4$, it remains constant for $k=5$ and even decreases without a feature-cardinality constraint, though remaining higher than for $k \leq 2$.
+While its average runtime clearly increases over~$k$ till $k=3$, it roughly remains constant for $k \in \{4, 5\}$ and even decreases without a feature-cardinality constraint, only remaining higher than for $k = 1$.
 
 \subsection{Alternative Subgroup Descriptions}
 \label{sec:csd:evaluation:alternatives}
@@ -1715,14 +1715,14 @@ Both search methods employ a feature-cardinality threshold of~$k=3$.
 	\centering
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim=20 50 15 15, clip]{plots/csd-alternatives-hamming.pdf}
+		\includegraphics[width=\textwidth, trim=15 50 15 15, clip]{plots/csd-alternatives-hamming.pdf}
 		\caption{Normalized Hamming similarity.}
 		\label{fig:csd:alternatives-hamming}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim=20 50 15 15, clip]{plots/csd-alternatives-jaccard.pdf}
+		\includegraphics[width=\textwidth, trim=15 50 15 15, clip]{plots/csd-alternatives-jaccard.pdf}
 		\caption{Jaccard similarity.}
 		\label{fig:csd:alternatives-jaccard}
 	\end{subfigure}
@@ -1748,14 +1748,14 @@ Further, the observed trends exist for the solver-based search method \emph{SMT}
 	\centering
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim=20 50 15 15, clip]{plots/csd-alternatives-train-nwracc.pdf}
+		\includegraphics[width=\textwidth, trim=15 50 15 15, clip]{plots/csd-alternatives-train-nwracc.pdf}
 		\caption{Training set.}
 		\label{fig:csd:alternatives-train-nwracc}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim=20 50 15 15, clip]{plots/csd-alternatives-test-nwracc.pdf}
+		\includegraphics[width=\textwidth, trim=15 50 15 15, clip]{plots/csd-alternatives-test-nwracc.pdf}
 		\caption{Test set.}
 		\label{fig:csd:alternatives-test-nwracc}
 	\end{subfigure}
@@ -1783,12 +1783,12 @@ This may be a consequence of the alternative subgroup descriptions not directly 
 		\cmidrule(lr){3-8}
 		& &  0 & 1 & 2 & 3 & 4 & 5 \\
 		\midrule
-		\multirow[t]{3}{*}{Beam} & 1 & 13.2~s & 8.3~s & 7.9~s & 7.9~s & 7.7~s & 7.6~s \\
-		& 2 & 13.3~s & 7.9~s & 7.6~s & 7.5~s & 7.2~s & 7.0~s \\
-		& 3 & 13.4~s & 6.1~s & 5.2~s & 4.8~s & 4.1~s & 3.5~s \\
-		\multirow[t]{3}{*}{SMT} & 1 & 1079.5~s & 158.7~s & 198.7~s & 219.3~s & 237.2~s & 283.0~s \\
-		& 2 & 1100.3~s & 410.8~s & 477.2~s & 527.9~s & 637.2~s & 662.4~s \\
-		& 3 & 1104.2~s & 913.4~s & 693.2~s & 629.2~s & 616.7~s & 577.9~s \\
+		\multirow[t]{3}{*}{Beam} & 1 & 12.8~s & 8.0~s & 7.6~s & 7.3~s & 7.3~s & 7.3~s \\
+		& 2 & 12.8~s & 7.7~s & 7.4~s & 7.2~s & 7.0~s & 6.8~s \\
+		& 3 & 12.8~s & 5.8~s & 5.1~s & 4.7~s & 4.1~s & 3.5~s \\
+		\multirow[t]{3}{*}{SMT} & 1 & 1091.7~s & 166.0~s & 221.5~s & 239.6~s & 258.1~s & 277.9~s \\
+		& 2 & 1105.2~s & 377.5~s & 463.5~s & 537.5~s & 599.4~s & 658.3~s \\
+		& 3 & 1107.4~s & 869.1~s & 670.8~s & 597.6~s & 588.1~s & 557.6~s \\
 		\bottomrule
 	\end{tabular}
 	\caption{

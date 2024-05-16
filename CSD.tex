@@ -1193,7 +1193,7 @@ To this end, we introduce the following definition:
 		\item a dissimilarity measure $\text{dis}(\cdot)$ for feature-selection vectors of subgroups,
 		\item and a dissimilarity threshold~$\tau \in \mathbb{R}_{\geq 0}$,
 	\end{itemize}
-	a \emph{perfect alternative subgroup description} is a subgroup (cf.~Definition~\ref{def:csd:subgroup}) with membership~$b^{(a)} \in \{0, 1\}^m$ and feature selection~$s^{(a)} \in \{0, 1\}^n$ that exactly replicates the subgroup membership of the original subgroup, i.e., $b^{(a)} = b^{(0)}$, while being dissimilar regarding the feature selection, i.e., $\text{dis}(s^{(a)}, s^{(0)}) \geq \tau$.
+	a \emph{perfect alternative subgroup description} defines a subgroup (cf.~Definition~\ref{def:csd:subgroup}) with membership~$b^{(a)} \in \{0, 1\}^m$ and feature selection~$s^{(a)} \in \{0, 1\}^n$ that exactly replicates the subgroup membership of the original subgroup, i.e., $b^{(a)} = b^{(0)}$, while being dissimilar regarding the feature selection, i.e., $\text{dis}(s^{(a)}, s^{(0)}) \geq \tau$.
 	\label{def:csd:perfect-alternative}
 \end{definition}
 %
@@ -2592,7 +2592,7 @@ In particular, we define the objective as optimizing the subgroup-membership sim
 The other inputs of the problem instance remain the same.
 
 Based on the assumption we made on~$\text{sim}(\cdot)$ in Proposition~\ref{prop:csd:complexity-alternatives-np}, the optimal solution for~$I'$ is a perfect alternative subgroup description if the latter exists.
-Thus, if the optimal alternative subgroup description for~$I'$ is not a perfect alternative, then a perfect alternative subgroup description does not exists at all.
+Thus, if the optimal alternative subgroup description for~$I'$ is not a perfect alternative, then a perfect alternative subgroup description does not exist at all.
 Overall, an algorithm for alternative-subgroup-description discovery (cf.~Definition~\ref{def:csd:alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) solves perfect-alternative-subgroup-description discovery (cf.~Definition~\ref{def:csd:perfect-alternative-subgroup-description-discovery}) with the same constraint with negligible overhead.
 Since the latter problem is $\mathcal{NP}$-complete (cf.~Propositions~\ref{prop:csd:complexity-perfect-alternatives-np-perfect-subgroup} and~\ref{prop:csd:complexity-perfect-alternatives-np-imperfect-subgroup}) and the former resides in complexity class $\mathcal{NP}$, the former is $\mathcal{NP}$-complete as well.
 \end{proof}

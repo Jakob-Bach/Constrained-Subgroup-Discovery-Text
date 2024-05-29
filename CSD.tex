@@ -2098,50 +2098,50 @@ In that regard, one could seek for an approximation complexity result, e.g., mem
 \label{sec:csd:appendix}
 
 In this section, we provide supplementary materials.
-Appendix~\ref{sec:csd:appendix:further-encodings} describes further encodings of the subgroup-discovery problem, complementing the SMT encoding from Section~\ref{sec:csd:approach:smt}.
+Appendix~\ref{sec:csd:appendix:further-encodings} describes further encodings of the subgroup-discovery problem, complementing Section~\ref{sec:csd:approach:smt}.
 Appendix~\ref{sec:csd:appendix:proofs} contains proofs for propositions from Section~\ref{sec:csd:approach}.
 
 \subsection{Further Problem Encodings of Subgroup Discovery}
 \label{sec:csd:appendix:further-encodings}
 
-In this section, we provide additional encodings of subgroup-discovery as a white-box optimization problem.
+In this section, we provide additional white-box encodings of subgroup discovery beyond the SMT encoding from Section~\ref{sec:csd:approach:smt}.
 First, we describe how to encode categorical features within the SMT formulation (cf.~Section~\ref{sec:csd:appendix:further-encodings:smt-categorical}).
 Next, we discuss encodings as a mixed-integer linear program (cf.~Section~\ref{sec:csd:appendix:further-encodings:milp}) and a maximum-satisfiability problem (cf.~Section~\ref{sec:csd:appendix:further-encodings:max-sat}).
 
-\subsubsection{Handling Categorical Features in SMT Encoding}
+\subsubsection{Handling Categorical Features in the SMT Encoding}
 \label{sec:csd:appendix:further-encodings:smt-categorical}
 
 In general, there are many different options to numerically encode categorical data in machine learning~\cite{matteucci2023benchmark}.
-Similarly, there are also multiple options to consider categorical features in the SMT formulation of subgroup discovery.
+Similarly, there are also multiple options to consider categorical features in an SMT formulation of subgroup discovery.
 We present three of them in the following.
 
 \paragraph{Two variables per categorical feature}
 
 As a straightforward option, one may map all categories, i.e., unique values, of each categorical feature to distinct integers before instantiating the optimization problem.
-This so-called ordinal encoding allows us to directly apply our existing SMT formulation (cf.~Equation~\ref{eq:csd:smt-problem-unconstrained-complete}) to the dataset, at least technically.
-Consequently, there are two integer-valued bound variables for each encoded categorical feature.
+Next, one can directly apply our existing SMT formulation (cf.~Equation~\ref{eq:csd:smt-problem-unconstrained-complete}) to such an ordinally encoded dataset, at least technically.
+In particular, there would be two integer-valued bound variables for each encoded categorical feature.
 However, the ordering of categories should be semantically meaningful since it influences which categories may jointly be included in the subgroup.
 In particular, only sets of categories that form contiguous integer ranges in the ordinal encoding may define subgroup membership.
 I.e., the subgroup may comprise the encoded categories~$\{3,4,5\}$, but not only~$\{3,5 \}$ since it needs to include all values between a lower and an upper bound.
-If there is no meaningful ordering of categories, one should choose a different encoding.
+Thus, if there is no meaningful ordering of categories, one should choose a different encoding.
 
 \paragraph{Two variables per categorical feature value}
 
 One can achieve more flexibility by introducing separate bound variables for each category of a feature rather than only for each feature.
 This approach corresponds to a one-hot encoding of the dataset, which creates one new binary feature for each category.
 Thus, the bound variables effectively are binary as well.
-By default in our SMT encoding, there is a logical AND ($\land$) over the binary features, i.e., categories.
+By default, our SMT encoding uses a logical AND ($\land$) over the binary features, i.e., categories.
 The interpretation of bound values for one binary Feature~$j$ is as follows:
 
 (Case 1) $\mathit{lb}_j = \mathit{ub}_j = 1$ means that data objects that assume the corresponding category for Feature~$j$ are members of the subgroup.
-This case should apply to at most one category of each feature.
-Otherwise, the AND operator would require each data object to assume multiple categories for one feature, which is unsatisfiable.
+In practice, this case may apply to at most one category of each feature.
+Otherwise, the AND ($\land$) operator would require each data object to assume multiple categories for one feature, which is unsatisfiable.
 Thus, this encoding cannot directly express that a set of categories is included the subgroup.
 
 (Case 2) $\mathit{lb}_j = \mathit{ub}_j = 0$ means that data objects that do \emph{not} assume the corresponding category for Feature~$j$ are members of the subgroup.
 I.e., data objects assuming the corresponding category are not members of the subgroup.
-Other than Case~1, this case can apply to multiple categories of each feature, i.e., the subgroup may directly exclude multiple categories.
-Further, if one category is actively included in the subgroup, i.e., falls into Case~1, then Case-2 bounds on other categories are redundant since they are implied by the former.
+Other than Case~1, this case can apply to multiple categories of each feature, i.e., the subgroup may explicitly exclude multiple categories.
+Further, if one category is actively included in the subgroup (Case~1), then Case-2 bounds on other categories are redundant since they are implied by the former.
 
 (Case 3) $\mathit{lb}_j = 0,~\mathit{ub}_j = 1$ explicitly deselects a binary feature, i.e., both binary values do not restrict subgroup membership.
 

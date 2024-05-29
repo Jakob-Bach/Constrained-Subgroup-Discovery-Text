@@ -718,23 +718,23 @@ Such implicit guarantees may only hold for particular constraint types or may re
 
 \paragraph{Domain knowledge}
 
-Constraints can express firm knowledge or hypotheses from the domain that solutions, i.e., subgroups, should adhere to~\cite{bach2022empirical}.
+Constraints can express firm knowledge or hypotheses from the domain that solutions of machine-learning techniques should adhere to~\cite{bach2022empirical}.
 Since the definition of such constraints depends on the use case, we do not give domain-specific examples here.
 \cite{atzmueller2006methodological, atzmueller2005exploiting, atzmueller2007using} provide a taxonomy and examples for knowledge-based constraint types in subgroup discovery.
 In a white-box formulation of subgroup discovery, such constraints may restrict the values of decision variables, e.g., lower and upper bounds, subgroup membership (cf.~Equation~\ref{eq:csd:smt-problem-unconstrained-complete}), or selected features (cf.~Equation~\ref{eq:csd:smt-constraint-feature-selection}).
-For example, certain bound values or combinations of features used in the subgroup description may contradict domain knowledge and should therefore be prevented with constraints.
-In our formulation of subgroup discovery as SMT problem with linear real arithmetic (cf.~Section~\ref{sec:csd:approach:smt}), one can employ propositional logic, basic arithmetic operators, and inequalities to express constraints over the decision variables~\cite{barrett2018satisfiability}.
+For example, certain bound values or feature combinations used in the subgroup description may contradict domain knowledge and should therefore be prevented with constraints.
+In our formulation of subgroup discovery as an SMT problem with linear real arithmetic (cf.~Section~\ref{sec:csd:approach:smt}), one can employ propositional logic, basic arithmetic operators, and inequalities to express constraints over the decision variables~\cite{barrett2018satisfiability}.
 
 \paragraph{Secondary objectives}
 
 Various notions of subgroup quality can serve as an objective in subgroup discovery~\cite{atzmueller2015subgroup, herrera2011overview}.
 If one wants to consider several quality metrics simultaneously, one option is multi-objective optimization. However, the latter typically requires using different search methods than single-objective optimization.
 Also, there may be not one but a set of Pareto-optimal solutions or users may need to manually define trade-offs between objectives.
-As an alternative formulation, one can keep a single primary objective and add the other objectives as inequality constraints, e.g., enforcing that their values are below or above user-defined thresholds.
+Alternatively, one can keep a single primary objective and add the other objectives as inequality constraints, e.g., enforcing that their values are below or above user-defined thresholds.
 According to~\cite{meeng2021real}, such lower bounds on subgroup quality are a common constraint type in subgroup discovery.
-One may also prune the set of discovered subgroups as a post-processing step~\cite{atzmueller2015subgroup}.
+Without constraints, one may prune the set of discovered subgroups as a post-processing step~\cite{atzmueller2015subgroup}.
 Finally, quality-based pruning can also reduce the search space during subgroup discovery, e.g., using optimistic estimates in exhaustive search~\cite{atzmueller2015subgroup, atzmueller2009fast, grosskreutz2009subgroup}.
-However, such automatically determined bounds on subgroup quality relate to the primary optimization objective and differ from the user-provided constraints that we focus on.
+However, such automatically determined bounds on subgroup quality relate to the primary optimization objective rather than being user-provided constraints.
 
 \paragraph{Regularization}
 
@@ -743,7 +743,7 @@ In subgroup discovery, we see three directions for regularization:
 the data objects via subgroup membership, the feature values via the subgroup's bounds, and the features via the subgroup's feature selection.
 
 Regarding \emph{subgroup membership}, one can introduce lower or upper bounds on the number of data objects in the subgroup, using the decision variables~$b_i$ (cf.~Equation~\ref{eq:csd:smt-constraint-subgroup-membership}).
-Such constraints are particularly useful for notions of subgroup quality that incentivize including all data objects in the subgroup, like recall, or including only very few data objects, like precision.
+Such constraints are particularly useful for notions of subgroup quality that incentivize including all data objects in the subgroup, like recall, or including very few data objects, like precision.
 In contrast, WRAcc (cf.~Equation~\ref{eq:csd:wracc}) automatically considers the number of data objects in the subgroup.
 According to~\cite{meeng2021real}, lower bounds on subgroup membership are a common constraint type in subgroup discovery.
 
@@ -754,9 +754,9 @@ Generally, however, a feature's bounded value range need not indicate how many d
 Alternatively, one can constrain the subgroup membership implied by individual features' bounds, e.g., enforcing that selected features exclude at least a certain fraction of data objects.
 The latter constraint type may prevent setting over-sensitive bounds that only prune a small number of data objects from the subgroup, which may not generalize to unseen data.
 
-Regarding \emph{features selection}, one can limit the number of features used in the subgroup description, which is a common constraint type~\cite{meeng2021real} and also a metric for subgroup complexity~\cite{atzmueller2015subgroup, helal2016subgroup, herrera2011overview, ventura2018subgroup}, proposed as early as in the article introducing PRIM~\cite{friedman1999bump}.
+Regarding \emph{features selection}, one can limit the number of features used in the subgroup description, which is a common constraint type~\cite{meeng2021real} and also a metric for subgroup complexity~\cite{helal2016subgroup, herrera2011overview, ventura2018subgroup}, already proposed in the article introducing PRIM~\cite{friedman1999bump}.
 Section~\ref{sec:csd:approach:cardinality} discusses such feature-cardinality constraints in detail.
-Instead of using this constraint type while searching subgroups, one may also post-process subgroups to eliminate irrelevant features after search~\cite{friedman1999bump}.
+Instead of using this constraint type, one may also post-process subgroups to eliminate irrelevant features after search~\cite{friedman1999bump}.
 Further, instead of limiting the total number of used features, one may also introduce constraints to remove individual irrelevant features based on the number of data objects they represent correctly in absolute terms or relative to other features~\cite{lavrac2006relevancy}.
 
 \paragraph{Alternatives}

@@ -2074,8 +2074,9 @@ We established $\mathcal{NP}$-hardness for optimizing subgroups with a feature-c
 While the search problem admits a polynomial-time algorithm for perfect subgroups without such constraints (cf.~Proposition~\ref{prop:csd:complexity-unconstrained-perfect-subgroup}), we did not analyze the general unconstrained optimization problem, i.e., including imperfect subgroups.
 
 Further, we showed $\mathcal{NP}$-hardness for finding alternative subgroup descriptions for perfect and imperfect subgroups (cf.~Propositions~\ref{prop:csd:complexity-perfect-alternatives-np-perfect-subgroup} and~\ref{prop:csd:complexity-perfect-alternatives-np-imperfect-subgroup}).
-In both cases, our proofs tackle perfect alternatives (cf.~Definition~\ref{def:csd:perfect-alternative}), i.e., alternative descriptions that entail exactly the same subgroup membership of data objects as the original subgroup.
-One could try to extend these proofs to imperfect alternatives.
+In both cases, we tackled the search problem for perfect alternatives (cf.~Definition~\ref{def:csd:perfect-alternative}) first, i.e., alternative descriptions that entail exactly the same subgroup membership of data objects as the original subgroup.
+While we generalized $\mathcal{NP}$-hardness to the optimization problem (cf.~Definition~\ref{def:csd:alternative-subgroup-description-discovery}), which also includes imperfect alternatives as solutions (cf.~Proposition~\ref{prop:csd:complexity-alternatives-np}),
+one could try to explicitly prove hardness for imperfect alternatives specifically.
 Also, our proofs focused on scenarios where all originally selected features must not be selected in the alternative subgroup description, i.e., a specific value of dissimilarity threshold~$\tau$.
 One could analyze scenarios with overlapping feature sets explicitly.
 

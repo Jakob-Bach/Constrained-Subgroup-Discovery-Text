@@ -78,13 +78,14 @@ This article addresses the problem of constrained subgroup discovery.
 In particular, we focus on two types of constraints related to the features used in subgroup descriptions:
 
 First, \emph{feature-cardinality constraints} limit the number of selected features, i.e., features used in subgroup descriptions.
-E.g., in Figure~\ref{fig:csd:exemplary-subgroup}, one may use only either feature to define a subgroup with $\mathit{Target} = 1$ instead of using both features, thereby simplifying the subgroup description but inevitably covering more data objects with $\mathit{Target} = 0$.
-With feature selection, the subgroup descriptions become \emph{sparse}, which increases their interpretability.
-In particular, even intrinsically interpretable model may loose interpretability if they involve too many features~\cite{meeng2021real, molnar2020interpretable}.
-This constraint type resembles feature selection~\cite{guyon2003introduction, li2017feature}, which is a common task in machine-learning pipelines.
+Thus, the subgroup descriptions become \emph{sparse}, which increases their interpretability, at the potential expense of subgroup quality.
+E.g., in Figure~\ref{fig:csd:exemplary-subgroup}, one can use bounds on either feature instead of both to define a subgroup still containing all data objects with $\mathit{Target} = 1$.
+Such a description is simpler but also covers more data objects with $\mathit{Target} = 0$.
+In general, even intrinsically interpretable model may loose interpretability if they involve too many features~\cite{meeng2021real, molnar2020interpretable}.
+Further, feature selection~\cite{guyon2003introduction, li2017feature} is common for other machine-learning tasks than subgroup discovery as well.
 
 Second, we formulate constraints to search \emph{alternative subgroup descriptions}:
-Given an \emph{original} subgroup, an alternative subgroup should reproduce the set of contained data objects as closely as possible but use different features in its subgroup description.
+Given an \emph{original} subgroup, an alternative subgroup description should use different features but cover a similar set of data objects.
 E.g., in Figure~\ref{fig:csd:exemplary-subgroup}, one may define a subgroup with an interval one feature and then try to cover a similar set of data objects with the other feature.
 With alternative subgroup descriptions, users obtain different explanations for the same subgroup.
 Such alternative explanations are also popular in other explainable-AI techniques like counterfactuals~\cite{mothilal2020explaining, russell2019efficient}, e.g., to enable users to develop and test multiple hypotheses or foster trust in the predictions~\cite{kim2021multi, wang2019designing}.
@@ -95,10 +96,10 @@ There are various search methods for subgroup discovery, exact~\cite{atzmueller2
 We see research gaps in three aspects:
 First, all widely used subgroup-discovery methods are algorithmic in nature and only support a limited set of constraints, as the search routines need to be specifically adapted to particular constraint types.
 Second, the number of features used in a subgroup description is a well-known measure for subgroup complexity~\cite{helal2016subgroup, herrera2011overview, ventura2018subgroup}.
-However, there is a lack of systematic evaluations of this constraint type, particularly evaluations with different cardinality thresholds and comparing multiple subgroup-discovery methods.
+However, there is a lack of systematic evaluations of this constraint type, particularly regarding evaluations with different cardinality thresholds and comparing multiple subgroup-discovery methods.
 Third, various subgroup-discovery methods yield a diverse set of subgroups rather than only one subgroup, thereby providing alternative solutions~\cite{belfodil2019fssd, bosc2018anytime, leeuwen2012diverse, lemmerich2010fast, lucas2018ssdp+, proencca2022robust}.
 However, this notion of alternatives targets at covering different subsets of data objects from the dataset.
-In contrast, our notion of alternative subgroup descriptions tries to cover the same data objects as in the original subgroup but with different features in the description.
+In contrast, our notion of alternative subgroup descriptions tries to cover a similar set of data objects as in the original subgroup but with different features in the description.
 
 \paragraph{Contributions}
 
@@ -118,7 +119,8 @@ Fourth, we analyze the computational complexity of the subgroup-discovery proble
 In particular, prove several $\mathcal{NP}$-completeness results and thereby show that finding optimal solutions under these constraint types is computationally hard.
 
 Fifth, we conduct comprehensive experiments with 27 binary-classification datasets from the Penn Machine Learning Benchmarks (PMLB)~\cite{olson2017pmlb, romano2021pmlb}.
-We compare solver-based and heuristic subgroup-discovery methods without constraints, with a feature-cardinality constraint, and for searching alternative subgroup descriptions.
+We compare solver-based and heuristic subgroup-discovery methods in different experimental scenarios:
+without constraints, with a feature-cardinality constraint, and for searching alternative subgroup descriptions.
 In particular, we evaluate the runtime of subgroup discovery and the quality of the discovered subgroups.
 We also analyze how the subgroup quality in solver-based search depends on the timeout of the solver.
 We publish all code\footnote{\url{https://github.com/Jakob-Bach/Constrained-Subgroup-Discovery}} and experimental data\footnote{TODO} online.

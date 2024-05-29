@@ -39,8 +39,8 @@ Using constraints in subgroup discovery can enhance interpretability even furthe
 In this article, we focus on two types of constraints:
 First, we limit the number of features used in subgroup descriptions, making the latter sparse.
 Second, we propose the novel optimization problem of finding alternative subgroup descriptions, which cover similar data objects as a given subgroup but use different features.
-For both constraint types, we describe how to integrate them into heuristic search methods for subgroups.
-Further, we propose a novel Satisfiability Modulo Theories (SMT) formulation of subgroup discovery as a white-box optimization problem, which allows solver-based search and is open for a variety of constraint types.
+We describe how to integrate both constraint types into heuristic subgroup-discovery methods.
+Further, we propose a novel Satisfiability Modulo Theories (SMT) formulation of subgroup discovery as a white-box optimization problem, which allows solver-based search for subgroups and is open for a variety of constraint types.
 Additionally, we prove that both constraint types lead to an $\mathcal{NP}$-hard optimization problem.
 Finally, we employ 27 binary-classification datasets to compare heuristic and solver-based search for unconstrained and constrained subgroup discovery.
 We observe that heuristic search methods often yield subgroups of high quality within a short runtime, also in scenarios with constraints.

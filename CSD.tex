@@ -489,8 +489,7 @@ While they technically also are heuristics, we use the term \emph{baselines} to 
 		\lIf{$\mathit{ub}_j = \max_{i \in \{1, \dots, m\}} X_{ij}$}{$\mathit{ub}_j \leftarrow + \infty$} \label{al:csd:mors:line:bounds-infty-end}
 	}
 	\For{$j \notin \text{get\_permissible\_feature\_idxs(\dots)}$}{ \label{al:csd:mors:line:reset-start} \label{al:csd:mors:line:permissible-features}
-		$\mathit{lb}_j \rightarrow -\infty$\;
-		$\mathit{ub}_j \rightarrow +\infty$\; \label{al:csd:mors:line:reset-end}
+		$(\mathit{lb}_j,~ \mathit{ub}_j) \leftarrow (-\infty, +\infty)$\; \label{al:csd:mors:line:reset-end}
 	}
 	\Return{$\mathit{lb}, \mathit{ub}$}
 	\caption{\emph{MORS} for subgroup discovery.}
@@ -504,15 +503,15 @@ This baseline builds on the following definition:
 %
 \begin{definition}[Minimal Optimal-Recall Subgroup (MORS)]
 	Given a dataset $X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^m$,
-	the \emph{Minimal Optimal-Recall Subgroup (MORS)} is the subgroup (cf.~Definition~\ref{def:csd:subgroup}) whose lower and upper bounds of each feature correspond to the minimum and maximum value of that feature for all positive data objects (i.e., with $y_i = 1$) from the dataset~$X$.
+	the \emph{Minimal Optimal-Recall Subgroup (MORS)} is the subgroup (cf.~Definition~\ref{def:csd:subgroup}) whose lower and upper bounds of each feature correspond to the minimum and maximum value of that feature over all positive data objects (i.e., with $y_i = 1$) from the dataset~$X$.
 	\label{def:csd:mors}
 \end{definition}
 %
 The definition ensures that all positive data objects are contained in the subgroup.
-Thus, the evaluation metric `recall', i.e., fraction of positive data objects in the subgroup, equals~1, i.e., is optimal.
+Thus, the evaluation metric \emph{recall}, i.e., the fraction of positive data objects becoming members of the subgroup, reaches its optimum of~1.
 At the same time, moving the lower bounds higher or moving the upper bounds lower would exclude positive data objects from the subgroup.
 In this sense, the bounds are minimal.
-The corresponding subgroup is unique and implicitly solves the following variant of the subgroup-discovery problem:
+The corresponding subgroup description is unique and implicitly solves the following variant of the subgroup-discovery problem:
 %
 \begin{definition}[Minimal-optimal-recall-subgroup discovery]
 	Given a dataset $X \in \mathbb{R}^{m \times n}$ with prediction target~$y \in \{0, 1\}^m$,
@@ -521,11 +520,11 @@ The corresponding subgroup is unique and implicitly solves the following variant
 \end{definition}
 %
 I.e., the problem targets at minimizing the number of false positives subject to producing no false negatives.
-Given the constraint on the positive data objects, minimizing the number of false positives is equivalent to maximizing the number of true negatives.
+With the constraint on the positive data objects, minimizing the number of false positives is equivalent to maximizing the number of true negatives, i.e., negative data objects excluded from the subgroup.
 
 Algorithm~\ref{al:csd:mors} outlines the procedure to determine the \emph{MORS} bounds.
-Slightly deviating from Definition~\ref{def:csd:mors}, but consistent to \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), the \emph{MORS} algorithm replaces all non-excluding bounds with infinity (Lines~\ref{al:csd:random-search:line:bounds-infty-start}-\ref{al:csd:random-search:line:bounds-infty-end}).
-Further, if only certain features are permissible, we reset the bounds of the remaining features (Line~\ref{al:csd:mors:line:reset-start}-\ref{al:csd:mors:line:reset-end}).
+Slightly deviating from Definition~\ref{def:csd:mors}, but consistent to \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{MORS} replaces all non-excluding bounds with infinity (Lines~\ref{al:csd:random-search:line:bounds-infty-start}-\ref{al:csd:random-search:line:bounds-infty-end}).
+Further, if only certain features are permissible, as we discuss later, we reset the bounds of the remaining features (Line~\ref{al:csd:mors:line:reset-start}-\ref{al:csd:mors:line:reset-end}).
 
 Since \emph{MORS} only needs to iterate over all data objects and features once to determine the minima and maxima, the computational complexity of this algorithm is~$O(n \cdot m)$.
 This places minimal-optimal-recall-subgroup discovery in complexity class~$\mathcal{P}$:
@@ -559,7 +558,7 @@ Since \emph{MORS} solves this problem in~$O(n \cdot m)$ as well, we obtain the f
 	\label{prop:csd:complexity-unconstrained-perfect-subgroup}
 \end{proposition}
 %
-In particular, after \emph{MORS} has found a subgroup, we only need to check whether the subgroup contains any negative data objects.
+In particular, after \emph{MORS} (cf.~Algorithm~\ref{al:csd:mors}) has found a subgroup, one only needs to check whether the subgroup contains any negative data objects.
 If the found subgroup does not contain negative data objects, then it is perfect.
 If it does, then no perfect subgroup exists.
 In particular, the bounds found by \emph{MORS} cannot be made tighter to exclude negative data objects from the subgroup without also excluding positive data objects, thereby violating perfection.
@@ -600,7 +599,7 @@ In particular, the bounds found by \emph{MORS} cannot be made tighter to exclude
 \subsection{Random Search}
 \label{sec:csd:baselines:random-search}
 
-Algorithm~\ref{al:csd:random-search} shows the randomized search procedure that constitutes the second baseline.
+Algorithm~\ref{al:csd:random-search} outlines a randomized search procedure that constitutes the second baseline.
 \emph{Random Search} generates and evaluates subgroups for a fixed number of iterations, which the user controls with the parameter~$\mathit{n\_iters} \in \mathbb{N}$.
 Hereby, subgroup generation samples a lower bound and an upper bound uniformly random from the unique values for each permissible feature, leaving the remaining features unrestricted (Lines~\ref{al:csd:random-search:line:sampling-start}-\ref{al:csd:random-search:line:sampling-end}).
 The algorithm tracks the best generated subgroup so far over the iterations (Lines~\ref{al:csd:random-search:line:optimum-update-start}-\ref{al:csd:random-search:line:optimum-update-end}) and finally returns the subgroup with the highest quality.

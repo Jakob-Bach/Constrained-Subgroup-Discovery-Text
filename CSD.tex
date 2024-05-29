@@ -619,12 +619,12 @@ Fourth, we formalize and analyze alternative subgroup descriptions (cf.~Section~
 
 To find optimal subgroups exactly, one can encode subgroup discovery as a white-box optimization problem and employ a solver.
 Here, we propose a Satisfiability Modulo Theories (SMT)~\cite{barrett2018satisfiability} encoding, which is straightforward given the problem definition (cf.~Definition~\ref{def:csd:subgroup-discovery}).
-SMT generally allows expressions in first-order logic with particular interpretations, e.g., arrays, arithmetic, or bit vectors~\cite{barrett2018satisfiability}.
-For our encoding of optimal subgroup discovery, we use linear real arithmetic (LRA).
+SMT allows expressions in first-order logic with particular interpretations, e.g., arrays, arithmetic, or bit vectors~\cite{barrett2018satisfiability}.
+For our encoding of subgroup discovery, we use linear real arithmetic (LRA).
 Complementing this SMT encoding, Appendix~\ref{sec:csd:appendix:further-encodings} describes further encodings:
-categorical variables in SMT (cf.~Section~\ref{sec:csd:appendix:further-encodings:smt-categorical}), mixed-integer linear programming (cf.~Section~\ref{sec:csd:appendix:further-encodings:milp}) and maximum satisfiability (cf.~Section~\ref{sec:csd:appendix:further-encodings:max-sat}).
+SMT for categorical features (cf.~Section~\ref{sec:csd:appendix:further-encodings:smt-categorical}), mixed-integer linear programming (cf.~Section~\ref{sec:csd:appendix:further-encodings:milp}), and maximum satisfiability (cf.~Section~\ref{sec:csd:appendix:further-encodings:max-sat}).
 
-The optimization problems consists of an objective function and constraints, which we both describe in the following.
+The optimization problems consists of an objective function and constraints.
 
 \paragraph{Objective function}
 
@@ -651,10 +651,9 @@ I.e., $b_i$~expresses whether the $i$-th data object is in the subgroup or not:
 	\label{eq:csd:smt-constraint-m-as-sum}
 \end{equation}
 %
-Since one know the values of the target variable~$y$ a priori, one only needs to sum over the affected, i.e.. positive, data objects in the expression for~$m_b^+$.
-Further, defining $m_b^+$ and~$m_b$ as separate integer variables is optional.
-One can also directly insert their expressions into Equation~\ref{eq:csd:smt-wracc}.
-We choose this formulation in our implementation and therefore wrote $:=$ instead of using a proper propositional operator like $\leftrightarrow$ in Equation~\ref{eq:csd:smt-constraint-m-as-sum}.
+Since the values of the target variable~$y$ are fixed, the expression for~$m_b^+$ simply sums over the positive data objects only.
+Further, one may define $m_b^+$ and~$m_b$ as separate integer variables or directly insert their expressions into Equation~\ref{eq:csd:smt-wracc}.
+We choose the latter formulation in our implementation and therefore wrote $:=$ in Equation~\ref{eq:csd:smt-constraint-m-as-sum} instead of using a proper propositional operator like $\leftrightarrow$.
 
 The formula for nWRAcc (cf.~Equation~\ref{eq:csd:wracc-normalized}) is linear as well, having the same enumerator as Equation~\ref{eq:csd:smt-wracc} and a different constant in the denominator.
 
@@ -677,7 +676,7 @@ A data object is a member of the subgroup if all its feature values are containe
 	\label{eq:csd:smt-constraint-subgroup-membership}
 \end{equation}
 %
-Instead of defining separate decision variables~$b_i$ and binding them to the bounds with a equivalence constraint, one could also insert the Boolean expression on the right-hand-side into Equation~\ref{eq:csd:smt-constraint-m-as-sum} directly.
+Instead of defining separate decision variables~$b_i$ and binding them to the bounds with a equivalence constraint, one could also insert the Boolean expression into the right-hand-side of Equation~\ref{eq:csd:smt-constraint-m-as-sum} directly.
 In particular, $\mathit{lb}_j$ and $\mathit{ub}_j$ are the only decision variables that are strictly necessary in the optimization problem.
 However, for formulating some constraint types on subgroups (cf.~Section~\ref{sec:csd:approach:constraint-types}), it is helpful to be able to refer to~$b_i$.
 
@@ -700,12 +699,15 @@ Combining all prior definitions of decision variables, constraints, and the obje
 
 We refer to this optimization problem as \emph{unconstrained subgroup discovery} in the following since it only contains constraints that are technically necessary to define subgroup discovery properly but no additional user constraints.
 
+\paragraph{Post-processing}
+
 In our implementation, we add a small post-processing step.
 In particular, we do not use the solver-determined values of the variables $\mathit{lb}_j$ and $\mathit{ub}_j$ when evaluating subgroup quality.
 Instead, we set the lower and upper bounds to the minimum and maximum feature values of all data objects in the subgroup (i.e., with $b_i=1$).
 Thus, we ensure that the bounds correspond to actual feature values.
 This guarantee is not formally necessary, but consistent with the subgroup descriptions returned by heuristic search methods and baselines.
-If the subgroup does not contain any data objects, we use invalid bounds (i.e., $\mathit{ub}_j = -\infty < \infty = \mathit{lb}_j$) to ensure that the subgroup remains empty even if evaluated with an arbitrary new set of data objects.
+Also, we avoid potential minor numeric issues caused by extracting the values of real variables from the solver.
+Finally, if the subgroup does not contain any data objects, we use invalid bounds (i.e., $\mathit{ub}_j = -\infty < \infty = \mathit{lb}_j$) to ensure that the subgroup remains empty even for arbitrary new data objects.
 
 \subsection{Overview of Constraint Types}
 \label{sec:csd:approach:constraint-types}

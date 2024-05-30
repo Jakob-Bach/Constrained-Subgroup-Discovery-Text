@@ -792,8 +792,8 @@ Finally, we analyze the computational complexity of subgroup discovery with this
 \label{sec:csd:approach:cardinality:concept}
 
 Feature-cardinality constraints are a constraint type that regularizes subgroup descriptions (cf.~Section~\ref{sec:csd:approach:constraint-types}).
-In particular, this constraint type limits the number of features used in the subgroup description, rendering the latter less complex and easier to interpret for users~\cite{meeng2021real}.
-To formalize this constraint type, we define the concept of feature selection~\cite{guyon2003introduction, li2017feature} in the context of subgroup discovery as follows:
+In particular, this constraint type limits the number of features used in the subgroup description, rendering the latter less complex and easier to interpret~\cite{meeng2021real}.
+To formalize this constraint type, we define feature selection~\cite{guyon2003introduction, li2017feature} in the context of subgroup discovery as follows:
 %
 \begin{definition}[Feature selection in subgroups]
 	Given a dataset~$X \in \mathbb{R}^{m \times n}$ and a subgroup (cf.~Definition~\ref{def:csd:subgroup}) with bounds~$\mathit{lb}, \mathit{ub} \in \{\mathbb{R} \cup \{-\infty, +\infty\}\}^n$,
@@ -815,7 +815,6 @@ To formulate a feature-cardinality constraint, users provide an upper bound on t
 \end{definition}
 %
 In practice, less than $k$ features may be selected if selecting more features does not improve the subgroup quality.
-I.e., depending on the notion of subgroup quality, selecting more features may decrease quality.
 
 \subsubsection{SMT Encoding}
 \label{sec:csd:approach:cardinality:smt}
@@ -843,26 +842,26 @@ Given the definition of~$s_j$, setting an upper bound on the number of selected 
 	\label{eq:csd:smt-constraint-feature-cardinalty}
 \end{equation}
 %
-Instead of explicitly defining decision variables $s_j$, $s^{\text{lb}}_j$, and $s^{\text{ub}}_j$, one could also insert the corresponding expressions into Equation~\ref{eq:csd:smt-constraint-feature-cardinalty} directly.
+Instead of explicitly defining the decision variables $s_j$, $s^{\text{lb}}_j$, and $s^{\text{ub}}_j$, one could also insert the corresponding expressions into Equation~\ref{eq:csd:smt-constraint-feature-cardinalty} directly.
 However, we will use~$s_j$ for alternative subgroup descriptions (cf.~Section~\ref{sec:csd:approach:alternatives:smt}) as well, so we define corresponding variables in our implementation.
 
 The overall SMT encoding of subgroup discovery with a feature-cardinality constraint is the SMT encoding of unconstrained subgroup discovery (cf.~Equation~\ref{eq:csd:smt-problem-unconstrained-complete}) supplemented by the variables and constraints from Equations~\ref{eq:csd:smt-constraint-feature-selection} and~\ref{eq:csd:smt-constraint-feature-cardinalty}.
 
 In our implementation, we also add a post-processing step that sets non-excluding lower bounds (i.e., with $s^{\text{lb}}_j = 0$) to $-\infty$ and non-excluding upper bounds (i.e., with $s^{\text{ub}}_j = 0$) to $+\infty$.
-This step is consistent with the heuristic search methods and baselines (e.g., cf.~Lines~\ref{al:csd:prim:line:bounds-infty-start}-\ref{al:csd:prim:line:bounds-infty-end} in Algorithm~\ref{al:csd:prim}).
+This step is consistent with the heuristic search methods and baselines (e.g., cf.~Lines~\ref{al:csd:prim:line:bounds-infty-start}--\ref{al:csd:prim:line:bounds-infty-end} in Algorithm~\ref{al:csd:prim}).
 
 \subsubsection{Integration into Heuristic Search Methods}
 \label{sec:csd:approach:cardinality:heuristics}
 
-The feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) is \emph{antimonotonic}~\cite{ng1998exploratory} in the feature selection:
+The given feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) is \emph{antimonotonic}~\cite{ng1998exploratory} in the feature selection:
 If a set of selected features satisfies the constraint, all its subsets also satisfy the constraint.
 Vice versa, if a feature set violates the constraint, all its supersets also violate the constraint.
 This property allows to easily integrate the constraint into the three presented heuristic search methods, i.e., \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Beam Search} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}), and \emph{Best Interval} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:best-interval-subgroup-update}), which all iteratively enlarge the set of selected features.
-In particular, these search methods start with unrestricted subgroup bounds, i.e., an empty set of selected features, which satisfies the feature-cardinality constraint for any~$k \geq 0$.
+In particular, these search methods start with unrestricted subgroup bounds, i.e., an empty feature set, which satisfies the constraint for any~$k \geq 0$.
 Each iteration may either add bounds on one further feature or refine the bounds on an already selected feature.
-Thus, we can prevent generation of invalid solution candidates by defining the function \emph{get\_permissible\_feature\_idxs(\dots)} (cf.~Line~\ref{al:csd:prim:line:permissible-features} in Algorithm~\ref{al:csd:prim} and Line~\ref{al:csd:generic-beam-search:line:permissible-features} in Algorithm~\ref{al:csd:generic-beam-search}) as follows:
+Thus, one can prevent generation of invalid solution candidates by defining the function \emph{get\_permissible\_feature\_idxs(\dots)} (cf.~Line~\ref{al:csd:prim:line:permissible-features} in Algorithm~\ref{al:csd:prim} and Line~\ref{al:csd:generic-beam-search:line:permissible-features} in Algorithm~\ref{al:csd:generic-beam-search}) as follows:
 If already $k$~features are selected, then only these features are permissible, i.e., may be refined.
-Due to antimonotonicity, all feature supersets that could be formed in future iterations are invalid.
+Due to antimonotonicity, all feature supersets that could be formed in future iterations are invalid as well.
 If less than $k$~features are selected, all features are permissible, as in the unconstrained search.
 
 \subsubsection{Integration into Baselines}
@@ -872,11 +871,11 @@ If less than $k$~features are selected, all features are permissible, as in the 
 
 \emph{MORS} calls the function \emph{get\_permissible\_feature\_idxs(\dots)} in Line~\ref{al:csd:mors:line:permissible-features} of Algorithm~\ref{al:csd:mors}.
 To instantiate this function, we employ a univariate, quality-based heuristic for feature selection:
-For each feature, we evaluate what happens if only this feature is restricted according to \emph{MORS} (cf.~Definition~\ref{def:csd:mors}).
-In particular, we determine the number of false positives, i.e., negative data objects in the subgroup, defined by the feature's \emph{MORS} bounds (Lines~\ref{al:csd:mors:line:bounds-start}-\ref{al:csd:mors:line:bounds-end}).
+For each feature, we evaluate what would happen if only this feature was restricted according to \emph{MORS} (cf.~Definition~\ref{def:csd:mors}).
+In particular, we determine the number of false positives, i.e., negative data objects in the subgroup, defined by each feature's \emph{MORS} bounds (Lines~\ref{al:csd:mors:line:bounds-start}--\ref{al:csd:mors:line:bounds-end}).
 We select the $k$~features with the lowest number of false positives.
 
-This heuristic is equivalent to selecting the features with the highest individual WRAcc for \emph{MORS} bounds:
+This heuristic is equivalent to selecting the features with the highest WRAcc for univariate \emph{MORS} bounds:
 Due to \emph{MORS}, not only~$m$ and~$m^+$ are constant in Equation~\ref{eq:csd:wracc} but also the number of positive data objects in the subgroup~$m_b^+$, which equals~$m^+$.
 In particular, we can rephrase Equation~\ref{eq:csd:wracc} as follows:
 %
@@ -920,7 +919,7 @@ Since we need to combine bounds over all $n$~features, the size of the search sp
 	\label{prop:csd:complexity-unconstrained-exhaustive}
 \end{proposition}
 %
-For each subgroup, the cost of evaluating a quality function like WRAcc (cf.~Equation~\ref{eq:csd:wracc}) should be $O(m \cdot n)$, i.e., require a constant number of passes over the dataset and therefore have linear complexity in the dataset size.
+For each of theses candidate subgroups, the cost of evaluating a quality function like WRAcc (cf.~Equation~\ref{eq:csd:wracc}) typically is $O(m \cdot n)$, i.e., requires a constant number of passes over the dataset and therefore has linear complexity in the dataset size.
 Additionally, the number of potential subgroups should be seen as an upper bound:
 There are also more efficient exhaustive search methods, which employ quality-based pruning to not explicitly evaluate all solution candidates while still implicitly covering the full search space~\cite{atzmueller2015subgroup}.
 
@@ -934,12 +933,12 @@ Instead of combining bounds from all $n$~features, there are $\binom{n}{k} \leq 
 %
 For the special case $k=1$, the size of the search space becomes $O(n \cdot m^2)$, which is leveraged by heuristic search methods that only consider updating the bounds of each feature separately instead of jointly (cf.~Section~\ref{sec:csd:fundamentals:heuristics}).
 With the update procedure of \emph{Best Interval} (cf.~Algorithm~\ref{al:csd:best-interval-subgroup-update}), the cost for~$k=1$ even reduces to $O(n \cdot m)$ since it only requires one pass over the unique values of each feature to implicitly evaluate all lower-upper-bound combinations for WRAcc.
-The update procedure of \emph{Beam Search} (cf.~Algorithm~\ref{al:csd:beam-search-subgroup-update}) also requires $O(n \cdot m)$ by checking updates of lower and upper bound separately instead of jointly.
+The update procedure of \emph{Beam Search} (cf.~Algorithm~\ref{al:csd:beam-search-subgroup-update}) also requires $O(n \cdot m)$, by only checking updates of either lower or upper bound.
 
 \paragraph{Parameterized complexity}
 
 For unconstrained subgroup discovery, the complexity term from Proposition~\ref{prop:csd:complexity-unconstrained-exhaustive} is polynomial in~$m$ if we consider~$n$ to be a small constant.
-In particular, the term takes the form $O(f(n) \cdot m^{g(n)})$ with parameter~$n$ and polynomial functions~$f(\cdot)$ and~$g(\cdot)$.
+In particular, the term takes the form $O(f(n) \cdot m^{g(n)})$ with parameter~$n$ and polynomial functions~$f(\cdot)$ and~$g(\cdot)$~\cite{downey1997parameterized}.
 Thus, the problem of subgroup discovery belongs to the parameterized complexity class $\mathcal{XP}$:
 %
 \begin{proposition}[Parameterized complexity of subgroup discovery]
@@ -962,7 +961,7 @@ Considering Proposition~\ref{prop:csd:complexity-cardinality-exhaustive}, the pa
 \paragraph{NP-Hardness}
 
 \cite{boley2009non} showed that it is an $\mathcal{NP}$-hard problem to find a subgroup description with minimum feature cardinality that induces exactly the same subgroup membership as a given subgroup.
-We transfer this result to directly optimizing subgroup quality under a feature-cardinality constraint.
+We transfer this result to optimizing subgroup quality under a feature-cardinality constraint.
 First, we tackle the search problem for perfect subgroups (cf.~Appendix~\ref{sec:csd:appendix:proofs:complexity-cardinality-np-perfect-subgroup} for the proof):
 %
 \begin{proposition}[Complexity of perfect-subgroup discovery with feature-cardinality constraint]
@@ -972,7 +971,7 @@ First, we tackle the search problem for perfect subgroups (cf.~Appendix~\ref{sec
 %
 This hardness results under a feature-cardinality constraint contrasts with the polynomial runtime of unconstrained perfect-subgroup discovery (cf.~Proposition~\ref{prop:csd:complexity-unconstrained-perfect-subgroup}), which corresponds to a cardinality constraint with $k = n$.
 
-As a generalization of Proposition~\ref{prop:csd:complexity-cardinality-np-perfect-subgroup}, the optimization problem of subgroup discovery with a feature-cardinality constraint is $\mathcal{NP}$-complete under a reasonable assumption on the notion of subgroup quality (cf.~Appendix~\ref{sec:csd:appendix:proofs:complexity-cardinality-np} for the proof):
+Generalizing Proposition~\ref{prop:csd:complexity-cardinality-np-perfect-subgroup}, the optimization problem of subgroup discovery with a feature-cardinality constraint is $\mathcal{NP}$-complete under a reasonable assumption on the notion of subgroup quality (cf.~Appendix~\ref{sec:csd:appendix:proofs:complexity-cardinality-np} for the proof):
 %
 \begin{proposition}[Complexity of subgroup discovery with feature-cardinality constraint]
 	Assuming a subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$ for which only perfect subgroups (cf.~Definition~\ref{def:csd:perfect-subgroup}) reach its maximal value,
@@ -2448,7 +2447,7 @@ The same goes for the definition of alternative subgroup descriptions (cf.~Equat
 \subsection{Proofs}
 \label{sec:csd:appendix:proofs}
 
-In this section, we provide proofs for propositions from Section~\ref{sec:csd:approach}, particularly the complexity results for subgroup discovery with a feature-cardinality constraint and for searching alternative subgroup descriptions.
+In this section, we provide proofs for propositions from Section~\ref{sec:csd:approach}, particularly for the complexity results for subgroup discovery with a feature-cardinality constraint and for searching alternative subgroup descriptions.
 
 \subsubsection{Proof of Proposition~\ref{prop:csd:complexity-cardinality-np-perfect-subgroup}}
 \label{sec:csd:appendix:proofs:complexity-cardinality-np-perfect-subgroup}
@@ -2459,18 +2458,18 @@ $I$ consists of a set of elements~$E = \{e_1, \dots, e_m\}$, a set of sets~$\mat
 The  decision problem \textsc{Set Covering} asks whether a subset $\mathbb{C} \subseteq \mathbb{S}$ exists with $|\mathbb{C}| \leq k$ and $E = \bigcup_{S \in \mathbb{C}} S$, i.e., a subset of~$\mathbb{S}$ which contains (= covers) each element in at least one set and consist of at most $k$~sets.
 
 We transform~$I$ into a problem instance~$I'$ of the perfect-subgroup-discovery problem (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}).
-We define a binary dataset~$X \in \{0, 1\}^{(m + 1) \times n}$, prediction target~$y \in \{0, 1\}^{m+1}$, and retain the set cardinality~$k \in \mathbb{N}$ as feature cardinality~$k$.
+To this end, we define a binary dataset~$X \in \{0, 1\}^{(m + 1) \times n}$, prediction target~$y \in \{0, 1\}^{m+1}$, and retain the set cardinality~$k \in \mathbb{N}$ as feature cardinality~$k$.
 In particular, data objects represent elements from~$E$ and features represent sets from~$\mathbb{S}$.
 I.e., $X_{ij}$ denotes $e_i \in S_j$, i.e., membership of Element~$i$ in Set~$j$.
 The additional index $i = m + 1$ represents a \emph{dummy element} that is not part of any set, so all feature values~$X_{ij}$ are set to~0.
 Further, we define the prediction target~$y \in \{0, 1\}^{m+1}$ as $y_{m+1} = 1$ and $y_i = 0$ for all other indices $i \in \{1, \dots, m\}$.
 This prediction target represents whether an element should \emph{not} be covered by the set of sets~$\mathbb{C} \subseteq \mathbb{S}$.
 In particular, all actual elements from~$E$ should be covered but not the new dummy element.
-The `inverted' definition of the prediction target stems from the different nature of set covers and subgroups:
+This `inverted' definition of the prediction target stems from the different nature of set covers and subgroup descriptions:
 Set covers include elements from selected sets, with the empty cover $\mathbb{C} = \emptyset$ containing no elements.
 There is a logical OR ($\lor$) respectively set union over the selected sets.
-In contrast, subgroups exclude data objects based on their selected features, i.e., bounds, with the unrestricted subgroup containing all data objects.
-There is a logical AND ($\land$) over the bounds of the selected features.
+In contrast, subgroup descriptions exclude data objects based on bounds for their selected features, with the unrestricted subgroup containing all data objects.
+There is a logical AND ($\land$) over the features' bounds.
 
 A perfect subgroup (cf.~Definition~\ref{def:csd:perfect-subgroup}) exactly replicates the prediction target as subgroup membership.
 Here, it only contains the data object representing the dummy element but zero data objects representing actual elements.
@@ -2486,7 +2485,7 @@ Thus, at least one element is not contained in any set forming the set cover, so
 Overall, a solution to the instance~$I'$ of the perfect-subgroup discovery problem (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) also solves the instance~$I$ of the decision problem \textsc{Set Covering} ~\cite{karp1972reducibility} with negligible computational overhead.
 In particular, an efficient solution algorithm for the former would also efficiently solve the latter.
 However, since the latter problem is $\mathcal{NP}$-hard~\cite{karp1972reducibility}, the former is as well.
-To be more precise, the perfect-subgroup-discovery problem with feature-cardinality constraint resides in complexity class $\mathcal{NP}$ and therefore is $\mathcal{NP}$-complete.
+To be more precise, the perfect-subgroup-discovery problem with feature-cardinality constraint resides in the complexity class $\mathcal{NP}$ and therefore is $\mathcal{NP}$-complete.
 In particular, checking a solution induces a polynomial cost of~$O(m \cdot n)$, requiring one pass over the dataset to determine subgroup membership and feature selection.
 \end{proof}
 %
@@ -2508,13 +2507,13 @@ Vice versa, being able to use all features in the subgroup description leads to 
 Let an arbitrary problem instance~$I$ of the perfect-subgroup-discovery problem (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) be given.
 We transform~$I$ into a problem instance~$I'$ of the subgroup-discovery problem (cf.~Definition~\ref{def:csd:subgroup-discovery}) with the same constraint.
 In particular, we define the objective as optimizing a subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$ rather than searching for a perfect subgroup (cf.~Definition~\ref{def:csd:perfect-subgroup}) that may or may not exist.
-The other inputs of the problem instance remain the same.
+The other inputs of the problem instance ($X$, $y$, and $k$) remain the same.
 
 Based on the assumption we made on~$Q(\mathit{lb}, \mathit{ub}, X, y)$ in Proposition~\ref{prop:csd:complexity-cardinality-np}, the optimal solution for~$I'$ is a perfect subgroup if the latter exists.
 Thus, if the optimal subgroup for~$I'$ is not perfect, then a perfect subgroup does not exist at all.
-Checking whether a subgroup is perfect entails a cost of $O(n \cdot m)$, i.e., computing subgroup membership of all data objects and checking whether there are no false positives and no false negatives.
+Checking whether a subgroup is perfect entails a cost of $O(n \cdot m)$, i.e., computing subgroup membership and checking for false positives and false negatives.
 Overall, an algorithm for subgroup discovery (cf.~Definition~\ref{def:csd:subgroup-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) solves perfect-subgroup discovery (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) with the same constraint with negligible overhead.
-Since the latter problem is $\mathcal{NP}$-complete (cf.~Proposition~\ref{prop:csd:complexity-cardinality-np-perfect-subgroup}) and the former resides in complexity class $\mathcal{NP}$, the former is $\mathcal{NP}$-complete as well.
+Since the latter problem is $\mathcal{NP}$-complete (cf.~Proposition~\ref{prop:csd:complexity-cardinality-np-perfect-subgroup}) and the former resides in the complexity class $\mathcal{NP}$, the former is $\mathcal{NP}$-complete as well.
 \end{proof}
 %
 As an alternative proof, one could reduce from the optimization problem \textsc{Maximum Coverage}~\cite{chekuri2004maximum} instead of the search problem of perfect subgroup discovery (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}).

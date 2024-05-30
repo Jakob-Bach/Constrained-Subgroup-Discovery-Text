@@ -1263,7 +1263,7 @@ Normalized Hamming similarity (cf.~Equation~\ref{eq:csd:hamming-general}) as~$\t
 \label{sec:csd:experimental-design}
 
 In this section, we introduce our experimental design.
-After a brief overview of its components (cf.~Section~\ref{sec:csd:experimental-design:overview}), we describe evaluation metrics (cf.~Section~\ref{sec:csd:experimental-design:metrics}), subgroup-discovery methods (cf.~Section~\ref{sec:csd:experimental-design:methods}), experimental scenarios (cf.~Section~\ref{sec:csd:experimental-design:scenarios}), and datasets (cf.~Section~\ref{sec:csd:experimental-design:datasets}).
+After a brief overview of its components (cf.~Section~\ref{sec:csd:experimental-design:overview}), we describe subgroup-discovery methods (cf.~Section~\ref{sec:csd:experimental-design:methods}), experimental scenarios (cf.~Section~\ref{sec:csd:experimental-design:scenarios}), evaluation metrics (cf.~Section~\ref{sec:csd:experimental-design:metrics}), and datasets (cf.~Section~\ref{sec:csd:experimental-design:datasets}).
 Finally, we shortly outline our implementation (cf.~Section~\ref{sec:csd:experimental-design:implementation}).
 
 \subsection{Overview}
@@ -1274,57 +1274,34 @@ We measure the subgroup quality in terms of nWRAcc and also record the runtime o
 We analyze four \emph{experimental scenarios}:
 First, we compare all subgroup-discovery methods without constraints.
 Second, we vary the timeout in solver-based search.
-Third, we compare all subgroup-discovery methods with a constraint on the number of selected features~$k$, varying the latter parameter.
+Third, we compare all subgroup-discovery methods with a feature-cardinality constraint, varying the cardinality threshold~$k$.
 Fourth, we search for alternative subgroup descriptions with one solver-based and one heuristic search method.
 We vary the number of alternatives~$a$ and the dissimilarity threshold~$\tau_{\text{abs}}$.
-
-\subsection{Evaluation Metrics}
-\label{sec:csd:experimental-design:metrics}
-
-\paragraph{Subgroup quality}
-
-We use \emph{nWRAcc} (cf.~Equation~\ref{eq:csd:wracc-normalized}) to quantify subgroup quality.
-To analyze how well the subgroup-discovery methods generalize, we conduct a stratified five-fold cross-validation.
-In particular, each run of a subgroup-discovery method only uses 80\% of the data objects of a dataset as training data, while the remaining data objects serve as test data.
-Based on the bounds of each found subgroup, we determine subgroup membership for data objects from training \emph{and} test data.
-Based on this membership information and the true class labels~$y$, we compute \emph{training-set nWRAcc} and \emph{test-set nWRAcc} on the corresponding part of the data separately.
-
-\paragraph{Subgroup similarity}
-
-For evaluating alternative subgroup descriptions, we not only consider their quality but also their induced subgroup's similarity to the original subgroup.
-To this end, we use \emph{normalized Hamming similarity} (cf.~Equation~\ref{eq:csd:hamming-general}) and \emph{Jaccard similarity} (cf.~Equation~\ref{eq:csd:jaccard}) to compare subgroup membership of data objects between the original and the alternative.
-
-\paragraph{Runtime}
-
-As \emph{runtime}, we consider the training time of the subgroup-discovery methods.
-In particular, we measure how long the search for each subgroup takes.
-In solver-based search for subgroups, we also register whether the solver timed or not.
-In the latter case, the found solution is optimal, at least on the training set; in the former case, it may be suboptimal.
 
 \subsection{Subgroup-Discovery Methods}
 \label{sec:csd:experimental-design:methods}
 
 We employ six subgroup-discovery methods:
-Our solver-based one (cf.~Section~\ref{sec:csd:approach:smt}), three heuristic search methods from related work (cf.~Section~\ref{sec:csd:fundamentals:heuristics}), and our two baselines (cf.~Section~\ref{sec:csd:baselines}).
+A solver-based one using our SMT encoding (cf.~Section~\ref{sec:csd:approach:smt}), three heuristic search methods from related work (cf.~Section~\ref{sec:csd:fundamentals:heuristics}), and our two baselines (cf.~Section~\ref{sec:csd:baselines}).
 
 \paragraph{Solver-based search}
 
-For solver-based search, we use an SMT optimizer to solve our \emph{SMT} encoding of subgroup discovery (cf.~Equation~\ref{eq:csd:smt-problem-unconstrained-complete}).
-Unlike the other five subgroup-discovery methods in our experiments, this method is theoretically guaranteed to find the exact global optimum, though only if it is granted sufficient time.
-In practice, however, we set solver timeouts to keep the runtime under control (cf.~Section~\ref{sec:csd:experimental-design:scenarios}).
+For solver-based search, denoted as \emph{SMT}, we employ the solver \emph{Z3}~\cite{bjorner2015nuz, deMoura2008z3} with our SMT encoding of subgroup discovery (cf.~Equation~\ref{eq:csd:smt-problem-unconstrained-complete}).
+Unlike the other subgroup-discovery methods in our experiments, this method is exact, i.e., it finds the global optimum, if granted sufficient time.
+In practice, however, we set solver timeouts to control the runtime (cf.~Section~\ref{sec:csd:experimental-design:scenarios}).
 
 \paragraph{Heuristic search}
 
 We evaluate three heuristic search methods from related work:
-\emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Beam Search} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}), subsequently called \emph{Beam}), and \emph{Best Interval} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:best-interval-subgroup-update}), subsequently called \emph{BI}).
-For all three methods, we use WRAcc (cf.~Equation~\ref{eq:csd:wracc}) as the subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$.
+\emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Beam Search} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}), subsequently called \emph{Beam}, and \emph{Best Interval} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:best-interval-subgroup-update}), subsequently called \emph{BI}.
+In all three methods, we use WRAcc (cf.~Equation~\ref{eq:csd:wracc}) as the subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$ for search.
 We set the peeling fraction of \emph{PRIM} to~$\alpha = 0.05$, consistent with other implementations~\cite{arzamasov2021reds, kwakkel2017exploratory} and within the recommended value range proposed by the original authors~\cite{friedman1999bump}.
-Further, we set the support threshold to~$\beta_0 = 0$, so the shrinking of the subgroup is solely limited by WRAcc improvement and not the subgroup size.
+Further, we set the support threshold to~$\beta_0 = 0$, so the shrinking of the subgroup is solely limited by WRAcc and not the subgroup size.
 For \emph{Beam} and \emph{BI}, we choose a beam width of $w=10$, falling between default values used in other implementations~\cite{arzamasov2021reds, lemmerich2019pysubgroup}.
 
 \paragraph{Baselines}
 
-We also include baselines, which are even simpler than the heuristic search methods.
+We also include baselines that are simpler than the heuristic search methods.
 In particular, we employ our own methods \emph{MORS} (cf.~Algorithm~\ref{al:csd:mors}) and \emph{Random Search} (cf.~Algorithm~\ref{al:csd:random-search}, subsequently called \emph{Random}).
 \emph{MORS} is parameter-free.
 For \emph{Random}, we set the number of iterations to~$\mathit{n\_iters} = 1000$ and use WRAcc (cf.~Equation~\ref{eq:csd:wracc}) as the subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$.
@@ -1338,11 +1315,11 @@ Two of the scenarios do not involve all subgroup-discovery methods.
 \paragraph{Unconstrained subgroup discovery}
 
 Our first experimental scenario (cf. Section~\ref{sec:csd:evaluation:unconstrained} for results) compares all six subgroup-discovery methods without any constraints.
-This comparison allows us to assess the effectiveness of the solver-based search method \emph{SMT} for `conventional' subgroup discovery and serves as a reference point for subsequent experiment with constraints.
+This comparison allows us to assess the effectiveness of the solver-based search method \emph{SMT} for `conventional' subgroup discovery and serves as a reference point for subsequent experiments with constraints.
 
 \paragraph{Solver timeouts}
 
-Our second experimental scenario (cf.~Section~\ref{sec:csd:evaluation:timeouts} for results) takes a deeper dive into \emph{SMT} as subgroup-discovery method.
+Our second experimental scenario (cf.~Section~\ref{sec:csd:evaluation:timeouts} for results) takes a deeper dive into \emph{SMT} as the subgroup-discovery method.
 In particular, we analyze whether setting solver timeouts enables finding solutions with reasonable quality in a shorter time frame.
 If the solver does not finish optimization within a given timeout, we record the currently best solution at this time, which may be suboptimal.
 Note that the timeout only applies to the optimization procedure itself, while our runtime measurements also include the time for formulating the optimization problem upfront.
@@ -1363,6 +1340,27 @@ Our fourth experimental scenario (cf. Section~\ref{sec:csd:evaluation:alternativ
 We limit the number of selected features to~$k=3$, which yields reasonably high subgroup quality (cf.~Section~\ref{sec:csd:evaluation:cardinality}).
 We search for $a=5$ alternative subgroup descriptions with a dissimilarity threshold $\tau_{\text{abs}} \in \{1, 2, 3\}$.
 Since each dataset has $n \geq 20$ features (cf.~Section~\ref{sec:csd:experimental-design:datasets}), our choices of~$a$, $k$, and~$\tau$ ensure that there always is a valid alternative.
+
+\subsection{Evaluation Metrics}
+\label{sec:csd:experimental-design:metrics}
+
+\paragraph{Subgroup quality}
+
+We use \emph{nWRAcc} (cf.~Equation~\ref{eq:csd:wracc-normalized}) to report subgroup quality.
+To analyze how well the subgroup-discovery methods generalize, we conduct a stratified five-fold cross-validation.
+In particular, each run of a subgroup-discovery method only uses 80\% of the data objects of a dataset as training data, while the remaining data objects serve as test data.
+Based on the bounds of each found subgroup, we determine subgroup membership for all data objects and compute \emph{training-set nWRAcc} and \emph{test-set nWRAcc} on the corresponding part of the data separately, using the true class labels~$y$.
+
+\paragraph{Subgroup similarity}
+
+For evaluating alternative subgroup descriptions, we not only consider their quality but also their induced subgroup's similarity to the original subgroup.
+To this end, we use \emph{normalized Hamming similarity} (cf.~Equation~\ref{eq:csd:hamming-general}) and \emph{Jaccard similarity} (cf.~Equation~\ref{eq:csd:jaccard}) to compare subgroup membership of data objects between the original and the alternative.
+
+\paragraph{Runtime}
+
+As \emph{runtime}, we report the training time of the subgroup-discovery methods.
+In particular, we measure how long the search for each subgroup takes.
+For solver-based search, we also record whether the solver timed out.
 
 \begin{table}[p]
 	\centering
@@ -1405,7 +1403,7 @@ Since each dataset has $n \geq 20$ features (cf.~Section~\ref{sec:csd:experiment
 		Datasets from PMLB used in our experiments.
 		$m$~denotes the number of data objects and $n$~the number of features.
 		In dataset names, we replaced \emph{GAMETES\_Epistasis} with  \emph{GE\_} and \emph{GAMETES\_Heterogeneity} with \emph{GH\_} to reduce the table's width.
-		\emph{Timeouts} indicates whether at least one timeout occurred with \emph{SMT} as the subgroup-discovery method and the highest timeout (2048~s), optimizing the original subgroup without cardinality constraints (\emph{Max~$k$}) or in any cardinality setting (\emph{Any~$k$}).
+		\emph{Timeouts} indicates whether at least one timeout occurred with \emph{SMT} as the subgroup-discovery method and the highest timeout setting (2048~s), optimizing the original subgroup without cardinality constraints (\emph{Max~$k$}) or in any cardinality setting (\emph{Any~$k$}).
 	}
 	\label{tab:csd:datasets}
 \end{table}
@@ -1414,22 +1412,23 @@ Since each dataset has $n \geq 20$ features (cf.~Section~\ref{sec:csd:experiment
 \label{sec:csd:experimental-design:datasets}
 
 We use binary-classification datasets from the Penn Machine Learning Benchmarks (PMLB)~\cite{olson2017pmlb, romano2021pmlb}.
-If both classes occur with different frequencies, we encode the minority class as the class of interest, i.e., assign~1 as it class label.
+If the classes occur with different frequencies, we encode the minority class as the class of interest, i.e., assign~1 as its class label.
 To avoid prediction scenarios that may be too easy or do not have enough features for alternative subgroup descriptions, we only select datasets with at least 100 data objects and 20 features.
 Next, we exclude one dataset with 1000 features, which has a significantly higher dimensionality than all remaining datasets.
 Finally, we manually exclude datasets that seem duplicated or modified versions of other datasets in our experiments.
 
 Based on these criteria, we obtain 27 datasets with 106 to 9822 data objects and 20 to 168 features (cf.~Table~\ref{tab:csd:datasets}).
 The datasets do not contain any missing values.
-Further, there are no categorical feature values since PMLB encodes them ordinally by default.
+Further, PMLB encodes categorical features ordinally by default.
 
 \subsection{Implementation and Execution}
 \label{sec:csd:experimental-design:implementation}
 
 We implemented all subgroup-discovery methods, experiments, and evaluations in Python~3.8.
-A requirements file in our repository specifies the versions of all Python packages.
-The solver \emph{Z3}~\cite{bjorner2015nuz, deMoura2008z3} carries out the SMT optimization.
-The experimental pipeline parallelizes over datasets, cross-validation folds, and subgroup-discovery methods, while each of these experimental tasks runs single-threaded.
+A requirements file in our repository\footnote{\url{https://github.com/Jakob-Bach/Constrained-Subgroup-Discovery}} specifies the versions of all dependencies.
+Further, we organized the subgroup-discovery methods and some evaluation metrics as a Python package to ease reuse.
+
+Our experimental pipeline parallelizes over datasets, cross-validation folds, and subgroup-discovery methods, while each of these experimental tasks runs single-threaded.
 We ran the pipeline on a server with 160~GB RAM and an \emph{AMD EPYC 7551} CPU, having 32~physical cores and a base clock of 2.0~GHz.
 With this hardware, the parallelized pipeline run took approximately 34~hours.
 

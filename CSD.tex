@@ -1304,7 +1304,7 @@ For \emph{Beam} and \emph{BI}, we choose a beam width of $w=10$, falling between
 We also include baselines that are simpler than the heuristic search methods.
 In particular, we employ our own methods \emph{MORS} (cf.~Algorithm~\ref{al:csd:mors}) and \emph{Random Search} (cf.~Algorithm~\ref{al:csd:random-search}, subsequently called \emph{Random}).
 \emph{MORS} is parameter-free.
-For \emph{Random}, we set the number of iterations to~$\mathit{n\_iters} = 1000$ and use WRAcc (cf.~Equation~\ref{eq:csd:wracc}) as the subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$.
+For \emph{Random}, we set the number of iterations $\mathit{n\_iters} = 1000$ and use WRAcc (cf.~Equation~\ref{eq:csd:wracc}) as the subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$.
 
 \subsection{Experimental Scenarios}
 \label{sec:csd:experimental-design:scenarios}
@@ -1762,8 +1762,7 @@ Further, the observed trends exist for the solver-based search method \emph{SMT}
 		\label{fig:csd:alternatives-test-nwracc}
 	\end{subfigure}
 	\caption{
-		Mean subgroup quality with 95\% confidence intervals based on datasets and cross-validation folds, over the number of alternatives, by subgroup-discovery method and dissimilarity threshold~$\tau_{\text{abs}}$.
-		Results from the search for alternative subgroup descriptions.
+		Mean subgroup quality of alternative subgroup descriptions with 95\% confidence intervals based on datasets and cross-validation folds, over the number of alternatives, by subgroup-discovery method and dissimilarity threshold~$\tau_{\text{abs}}$.
 	}
 	\label{fig:csd:alternatives-nwracc}
 \end{figure}
@@ -2098,7 +2097,7 @@ In that regard, one could seek for an approximation complexity result, e.g., mem
 \label{sec:csd:appendix}
 
 In this section, we provide supplementary materials.
-Appendix~\ref{sec:csd:appendix:further-encodings} describes further encodings of the subgroup-discovery problem, complementing Section~\ref{sec:csd:approach:smt}.
+Appendix~\ref{sec:csd:appendix:further-encodings} describes further problem encodings of subgroup discovery, complementing Section~\ref{sec:csd:approach:smt}.
 Appendix~\ref{sec:csd:appendix:proofs} contains proofs for propositions from Section~\ref{sec:csd:approach}.
 
 \subsection{Further Problem Encodings of Subgroup Discovery}

@@ -313,23 +313,23 @@ Algorithm~\ref{al:csd:prim} outlines the peeling phase for finding one subgroup,
 Pasting may have little effect on the subgroup quality and is often left out~\cite{arzamasov2021reds}.
 Further, we do not discuss extensions of PRIM like bumping~\cite{friedman1999bump, kwakkel2016improving}, which uses bagging of multiple PRIM runs to improve subgroup quality, or covering~\cite{friedman1999bump}, which returns a sequence of subgroups covering different data objects.
 
-The algorithm \emph{PRIM} starts with a subgroup containing all data objects, which is the initial solution candidate (Lines~\ref{al:csd:prim:line:initialization-start}-\ref{al:csd:prim:line:initialization-end}).
+The algorithm \emph{PRIM} starts with a subgroup containing all data objects, which is the initial solution candidate (Lines~\ref{al:csd:prim:line:initialization-start}--\ref{al:csd:prim:line:initialization-end}).
 It continues peeling until the current solution candidate contains at most a fraction~$\beta_0$ of data objects (Line~\ref{al:csd:prim:line:stop}).
 The support threshold~$\beta_0 \in [0, 1]$ is a user parameter.
 The returned subgroup is the optimal solution candidate over all peeling iterations (Line~\ref{al:csd:prim:line:select-optimal-bounds}).
 In our \emph{PRIM} implementation, we add a small post-processing step after peeling:
-We set \emph{non-excluding bounds} to infinity (Lines~\ref{al:csd:prim:line:bounds-infty-start}-\ref{al:csd:prim:line:bounds-infty-end}).
+We set \emph{non-excluding bounds} to infinity (Lines~\ref{al:csd:prim:line:bounds-infty-start}--\ref{al:csd:prim:line:bounds-infty-end}).
 These are bounds that do not exclude any data objects from the subgroup, i.e., lower/upper bounds that equal the minimum/maximum feature value over all data objects.
 There are two reasons behind this post-processing:
 First, we ensure that these bounds remain non-excluding for any new data, where global feature minima/maxima may differ.
 Second, it becomes easier to see which features are selected in the subgroup description and which are not.
 
-In the iterative peeling procedure (Lines~\ref{al:csd:prim:iteration-start}-\ref{al:csd:prim:iteration-end}), the algorithm generates new solution candidates by trying to restrict each \emph{permissible feature} (Lines~\ref{al:csd:prim:line:peel-start}-\ref{al:csd:prim:line:peel-end}).
+In the iterative peeling procedure (Lines~\ref{al:csd:prim:iteration-start}--\ref{al:csd:prim:iteration-end}), the algorithm generates new solution candidates by trying to restrict each \emph{permissible feature} (Lines~\ref{al:csd:prim:line:peel-start}--\ref{al:csd:prim:line:peel-end}).
 In unconstrained subgroup discovery, each feature is permissible, but the function \emph{get\_permissible\_feature\_idxs(\dots)} will become useful once we introduce constraints.
 For each Feature~$j$, the algorithm tests a new lower bound at the $\alpha$-quantile of feature values in the subgroup and a new upper bound at the $1-\alpha$-quantile of feature values in the subgroup.
 The peeling fraction $\alpha \in (0, 1)$ is a user parameter.
 It describes which fraction of data objects gets excluded from the subgroup in each peeling iteration.
-Having tested two new bounds for each feature, the algorithm takes the subgroup with the highest associated quality (Line~\ref{al:csd:prim:line:best-peel-selection}) and continues peeling it in the next iteration. Further, if this solution candidate improves upon the optimal solution candidate from all prior iterations, it is stored as the new optimum (Lines~\ref{al:csd:prim:line:opt-check-start}-\ref{al:csd:prim:line:opt-check-end}).
+Having tested two new bounds for each feature, the algorithm takes the subgroup with the highest associated quality (Line~\ref{al:csd:prim:line:best-peel-selection}) and continues peeling it in the next iteration. Further, if this solution candidate improves upon the optimal solution candidate from all prior iterations, it is stored as the new optimum (Lines~\ref{al:csd:prim:line:opt-check-start}--\ref{al:csd:prim:line:opt-check-end}).
 
 \begin{algorithm}[p]
 	\DontPrintSemicolon
@@ -409,20 +409,20 @@ The number of solution candidates in the beam is a user parameter, i.e., the bea
 We outline one way to implement it in Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}, which we refer to as \emph{Beam Search} in the following.
 It is an adapted version of the beam-search implementation in the Python package \emph{pysubgroup}~\cite{lemmerich2019pysubgroup}.
 
-First, the algorithm \emph{Beam Search} initializes the beam by creating $w$ unrestricted subgroups (Lines~\ref{al:csd:generic-beam-search:line:initialization-start}-\ref{al:csd:generic-beam-search:line:initialization-end}).
+First, the algorithm \emph{Beam Search} initializes the beam by creating $w$ unrestricted subgroups (Lines~\ref{al:csd:generic-beam-search:line:initialization-start}--\ref{al:csd:generic-beam-search:line:initialization-end}).
 Further, it stores the quality of each of these subgroups.
-Additionally, it records which subgroups changed in the previous iteration (Lines~\ref{al:csd:generic-beam-search:line:iteration-start}-\ref{al:csd:generic-beam-search:line:iteration-end}) of the search.
+Additionally, it records which subgroups changed in the previous iteration (Lines~\ref{al:csd:generic-beam-search:line:iteration-start}--\ref{al:csd:generic-beam-search:line:iteration-end}) of the search.
 In particular, it stops once all subgroups in the beam remain unchanged (Line~\ref{al:csd:generic-beam-search:line:stop}).
-Subsequently, it returns the best subgroup from the beam (Lines~\ref{al:csd:generic-beam-search:line:finalization-start}-\ref{al:csd:generic-beam-search:line:finalization-end}).
+Subsequently, it returns the best subgroup from the beam (Lines~\ref{al:csd:generic-beam-search:line:finalization-start}--\ref{al:csd:generic-beam-search:line:finalization-end}).
 As for \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), we replace all non-excluding bounds with infinity as a post-processing step.
 
-The main loop (Lines~\ref{al:csd:generic-beam-search:line:iteration-start}-\ref{al:csd:generic-beam-search:line:iteration-end}) updates the beam.
-In particular, for each subgroup that changed in the previous iteration, the algorithm creates new solution candidates by attempting to update the bounds of each feature separately (Lines~\ref{al:csd:generic-beam-search:line:update-start}-\ref{al:csd:generic-beam-search:line:update-end}).
+The main loop (Lines~\ref{al:csd:generic-beam-search:line:iteration-start}--\ref{al:csd:generic-beam-search:line:iteration-end}) updates the beam.
+In particular, for each subgroup that changed in the previous iteration, the algorithm creates new solution candidates by attempting to update the bounds of each feature separately (Lines~\ref{al:csd:generic-beam-search:line:update-start}--\ref{al:csd:generic-beam-search:line:update-end}).
 There are different options for this update step.
 Algorithm~\ref{al:csd:beam-search-subgroup-update} outlines the update procedure for \emph{Beam Search}, while \emph{Best Interval} uses a slightly different one (cf.~Algorithm~\ref{al:csd:best-interval-subgroup-update}).
-For \emph{Beam Search}, the procedure tries to refine the lower bound (Lines~\ref{al:csd:beam-search-subgroup-update:line:lb-start}-\ref{al:csd:beam-search-subgroup-update:line:lb-end}) and the upper bound (Lines~\ref{al:csd:beam-search-subgroup-update:line:ub-start}-\ref{al:csd:beam-search-subgroup-update:line:ub-end}) for a given Feature~$j$ separately by replacing it with another feature value from data objects in the subgroup.
+For \emph{Beam Search}, the procedure tries to refine the lower bound (Lines~\ref{al:csd:beam-search-subgroup-update:line:lb-start}--\ref{al:csd:beam-search-subgroup-update:line:lb-end}) and the upper bound (Lines~\ref{al:csd:beam-search-subgroup-update:line:ub-start}--\ref{al:csd:beam-search-subgroup-update:line:ub-end}) for a given Feature~$j$ separately by replacing it with another feature value from data objects in the subgroup.
 In particular, it iterates over all these unique feature values.
-Each solution candidate that improves upon the minimum subgroup quality from the beam replaces the corresponding subgroup, unless it already is part of them beam due to another update action (Lines~\ref{al:csd:beam-search-subgroup-update:line:lb-replace-start}-\ref{al:csd:beam-search-subgroup-update:line:lb-replace-end} and~\ref{al:csd:beam-search-subgroup-update:line:ub-replace-start}-\ref{al:csd:beam-search-subgroup-update:line:ub-replace-end}).
+Each solution candidate that improves upon the minimum subgroup quality from the beam replaces the corresponding subgroup, unless it already is part of them beam due to another update action (Lines~\ref{al:csd:beam-search-subgroup-update:line:lb-replace-start}--\ref{al:csd:beam-search-subgroup-update:line:lb-replace-end} and~\ref{al:csd:beam-search-subgroup-update:line:ub-replace-start}--\ref{al:csd:beam-search-subgroup-update:line:ub-replace-end}).
 
 \begin{algorithm}[t]
 	\DontPrintSemicolon
@@ -461,10 +461,10 @@ Each solution candidate that improves upon the minimum subgroup quality from the
 
 \emph{Best Interval}~\cite{mampaey2012efficient} offers an update procedure for subgroups (cf.~Algorithm~\ref{al:csd:best-interval-subgroup-update}) that is tailored towards WRAcc (cf.~Equation~\ref{eq:csd:wracc}) as the subgroup-quality function.
 This update procedure can be used within a generic beam-search strategy (cf.~Algorithm~\ref{al:csd:generic-beam-search}).
-As before, the best new solution candidate from an update becomes part of the beam if it improves upon the worst subgroup quality there and is not a duplicate (Lines~\ref{al:csd:best-interval-subgroup-update:line:replace-start}-\ref{al:csd:best-interval-subgroup-update:line:replace-end}).
+As before, the best new solution candidate from an update becomes part of the beam if it improves upon the worst subgroup quality there and is not a duplicate (Lines~\ref{al:csd:best-interval-subgroup-update:line:replace-start}--\ref{al:csd:best-interval-subgroup-update:line:replace-end}).
 
 However, solution candidates are generated differently than in the update procedure of \emph{Beam Search} (cf.~Algorithm~\ref{al:csd:beam-search-subgroup-update}).
-In particular, \emph{Best Interval} updates lower and upper bounds for a given Feature~$j$ simultaneously rather than separately (Lines~\ref{al:csd:best-interval-subgroup-update:line:main-start}-\ref{al:csd:best-interval-subgroup-update:line:main-end}).
+In particular, \emph{Best Interval} updates lower and upper bounds for a given Feature~$j$ simultaneously rather than separately (Lines~\ref{al:csd:best-interval-subgroup-update:line:main-start}--\ref{al:csd:best-interval-subgroup-update:line:main-end}).
 Thus, this procedure optimizes over all potential combinations of lower and upper bounds.
 However, it still only requires one pass over the unique values of Feature~$j$ rather than quadratic cost, due to theoretical properties of the WRAcc function~\cite{mampaey2012efficient}.
 
@@ -523,8 +523,8 @@ I.e., the problem targets at minimizing the number of false positives subject to
 With the constraint on the positive data objects, minimizing the number of false positives is equivalent to maximizing the number of true negatives, i.e., negative data objects excluded from the subgroup.
 
 Algorithm~\ref{al:csd:mors} outlines the procedure to determine the \emph{MORS} bounds.
-Slightly deviating from Definition~\ref{def:csd:mors}, but consistent to \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{MORS} replaces all non-excluding bounds with infinity (Lines~\ref{al:csd:random-search:line:bounds-infty-start}-\ref{al:csd:random-search:line:bounds-infty-end}).
-Further, if only certain features are permissible, as we discuss later, we reset the bounds of the remaining features (Line~\ref{al:csd:mors:line:reset-start}-\ref{al:csd:mors:line:reset-end}).
+Slightly deviating from Definition~\ref{def:csd:mors}, but consistent to \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{MORS} replaces all non-excluding bounds with infinity (Lines~\ref{al:csd:random-search:line:bounds-infty-start}--\ref{al:csd:random-search:line:bounds-infty-end}).
+Further, if only certain features are permissible, as we discuss later, we reset the bounds of the remaining features (Lines~\ref{al:csd:mors:line:reset-start}--\ref{al:csd:mors:line:reset-end}).
 
 Since \emph{MORS} only needs to iterate over all data objects and features once to determine the minima and maxima, the computational complexity of this algorithm is~$O(n \cdot m)$.
 This places minimal-optimal-recall-subgroup discovery in complexity class~$\mathcal{P}$:
@@ -601,9 +601,9 @@ In particular, the bounds found by \emph{MORS} cannot be made tighter to exclude
 
 Algorithm~\ref{al:csd:random-search} outlines a randomized search procedure that constitutes the second baseline.
 \emph{Random Search} generates and evaluates subgroups for a fixed number of iterations, which the user controls with the parameter~$\mathit{n\_iters} \in \mathbb{N}$.
-Hereby, subgroup generation samples a lower bound and an upper bound uniformly random from the unique values for each permissible feature, leaving the remaining features unrestricted (Lines~\ref{al:csd:random-search:line:sampling-start}-\ref{al:csd:random-search:line:sampling-end}).
-The algorithm tracks the best generated subgroup so far over the iterations (Lines~\ref{al:csd:random-search:line:optimum-update-start}-\ref{al:csd:random-search:line:optimum-update-end}) and finally returns the subgroup with the highest quality.
-As for \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Random Search} replaces all non-excluding bounds with infinity (Lines~\ref{al:csd:random-search:line:bounds-infty-start}-\ref{al:csd:random-search:line:bounds-infty-end}).
+Hereby, subgroup generation samples a lower bound and an upper bound uniformly random from the unique values for each permissible feature, leaving the remaining features unrestricted (Lines~\ref{al:csd:random-search:line:sampling-start}--\ref{al:csd:random-search:line:sampling-end}).
+The algorithm tracks the best generated subgroup so far over the iterations (Lines~\ref{al:csd:random-search:line:optimum-update-start}--\ref{al:csd:random-search:line:optimum-update-end}) and finally returns the subgroup with the highest quality.
+As for \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Random Search} replaces all non-excluding bounds with infinity (Lines~\ref{al:csd:random-search:line:bounds-infty-start}--\ref{al:csd:random-search:line:bounds-infty-end}).
 
 \section{Constrained Subgroup Discovery}
 \label{sec:csd:approach}

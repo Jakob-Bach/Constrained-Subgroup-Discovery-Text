@@ -2056,35 +2056,35 @@ In such studies, one could also interpret alternative subgroup descriptions qual
 We formalized, analyzed, and evaluated two constraint types, i.e., feature-cardinality constraints (cf.~Sections~\ref{sec:csd:approach:cardinality} and~\ref{sec:csd:evaluation:cardinality}) and alternative subgroup descriptions (cf.~Sections~\ref{sec:csd:approach:alternatives} and~\ref{sec:csd:evaluation:alternatives}).
 As mentioned in Section~\ref{sec:csd:approach:constraint-types}, there are further constraint types one could investigate, e.g., domain-specific constraints, secondary objectives, or alternatives in the sense of covering different data objects rather than covering the same data objects differently.
 
-For our constraint type for alternative subgroup descriptions, one could analyze other dissimilarities, e.g., symmetric ones rather than the asymmetric one we used (cf.~Equation~\ref{eq:csd:constraint-dissimilarity}).
-While the SMT encoding of subgroup discovery is relatively flexible regarding dissimilarities, integrating them into heuristic search methods may be challenging, e.g., if they are not antimonotonic.
+For alternative subgroup descriptions, one could analyze other dissimilarities, e.g., symmetric ones rather than the asymmetric deselection dissimilarity we used (cf.~Equation~\ref{eq:csd:constraint-dissimilarity}).
+While the SMT encoding of subgroup discovery is relatively flexible regarding dissimilarities, integrating them into heuristic search methods may be challenging, e.g., if the dissimilarity is not antimonotonic.
 
 \paragraph{Formalization}
 
 In solver-based search for subgroups, we used an SMT encoding (cf.~Section~\ref{sec:csd:approach:smt}) and one particular solver.
 Different white-box encodings or solvers may speed up the search and lead to less timeouts, potentially improving the subgroup quality.
-We already proposed MILP and MaxSAT encodings of subgroup discovery (cf.~Appendix~\ref{sec:csd:appendix:further-encodings}), though without evaluation.
+We already proposed MILP and MaxSAT encodings (cf.~Appendices~\ref{sec:csd:appendix:further-encodings:milp} and~\ref{sec:csd:appendix:further-encodings:max-sat}), though without evaluation.
 
 Two assumptions for subgroup discovery in our article were numerical features and a binary target (cf.~Section~\ref{sec:csd:fundamentals:problem}).
-One could adapt the SMT encoding to multi-valued categorical features (cf.~Appendix~\ref{sec:csd:appendix:further-encodings}) and continuous targets.
+One could adapt the SMT encoding to multi-valued categorical features (cf.~Appendix~\ref{sec:csd:appendix:further-encodings:smt-categorical}) and continuous targets.
 
 \paragraph{Computational complexity}
 
-We established $\mathcal{NP}$-hardness for optimizing subgroups with a feature-cardinality constraint (cf.~Propositions~\ref{prop:csd:complexity-cardinality-np-perfect-subgroup} and~\ref{prop:csd:complexity-cardinality-np}).
-While the search problem admits a polynomial-time algorithm for perfect subgroups without such constraints (cf.~Proposition~\ref{prop:csd:complexity-unconstrained-perfect-subgroup}), we did not analyze the general unconstrained optimization problem, i.e., including imperfect subgroups.
+We established $\mathcal{NP}$-hardness for subgroup discovery with a feature-cardinality constraint (cf.~Propositions~\ref{prop:csd:complexity-cardinality-np-perfect-subgroup} and~\ref{prop:csd:complexity-cardinality-np}).
+While the search problem for perfect subgroups admits a polynomial-time algorithm without such constraints (cf.~Proposition~\ref{prop:csd:complexity-unconstrained-perfect-subgroup}), we did not analyze the general unconstrained optimization problem, i.e., including imperfect subgroups.
 
 Further, we showed $\mathcal{NP}$-hardness for finding alternative subgroup descriptions for perfect and imperfect subgroups (cf.~Propositions~\ref{prop:csd:complexity-perfect-alternatives-np-perfect-subgroup} and~\ref{prop:csd:complexity-perfect-alternatives-np-imperfect-subgroup}).
 In both cases, we tackled the search problem for perfect alternatives (cf.~Definition~\ref{def:csd:perfect-alternative}) first, i.e., alternative descriptions that entail exactly the same subgroup membership of data objects as the original subgroup.
 While we generalized $\mathcal{NP}$-hardness to the optimization problem (cf.~Definition~\ref{def:csd:alternative-subgroup-description-discovery}), which also includes imperfect alternatives as solutions (cf.~Proposition~\ref{prop:csd:complexity-alternatives-np}),
-one could try to explicitly prove hardness for imperfect alternatives specifically.
-Also, our proofs focused on scenarios where all originally selected features must not be selected in the alternative subgroup description, i.e., a specific value of dissimilarity threshold~$\tau$.
+one could try to explicitly prove hardness for imperfect alternatives.
+Also, our proofs focused on scenarios where all originally selected features must not be selected in the alternative subgroup description, i.e., a specific value of the dissimilarity threshold~$\tau$.
 One could analyze scenarios with overlapping feature sets explicitly.
 
-Regarding parameterized complexity for the unconstrained scenario, feature-cardinality constraints, and alternative subgroup descriptions, we proved membership in the relatively broad complexity class $\mathcal{XP}$ (cf.~Propositions~\ref{prop:csd:complexity-unconstrained-xp}, \ref{prop:csd:complexity-cardinality-xp}, and~\ref{prop:csd:complexity-alternatives-xp}).
+For parameterized complexity, we established membership in the relatively broad complexity class $\mathcal{XP}$ for the unconstrained scenario, feature-cardinality constraints, and alternative subgroup descriptions (cf.~Propositions~\ref{prop:csd:complexity-unconstrained-xp}, \ref{prop:csd:complexity-cardinality-xp}, and~\ref{prop:csd:complexity-alternatives-xp}).
 One may attempt to tighten these results.
 
 Finally, while we described how one can integrate feature-cardinality constraints and alternative subgroup descriptions into heuristic search methods (cf.~Sections~\ref{sec:csd:approach:cardinality:heuristics} and~\ref{sec:csd:approach:alternatives:heuristics}), we did not provide quality guarantees relative to the exact optimum.
-In that regard, one could seek for an approximation complexity result, e.g., membership in the complexity class~$\mathcal{APX}$.
+In that regard, one could seek for an approximation complexity result, e.g., membership in the complexity class~$\mathcal{APX}$, as established for the problem of finding equivalent subgroup descriptions of minimal length~\cite{boley2009non}.
 
 %~\\
 %\noindent \textsc{Acknowledgments}\quad

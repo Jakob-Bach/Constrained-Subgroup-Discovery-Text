@@ -1271,7 +1271,7 @@ Finally, we shortly outline our implementation (cf.~Section~\ref{sec:csd:experim
 \label{sec:csd:experimental-design:overview}
 
 In our experiments, we evaluate six subgroup-discovery methods on 27 binary-classification datasets.
-We measure the subgroup quality in terms of nWRAcc and also record the runtime of the methods.
+We measure the subgroup quality in terms of nWRAcc and also record the methods' runtime.
 We analyze four \emph{experimental scenarios}:
 First, we compare all subgroup-discovery methods without constraints.
 Second, we vary the timeout in solver-based search.
@@ -1297,7 +1297,7 @@ We evaluate three heuristic search methods from related work:
 \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Beam Search} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}), subsequently called \emph{Beam}, and \emph{Best Interval} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:best-interval-subgroup-update}), subsequently called \emph{BI}.
 In all three methods, we use WRAcc (cf.~Equation~\ref{eq:csd:wracc}) as the subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$ for search.
 We set the peeling fraction of \emph{PRIM} to~$\alpha = 0.05$, consistent with other implementations~\cite{arzamasov2021reds, kwakkel2017exploratory} and within the recommended value range proposed by the original authors~\cite{friedman1999bump}.
-Further, we set the support threshold to~$\beta_0 = 0$, so the shrinking of the subgroup is solely limited by WRAcc and not the subgroup size.
+Further, we set the support threshold to~$\beta_0 = 0$, so the subgroup's shrinking is solely limited by WRAcc and not the subgroup's size.
 For \emph{Beam} and \emph{BI}, we choose a beam width of $w=10$, falling between default values used in other implementations~\cite{arzamasov2021reds, lemmerich2019pysubgroup}.
 
 \paragraph{Baselines}
@@ -1315,7 +1315,7 @@ Two of the scenarios do not involve all subgroup-discovery methods.
 
 \paragraph{Unconstrained subgroup discovery}
 
-Our first experimental scenario (cf. Section~\ref{sec:csd:evaluation:unconstrained} for results) compares all six subgroup-discovery methods without any constraints.
+Our first experimental scenario (cf. Section~\ref{sec:csd:evaluation:unconstrained} for results) compares all six subgroup-discovery methods without constraints.
 This comparison allows us to assess the effectiveness of the solver-based search method \emph{SMT} for `conventional' subgroup discovery and serves as a reference point for subsequent experiments with constraints.
 
 \paragraph{Solver timeouts}
@@ -1323,7 +1323,7 @@ This comparison allows us to assess the effectiveness of the solver-based search
 Our second experimental scenario (cf.~Section~\ref{sec:csd:evaluation:timeouts} for results) takes a deeper dive into \emph{SMT} as the subgroup-discovery method.
 In particular, we analyze whether setting solver timeouts enables finding solutions with reasonable quality in a shorter time frame.
 If the solver does not finish optimization within a given timeout, we record the currently best solution at this time, which may be suboptimal.
-Note that the timeout only applies to the optimization procedure itself, while our runtime measurements also include the time for formulating the optimization problem upfront.
+Note that the timeout only applies to the optimization procedure, while our runtime measurements also include the time for formulating the optimization problem upfront.
 
 We evaluate twelve exponentially scaled timeout values, i.e., \{1~s, 2~s, 4~s, $\dots$, 2048~s\}.
 In the three other experimental scenarios, we employ the maximum timeout of 2048~s for \emph{SMT}.
@@ -1333,7 +1333,7 @@ Since the heuristic search methods and baselines are significantly faster, we do
 
 Our third experimental scenario (cf.~Section~\ref{sec:csd:evaluation:cardinality} for results) analyzes feature-cardinality constraints (cf.~Section~\ref{sec:csd:approach:cardinality}) for all six subgroup-discovery methods.
 In particular, we evaluate $k \in \{1, 2, 3, 4, 5\}$ selected features.
-These values of~$k$ are upper bounds (cf.~Equation~\ref{eq:csd:smt-constraint-feature-cardinalty}), i.e., the subgroup-discovery methods may select less features if selecting more does not improve subgroup quality.
+These values of~$k$ are upper bounds (cf.~Equation~\ref{eq:csd:smt-constraint-feature-cardinalty}), i.e., the subgroup-discovery methods may select fewer features if selecting more does not improve subgroup quality.
 
 \paragraph{Alternative subgroup descriptions}
 
@@ -1349,12 +1349,12 @@ Since each dataset has $n \geq 20$ features (cf.~Section~\ref{sec:csd:experiment
 
 We use \emph{nWRAcc} (cf.~Equation~\ref{eq:csd:wracc-normalized}) to report subgroup quality.
 To analyze how well the subgroup-discovery methods generalize, we conduct a stratified five-fold cross-validation.
-In particular, each run of a subgroup-discovery method only uses 80\% of the data objects of a dataset as training data, while the remaining data objects serve as test data.
+In particular, each run of a subgroup-discovery method uses only 80\% of a dataset's data objects as training data, while the remaining data objects serve as test data.
 Based on the bounds of each found subgroup, we determine subgroup membership for all data objects and compute \emph{training-set nWRAcc} and \emph{test-set nWRAcc} on the corresponding part of the data separately, using the true class labels~$y$.
 
 \paragraph{Subgroup similarity}
 
-For evaluating alternative subgroup descriptions, we not only consider their quality but also their induced subgroup's similarity to the original subgroup.
+For evaluating alternative subgroup descriptions, we consider not only their quality but also their induced subgroup's similarity to the original subgroup.
 To this end, we use \emph{normalized Hamming similarity} (cf.~Equation~\ref{eq:csd:hamming-general}) and \emph{Jaccard similarity} (cf.~Equation~\ref{eq:csd:jaccard}) to compare subgroup membership of data objects between the original and the alternative.
 
 \paragraph{Runtime}

@@ -2110,8 +2110,8 @@ Next, we discuss encodings as a mixed-integer linear program (cf.~Section~\ref{s
 \subsubsection{Handling Categorical Features in the SMT Encoding}
 \label{sec:csd:appendix:further-encodings:smt-categorical}
 
-In general, there are many different options to numerically encode categorical data in machine learning~\cite{matteucci2023benchmark}.
-Similarly, there are also multiple options to consider categorical features in an SMT formulation of subgroup discovery.
+In general, there are many different options to encode categorical data in machine learning numerically~\cite{matteucci2023benchmark}.
+Similarly, there are also multiple options for considering categorical features in an SMT formulation of subgroup discovery.
 We present three of them in the following.
 
 \paragraph{Two variables per categorical feature}
@@ -2128,17 +2128,17 @@ Thus, if there is no meaningful ordering of categories, one should choose a diff
 
 One can achieve more flexibility by introducing separate bound variables for each category of a feature rather than only for each feature.
 This approach corresponds to a one-hot encoding of the dataset, which creates one new binary feature for each category.
-Thus, the bound variables effectively are binary as well.
+Thus, the bound variables are effectively binary as well.
 By default, our SMT encoding uses a logical AND ($\land$) over the binary features, i.e., categories.
 The interpretation of bound values for one binary Feature~$j$ is as follows:
 
 (Case 1) $\mathit{lb}_j = \mathit{ub}_j = 1$ means that data objects that assume the corresponding category for Feature~$j$ are members of the subgroup.
 In practice, this case may apply to at most one category of each feature.
 Otherwise, the AND ($\land$) operator would require each data object to assume multiple categories for one feature, which is unsatisfiable.
-Thus, this encoding cannot directly express that a set of categories is included the subgroup.
+Thus, this encoding cannot directly express that a set of categories is included in the subgroup.
 
 (Case 2) $\mathit{lb}_j = \mathit{ub}_j = 0$ means that data objects that do \emph{not} assume the corresponding category for Feature~$j$ are members of the subgroup.
-I.e., data objects assuming the corresponding category are not members of the subgroup.
+I.e., data objects assuming the corresponding category are not subgroup members.
 Other than Case~1, this case can apply to multiple categories of each feature, i.e., the subgroup may explicitly exclude multiple categories.
 Further, if one category is actively included in the subgroup (Case~1), then Case-2 bounds on other categories are redundant since they are implied by the former.
 
@@ -2147,7 +2147,7 @@ Further, if one category is actively included in the subgroup (Case~1), then Cas
 (Case 4) $\mathit{lb}_j = 1,~\mathit{ub}_j = 0$ cannot occur since it violates the bound constraints (cf.~Equation~\ref{eq:csd:smt-constraint-bounds-monotonic}).
 
 Finally, note that binary features allow us to slightly simplify the subgroup-membership expression (cf.~Equation~\ref{eq:csd:smt-constraint-subgroup-membership}).
-In general, we need to check lower bound and upper bound for a feature.
+In general, we need to check the lower and upper bound for a feature.
 However, if a binary feature assumes the value~0 for a data object, checking the upper bound is unnecessary since it is always satisfied.
 Similarly, if a binary feature assumes the value~1 for a data object, checking the lower bound is unnecessary since it is always satisfied.
 Both these simplifications assume that the bounds are explicitly defined as binary or at least in $[0, 1]$, which can be enforced with straightforward constraints.
@@ -2155,7 +2155,7 @@ Otherwise, the bounds may theoretically be placed outside the feature's range an
 
 \paragraph{One variable per categorical feature value}
 
-In some scenario, it does not make sense to include the absence of a category in the subgroup, i.e., to permit $\mathit{lb}_j = \mathit{ub}_j = 0$.
+In some scenarios, it does not make sense to include the absence of a category in the subgroup, i.e., to permit $\mathit{lb}_j = \mathit{ub}_j = 0$.
 In particular, some existing subgroup-discovery methods for categorical data assume that only the presence of categories is interesting~\cite{atzmueller2015subgroup}.
 In this case, introducing one instead of two bound variable(s) for each category suffices.
 Assume the categorical Feature~$j$ has $|c_j| \in \mathbb{N}$ different categories~$\{c^1_j, \dots, c^{|c_j|}_j\}$.
@@ -2163,7 +2163,7 @@ Let $\mathit{cb}_j \in \{0, 1\}^{|c_j|}$ denote the corresponding bound variable
 The ordering of categories in this vector is arbitrary but fixed.
 
 As a difference to previously described encodings, the subgroup-membership expression (cf.~Equation~\ref{eq:csd:smt-constraint-subgroup-membership}) should still use a logical AND ($\land$) over features but not over categories belonging to the same feature.
-Otherwise, the expression would be unsatisfiable, since each data object only assumes one category for each feature.
+Otherwise, the expression would be unsatisfiable since each data object only assumes one category for each feature.
 Instead, we replace the numeric bound check~$\left( X_{ij} \geq \mathit{lb}_j \right) \land \left( X_{ij} \leq \mathit{ub}_j \right)$ for Feature~$j$ with the following OR ($\lor$) expression:
 %
 \begin{equation}
@@ -2171,8 +2171,8 @@ Instead, we replace the numeric bound check~$\left( X_{ij} \geq \mathit{lb}_j \r
 	\label{eq:csd:category-constraint:or}
 \end{equation}
 %
-Since the equality holds for exactly one category, all conjunctions except one are false and the expression simplifies to one variable~$\mathit{cb}^{l'}_j$, where $l'$ is the index of the category~$X_{ij}$.
-I.e., for each categorical feature, a data object can only be member of the subgroup if the variable belonging to its category is~1.
+Since the equality holds for exactly one category, all conjunctions except one are false, and the expression simplifies to one variable~$\mathit{cb}^{l'}_j$, where $l'$ is the index of the category~$X_{ij}$.
+I.e., for each categorical feature, a data object can only be a subgroup member if the variable belonging to its category is~1.
 
 In general, multiple $\mathit{cb}^l_j$ for Feature~$j$ may be~1, representing multiple categories included in the subgroup, which is an advantage over the previous encoding.
 If all categories are in the subgroup, the feature becomes deselected.
@@ -2223,12 +2223,12 @@ Using linearization techniques for constraint satisfaction and AND operators fro
 \end{equation}
 %
 The first two inequalities ensure that $b^{\text{lb}}_{ij} = 1$ if and only if $\mathit{lb}_j \leq X_{ij}$.
-The next two inequalities perform a corresponding check for~$b^{\text{ub}}_{ij}$.
+The following two inequalities perform a corresponding check for~$b^{\text{ub}}_{ij}$.
 The values~$\varepsilon_j \in \mathbb{R}_{> 0}$ are small constants that turn strict inequalities into non-strict inequalities since a MILP solver may only be able to handle the latter.
 One possible choice, which we used in a demo implementation, is sorting all unique feature values and taking the minimum difference between two consecutive values in that order.
 
 The values~$M_j \in \mathbb{R}_{> 0}$ and $m_j \in \mathbb{R}_{< 0}$ are large positive and negative constants, respectively.
-They allow us to express logical implications between real-valued and binary-valued expressions, compensating for the fact that the latter may have a considerably smaller range.
+They allow us to express logical implications between real-valued and binary-valued expressions, compensating for the latter's considerably smaller range.
 One potential choice for~$M_j$ is taking a value larger than the difference between the feature's minimum and maximum, which can be pre-computed before optimization:
 %
 \begin{equation}
@@ -2277,7 +2277,7 @@ The last inequality covers the other direction of the logical equivalence, i.e.,
 
 \paragraph{Alternative subgroup descriptions}
 
-The objective function for alternative subgroup descriptions in the SMT formulation (cf.~Equation~\ref{eq:csd:smt-hamming}) already is linear.
+The objective function for alternative subgroup descriptions in the SMT formulation (cf.~Equation~\ref{eq:csd:smt-hamming}) is already linear.
 We only need to replace the logical negation operators ($\lnot$):
 %
 \begin{equation}
@@ -2298,7 +2298,8 @@ Otherwise, this expression is linear as well, so no further auxiliary variables 
 
 Our published code contains a MILP implementation for unconstrained and feature-cardinality-constrained subgroup discovery.
 We use the package \emph{OR-Tools}~\cite{perron2022or-tools} with \emph{SCIP}~\cite{bestuzheva2021scip} as the optimizer.
-However, in preliminary experiments, this implementation was (on average) slower than the SMT implementation or yielded worse subgroup quality in the same runtime, sometimes finished considerably after the prescribed timeout, and sometimes ran out of memory after consuming dozens of gigabytes.
+However, in preliminary experiments, this implementation was (on average) slower than the SMT implementation or yielded worse subgroup quality in the same runtime.
+Further, it sometimes finished considerably after the prescribed timeout or ran out of memory after consuming dozens of gigabytes.
 Thus, we stuck to the SMT implementation for our main experiments (cf.~Section~\ref{sec:csd:experimental-design:methods}).
 
 \subsubsection{Maximum Satisfiability (MaxSAT)}
@@ -2341,7 +2342,7 @@ In particular, there are four cases:
 (3)~If $\mathit{lb}_j = \mathit{ub}_j = 1$, then only $X_{ij} = 1$ is in the subgroup, i.e., a positive literal becomes part of the final subgroup description.
 (4)~The combination $\mathit{lb}_j = 1$ and $\mathit{ub}_j = 0$ violates the bound constraints and will therefore not appear in a valid solution.
 
-Finally, the objective function already is a weighted sum of the subgroup-membership variables~$b_i$, which form the soft constraints for the problem.
+Finally, the objective function is already a weighted sum of the subgroup-membership variables~$b_i$, which form the soft constraints for the problem.
 In particular, we can re-formulate Equation~\ref{eq:csd:smt-wracc} as follows:
 %
 \begin{equation}
@@ -2367,9 +2368,9 @@ For binary features, the definition of the feature selection variables~$s_j$ (cf
 	\label{eq:csd:maxsat-constraint-feature-selection}
 \end{equation}
 %
-I.e., a feature is selected regarding its lower bound if the lower bound is set to~1 and and at least one feature value is~0, i.e., at least one feature value is excluded from the subgroup.
+I.e., a feature is selected regarding its lower bound if the lower bound is set to~1 and at least one feature value is~0, i.e., at least one feature value is excluded from the subgroup.
 Vice versa, a feature is selected regarding its upper bound if the upper bound is set to~0 and and at least one feature value is~1, i.e., at least one feature value is excluded from the subgroup.
-Since all values~$X_{ij}$ are known, we can evaluate the corresponding AND and OR term before optimization.
+Since all values~$X_{ij}$ are known, we can evaluate the corresponding AND and OR terms before optimization.
 If a feature is~0 and~1 for at least one data object each, which should usually be the case, Equation~\ref{eq:csd:maxsat-constraint-feature-selection} becomes a much simpler expression:
 %
 \begin{equation}
@@ -2399,7 +2400,7 @@ Next, let $\mathit{lb}_j \in \{0, 1\}^{|v_j|}$ and $\mathit{ub}_j \in \{0, 1\}^{
 I.e., instead of two bound variables per feature, there are two bound variables for each unique feature value now.
 $\mathit{lb}^l_j$ indicates whether the $l$-th unique value of Feature~$j$ is the lower bound.
 Vice versa, $\mathit{ub}^l_j$ indicates whether the $l$-th unique value of Feature~$j$ is the upper bound.
-In case this encoding generates too many variables, one may discretize the feature first, e.g., by binning its values, and representing each bin by one value, e.g., the bin's mean.
+If this encoding generates too many variables, one may discretize the feature first, e.g., by binning its values and representing each bin by one value, e.g., the bin's mean.
 
 The bound constraints (cf.~Equations~\ref{eq:csd:smt-constraint-bounds-monotonic} and~\ref{eq:csd:maxsat-constraint-bounds-monotonic}) take the following form:
 %
@@ -2413,7 +2414,7 @@ The bound constraints (cf.~Equations~\ref{eq:csd:smt-constraint-bounds-monotonic
 	\label{eq:csd:maxsat-numeric-constraint-bounds-monotonic}
 \end{equation}
 %
-The first two constraints ensure that exactly one value of Feature~$j$ is chosen as lower bound and upper bound respectively.
+The first two constraints ensure that exactly one value of Feature~$j$ is chosen as the lower bound and upper bound, respectively.
 These constraints can be encoded into propositional logic with a cardinality encoding from the literature~\cite{sinz2005towards}.
 The third constraint enforces that the value chosen as the lower bound is less than or equal to the value chosen as the upper bound.
 Alternatively, one could also formulate that the value chosen as the upper bound is greater than or equal to the value chosen as the lower bound.
@@ -2425,7 +2426,7 @@ We formulate the subgroup-membership expressions (cf.~Equations~\ref{eq:csd:smt-
 	\label{eq:csd:maxsat-numeric-constraint-subgroup-membership}
 \end{equation}
 %
-In particular, for a data object to be a member of the subgroup, each feature's lower bound needs to be lower or equal to the actual value~$X_{ij}$, while the upper bound needs to be higher or equal.
+In particular, for a data object to be a subgroup member, each feature's lower bound needs to be lower or equal to the actual value~$X_{ij}$, while the upper bound needs to be higher or equal.
 For the binary lower-bound variables $\mathit{lb}^l_j$, this means that any of the bound variables representing values lower or equal to $X_{ij}$ needs to be~1; vice versa for the upper bounds.
 
 Finally, for feature-cardinality constraints, we define the feature-selection variables~$s_j$ (cf.~Equations~\ref{eq:csd:smt-constraint-feature-selection} and~\ref{eq:csd:maxsat-constraint-feature-selection}) as follows:
@@ -2450,11 +2451,11 @@ In this section, we provide proofs for propositions from Section~\ref{sec:csd:ap
 \begin{proof}
 Let an arbitrary problem instance~$I$ of the decision problem \textsc{Set Covering}~\cite{karp1972reducibility} be given.
 $I$ consists of a set of elements~$E = \{e_1, \dots, e_m\}$, a set of sets~$\mathbb{S} = \{S_1,  \dots, S_n\}$ with $E = \bigcup_{S \in \mathbb{S}} S$, and a cardinality~$k \in \mathbb{N}$.
-The  decision problem \textsc{Set Covering} asks whether a subset $\mathbb{C} \subseteq \mathbb{S}$ exists with $|\mathbb{C}| \leq k$ and $E = \bigcup_{S \in \mathbb{C}} S$, i.e., a subset of~$\mathbb{S}$ which contains (= covers) each element in at least one set and consist of at most $k$~sets.
+The decision problem \textsc{Set Covering} asks whether a subset $\mathbb{C} \subseteq \mathbb{S}$ exists with $|\mathbb{C}| \leq k$ and $E = \bigcup_{S \in \mathbb{C}} S$, i.e., a subset of~$\mathbb{S}$ which contains (= covers) each element in at least one set and consist of at most $k$~sets.
 
 We transform~$I$ into a problem instance~$I'$ of the perfect-subgroup-discovery problem (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}).
 To this end, we define a binary dataset~$X \in \{0, 1\}^{(m + 1) \times n}$, prediction target~$y \in \{0, 1\}^{m+1}$, and retain the set cardinality~$k \in \mathbb{N}$ as feature cardinality~$k$.
-In particular, data objects represent elements from~$E$ and features represent sets from~$\mathbb{S}$.
+In particular, data objects represent elements from~$E$, and features represent sets from~$\mathbb{S}$.
 I.e., $X_{ij}$ denotes $e_i \in S_j$, i.e., membership of Element~$i$ in Set~$j$.
 The additional index $i = m + 1$ represents a \emph{dummy element} that is not part of any set, so all feature values~$X_{ij}$ are set to~0.
 Further, we define the prediction target~$y \in \{0, 1\}^{m+1}$ as $y_{m+1} = 1$ and $y_i = 0$ for all other indices $i \in \{1, \dots, m\}$.
@@ -2469,7 +2470,7 @@ There is a logical AND ($\land$) over the features' bounds.
 A perfect subgroup (cf.~Definition~\ref{def:csd:perfect-subgroup}) exactly replicates the prediction target as subgroup membership.
 Here, it only contains the data object representing the dummy element but zero data objects representing actual elements.
 Further, as all feature values of this dummy data object are~0, the subgroup description only consists of the bounds $\mathit{lb}_j = \mathit{ub}_j = 0$ for selected features and $\mathit{lb}_j = 0 < 1 = \mathit{ub}_j$ for unselected features.
-The data objects described by the selected features therefore represent elements not contained in any of the selected sets, which only applies to the dummy element.
+Therefore, the data objects described by the selected features represent elements not contained in any of the selected sets, which only applies to the dummy element.
 Vice versa, all remaining data objects represent elements that are part of at least one selected set, which applies to all actual elements from~$E$.
 Further, the feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) ensures that at most $k$~features are selected, which means that at most $k$~sets are selected.
 Thus, if the feature-cardinality constraint is satisfied in the perfect subgroup, the selected features represent sets forming a valid set cover~$\mathbb{C}$.
@@ -2488,8 +2489,8 @@ This proof is an adaptation of the proof of \cite{boley2009non} for minimizing t
 The latter proof reduces from the optimization problem \textsc{Minimum Set Cover}, while we use the decision problem \textsc{Set Covering} since perfect-subgroup discovery (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) is not an optimization problem.
 Further, we replace the notion of a given subgroup description~\cite{boley2009non} with the notion of a perfect subgroup.
 Also, we employ inequalities with lower and upper bounds in the subgroup description, while \cite{boley2009non}~uses `feature=value' conditions.
-However, this difference is not relevant for binary datasets, where selected features have $\mathit{lb}_j = \mathit{ub}_j$ bounds and thereby implicitly select a feature value instead of a range.
-The hardness results naturally extends to real-valued datasets, which are a generalization of binary datasets.
+However, this difference is irrelevant for binary datasets, where selected features have $\mathit{lb}_j = \mathit{ub}_j$ bounds and thereby implicitly select a feature value instead of a range.
+The hardness result naturally extends to real-valued datasets, which generalize binary datasets.
 
 Note that the hardness reduction does not work for the special case $k=n$.
 For \textsc{Set Covering}, this case allows all sets to be selected, which leads to a trivial solution since the complete set of sets~$\mathbb{S}$ contains all elements from~$E$ by definition.
@@ -2520,7 +2521,7 @@ We introduced this problem as minimal-optimal-recall-subgroup discovery (cf.~Def
 When equipping \emph{MORS} with feature-cardinality constraints (cf.~Section~\ref{sec:csd:approach:cardinality:baselines}), existing heuristics for the \textsc{Maximum Coverage} problem may provide approximation guarantees.
 
 However, minimizing the number of false positives is a simpler objective than WRAcc (cf.~Equation~\ref{eq:csd:wracc}), which we focus on in this article.
-Our proof approach chosen above is more general regarding the notion of subgroup quality, but more narrow in the sense that it reduces from a search problem, assuming a particular value of the objective function, instead of an optimization problem.
+Our proof approach chosen above is more general regarding the notion of subgroup quality but more narrow in the sense that it reduces from a search problem, assuming a particular value of the objective function, instead of an optimization problem.
 
 \subsubsection{Proof of Proposition~\ref{prop:csd:complexity-perfect-alternatives-np-perfect-subgroup}}
 \label{sec:csd:appendix:proofs:complexity-perfect-alternatives-np-perfect-subgroup}
@@ -2532,8 +2533,8 @@ In particular, we retain the prediction target~$y \in \{0,1\}^m$ and the feature
 We will slightly modify the dataset~$X \in \mathbb{R}^{m \times n}$, as explained later.
 
 Based on the assumptions we made in Proposition~\ref{prop:csd:complexity-perfect-alternatives-np-perfect-subgroup}, we define the original subgroup for~$I'$ to be perfect (cf.~Definition~\ref{def:csd:perfect-subgroup}), i.e., having subgroup membership $b^{(0)} = y$.
-Also, we choose the dissimilarity threshold~$\tau \in \mathbb{R}_{\geq 0}$ high enough such that the alternative subgroup description may not select any features that were selected in the original subgroup description.
-The choice of~$\tau$ therefore depends on the choice of the dissimilarity measure~$\text{dis}(\cdot)$ for feature-selection vectors.
+Also, we choose the dissimilarity threshold~$\tau \in \mathbb{R}_{\geq 0}$ high enough that the alternative subgroup description may not select any features that were selected in the original subgroup description.
+Thus, the choice of~$\tau$ depends on the choice of the dissimilarity measure~$\text{dis}(\cdot)$ for feature-selection vectors.
 E.g., we can choose the deselection dissimilarity used in our article (cf.~Equation~\ref{eq:csd:constraint-dissimilarity}) and $\tau_{\text{abs}} = k$.
 Note that we do not even need to explicitly define the actual feature selection for the original subgroup description since we must not select these features in the alternative subgroup description anyway.
 For the sake of completeness, we can define dataset~$X' \in \mathbb{R}^{m \times (n+k)}$ of problem instance~$I'$ as dataset~$X \in \mathbb{R}^{m \times n}$ of problem instance~$I$ with $k$~extra \emph{perfect features} added.
@@ -2544,7 +2545,7 @@ We further assume that all extra features were selected in the original subgroup
 A solution for problem instance~$I'$ also is a solution for problem instance~$I$.
 In particular, the perfect alternative subgroup description (cf.~Definition~\ref{def:csd:perfect-alternative}) defines a perfect subgroup since it perfectly replicates the original subgroup membership, which constitutes a perfect subgroup.
 I.e., $b^{(a)} = b^{(0)} = y$.
-Due to the dissimilarity constraint, the alternative subgroup description only selects features from dataset~$X$, not the ones newly added to create~$X'$.
+Due to the dissimilarity constraint, the alternative subgroup description only selects features from dataset~$X$, not those newly added to create~$X'$.
 Finally, both~$I$ and~$I'$ use a feature-cardinality constraint with threshold~$k$.
 Thus, if a perfect alternative subgroup description for~$I'$ exists, it also solves~$I$.
 If it does not exist, then there also is no other perfect subgroup for~$I$.
@@ -2568,7 +2569,7 @@ However, we assume this data object to be a member of the original subgroup, i.e
 
 If there is a solution for problem instance~$I'$, we can easily transform it to a solution for~$I$.
 In particular, since the solution is a perfect alternative subgroup description (cf.~Definition~\ref{def:csd:perfect-alternative}), it replicates~$b^{(0)}$, i.e., assigns all positive data objects of~$I$ to the alternative subgroup and places all negative data objects of~$I$ outside the subgroup.
-The additional imperfect data object also is a member of the alternative subgroup in~$I'$ but does not exist in~$I$.
+The additional imperfect data object is also a member of the alternative subgroup in~$I'$ but does not exist in~$I$.
 Thus, the solution is a perfect subgroup for~$I$.
 On the other hand, if no solution for problem instance~$I'$ exists, then there is also no solution for~$I$.
 

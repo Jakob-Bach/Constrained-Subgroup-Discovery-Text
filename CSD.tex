@@ -173,7 +173,7 @@ For broader surveys, see~\cite{atzmueller2015subgroup, helal2016subgroup, herrer
 We focus on tabular, real-valued data.
 In particular, $X \in \mathbb{R}^{m \times n}$ stands for a dataset in the form of a matrix.
 Each row is a data object, and each column is a feature.
-We assume that categorical features have already been made numeric, e.g., via one-hot or ordinal encoding~\cite{matteucci2023benchmark}.
+We assume that categorical features have been made numeric, e.g., via one-hot or ordinal encoding~\cite{matteucci2023benchmark}.
 There are also subgroup-discovery methods that only process categorical data and require continuous features to be discretized~\cite{herrera2011overview, meeng2021real}.
 $X_{i \cdot} \in \mathbb{R}^n$ denotes the values of all features for the $i$-th data object,
 while $X_{\cdot j} \in \mathbb{R}^m$ denotes the values of the $j$-th feature for all data objects.
@@ -186,7 +186,7 @@ In general, one may also conduct subgroup discovery in multi-class, multi-target
 A subgroup description typically comprises a conjunction of conditions on individual features~\cite{meeng2021real}.
 For real-valued data, the conditions constitute intervals.
 Thus, a subgroup description defines a hyperrectangle.
-In particular, the subgroup description comprises a lower bound and an upper bound for each feature.
+In particular, the subgroup description comprises a lower and upper bound for each feature.
 The bounds for a feature may also be infinite to leave it unrestricted.
 A data object resides in the subgroup if all its feature values are in the intervals formed by lower and upper bounds:
 %
@@ -230,7 +230,7 @@ Weighted Relative Accuracy (WRAcc)~\cite{lavravc1999rule} is a popular metric fo
 Besides the total number of data objects~$m$, this metric considers the number of positive data objects~$m^+$, the number of data objects in the subgroup~$m_b$, and the number of positive data objects in the subgroup~$m_b^+$.
 In particular, WRAcc is the product of two factors:
 $m_b / m$ expresses the generality of the subgroup as the relative frequency of subgroup membership.
-The second factor measures the relative accuracy of the subgroup, i.e., the difference in relative frequency of the positive class between the subgroup and the whole dataset.
+The second factor measures the relative accuracy of the subgroup, i.e., the difference in the relative frequency of the positive class between the subgroup and the whole dataset.
 If the subgroup contains the same fraction of positive data objects as the whole dataset, WRAcc is zero.
 The theoretical maximum and minimum of WRAcc depend on the class frequencies in the dataset.
 In particular, the maximum WRAcc for a dataset equals the product of the relative frequencies of positive and negative data objects in the dataset~\cite{mathonat2021anytime}:
@@ -308,7 +308,7 @@ In this section, we discuss three popular heuristic search methods, which we wil
 
 \emph{Patient Rule Induction Method (PRIM)}~\cite{friedman1999bump} is an iterative search algorithm.
 In its basic form, it consists of a peeling phase and a pasting phase.
-Peeling iteratively restricts the bounds of the subgroup, while pasting iteratively expands them.
+Peeling restricts the bounds of the subgroup iteratively, while pasting expands them.
 Algorithm~\ref{al:csd:prim} outlines the peeling phase for finding one subgroup, which is the flavor of PRIM we consider in this article and denote as \emph{PRIM}.
 Pasting may have little effect on the subgroup quality and is often left out~\cite{arzamasov2021reds}.
 Further, we do not discuss extensions of PRIM like bumping~\cite{friedman1999bump, kwakkel2016improving}, which uses bagging of multiple PRIM runs to improve subgroup quality, or covering~\cite{friedman1999bump}, which returns a sequence of subgroups covering different data objects.
@@ -422,7 +422,7 @@ There are different options for this update step.
 Algorithm~\ref{al:csd:beam-search-subgroup-update} outlines the update procedure for \emph{Beam Search}, while \emph{Best Interval} uses a slightly different one (cf.~Algorithm~\ref{al:csd:best-interval-subgroup-update}).
 For \emph{Beam Search}, the procedure tries to refine the lower bound (Lines~\ref{al:csd:beam-search-subgroup-update:line:lb-start}--\ref{al:csd:beam-search-subgroup-update:line:lb-end}) and the upper bound (Lines~\ref{al:csd:beam-search-subgroup-update:line:ub-start}--\ref{al:csd:beam-search-subgroup-update:line:ub-end}) for a given Feature~$j$ separately by replacing it with another feature value from data objects in the subgroup.
 In particular, it iterates over all these unique feature values.
-Each solution candidate that improves upon the minimum subgroup quality from the beam replaces the corresponding subgroup, unless it already is part of them beam due to another update action (Lines~\ref{al:csd:beam-search-subgroup-update:line:lb-replace-start}--\ref{al:csd:beam-search-subgroup-update:line:lb-replace-end} and~\ref{al:csd:beam-search-subgroup-update:line:ub-replace-start}--\ref{al:csd:beam-search-subgroup-update:line:ub-replace-end}).
+Each solution candidate that improves upon the minimum subgroup quality from the beam replaces the corresponding subgroup, unless it already is part of the beam due to another update action (Lines~\ref{al:csd:beam-search-subgroup-update:line:lb-replace-start}--\ref{al:csd:beam-search-subgroup-update:line:lb-replace-end} and~\ref{al:csd:beam-search-subgroup-update:line:ub-replace-start}--\ref{al:csd:beam-search-subgroup-update:line:ub-replace-end}).
 
 \begin{algorithm}[t]
 	\DontPrintSemicolon

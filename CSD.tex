@@ -2032,7 +2032,7 @@ In this section, we recap our article (cf.~Section~\ref{sec:csd:conclusion:concl
 Subgroup-discovery methods constitute an important category of interpretable machine-learning models.
 In this article, we analyzed constrained subgroup discovery as another step to improve interpretability.
 First, we formalized subgroup discovery as an SMT optimization problem.
-This formulation supports a variety of user constraints and enables solver-based search for subgroups.
+This formulation supports a variety of user constraints and enables a solver-based search for subgroups.
 In particular, we studied two constraint types, i.e., limiting the number of features used in subgroups and searching for alternative subgroup descriptions.
 For the latter constraint type, we let users control the number of alternatives and a dissimilarity threshold.
 We showed how to integrate these constraint types into our SMT formulation as well as existing heuristic search methods for subgroup discovery.
@@ -2062,11 +2062,11 @@ While the SMT encoding of subgroup discovery is relatively flexible regarding di
 
 \paragraph{Formalization}
 
-In solver-based search for subgroups, we used an SMT encoding (cf.~Section~\ref{sec:csd:approach:smt}) and one particular solver.
-Different white-box encodings or solvers may speed up the search and lead to less timeouts, potentially improving the subgroup quality.
+In the solver-based search for subgroups, we used an SMT encoding (cf.~Section~\ref{sec:csd:approach:smt}) and one particular solver.
+Different white-box encodings or solvers may speed up the search and lead to fewer timeouts, potentially improving the subgroup quality.
 We already proposed MILP and MaxSAT encodings (cf.~Appendices~\ref{sec:csd:appendix:further-encodings:milp} and~\ref{sec:csd:appendix:further-encodings:max-sat}), though without evaluation.
 
-Two assumptions for subgroup discovery in our article were numerical features and a binary target (cf.~Section~\ref{sec:csd:fundamentals:problem}).
+In our article, two assumptions for subgroup discovery were numerical features and a binary target (cf.~Section~\ref{sec:csd:fundamentals:problem}).
 One could adapt the SMT encoding to multi-valued categorical features (cf.~Appendix~\ref{sec:csd:appendix:further-encodings:smt-categorical}) and continuous targets.
 
 \paragraph{Computational complexity}
@@ -2075,9 +2075,9 @@ We established $\mathcal{NP}$-hardness for subgroup discovery with a feature-car
 While the search problem for perfect subgroups admits a polynomial-time algorithm without such constraints (cf.~Proposition~\ref{prop:csd:complexity-unconstrained-perfect-subgroup}), we did not analyze the general unconstrained optimization problem, i.e., including imperfect subgroups.
 
 Further, we showed $\mathcal{NP}$-hardness for finding alternative subgroup descriptions for perfect and imperfect subgroups (cf.~Propositions~\ref{prop:csd:complexity-perfect-alternatives-np-perfect-subgroup} and~\ref{prop:csd:complexity-perfect-alternatives-np-imperfect-subgroup}).
-In both cases, we tackled the search problem for perfect alternatives (cf.~Definition~\ref{def:csd:perfect-alternative}) first, i.e., alternative descriptions that entail exactly the same subgroup membership of data objects as the original subgroup.
+In both cases, we first tackled the search problem for perfect alternatives (cf.~Definition~\ref{def:csd:perfect-alternative}), i.e., alternative descriptions that entail exactly the same subgroup membership of data objects as the original subgroup.
 While we generalized $\mathcal{NP}$-hardness to the optimization problem (cf.~Definition~\ref{def:csd:alternative-subgroup-description-discovery}), which also includes imperfect alternatives as solutions (cf.~Proposition~\ref{prop:csd:complexity-alternatives-np}),
-one could try to explicitly prove hardness for imperfect alternatives.
+one could try to prove hardness for imperfect alternatives explicitly.
 Also, our proofs focused on scenarios where all originally selected features must not be selected in the alternative subgroup description, i.e., a specific value of the dissimilarity threshold~$\tau$.
 One could analyze scenarios with overlapping feature sets explicitly.
 
@@ -2085,7 +2085,7 @@ For parameterized complexity, we established membership in the relatively broad 
 One may attempt to tighten these results.
 
 Finally, while we described how one can integrate feature-cardinality constraints and alternative subgroup descriptions into heuristic search methods (cf.~Sections~\ref{sec:csd:approach:cardinality:heuristics} and~\ref{sec:csd:approach:alternatives:heuristics}), we did not provide quality guarantees relative to the exact optimum.
-In that regard, one could seek for an approximation complexity result, e.g., membership in the complexity class~$\mathcal{APX}$, as established for the problem of finding equivalent subgroup descriptions of minimal length~\cite{boley2009non}.
+In that regard, one could seek an approximation complexity result, e.g., membership in the complexity class~$\mathcal{APX}$, as established for the problem of finding equivalent subgroup descriptions of minimal length~\cite{boley2009non}.
 
 %~\\
 %\noindent \textsc{Acknowledgments}\quad

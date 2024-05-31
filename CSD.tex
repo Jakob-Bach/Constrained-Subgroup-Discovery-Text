@@ -2304,7 +2304,7 @@ Thus, we stuck to the SMT implementation for our main experiments (cf.~Section~\
 \label{sec:csd:appendix:further-encodings:max-sat}
 
 Our SMT formulation of subgroup discovery with and without constraints uses a combination of propositional logic and linear arithmetic.
-However, if all feature values are binary, i.e., $X \in \{0, 1\}^{m \times n}$, we can also define a partial weighted MaxSAT problem \cite{bacchus2021maximum, li2021maxsat}.
+However, if all feature values are binary or binarized, i.e., $X \in \{0, 1\}^{m \times n}$, we can also define a partial weighted MaxSAT problem \cite{bacchus2021maximum, li2021maxsat}.
 This formulation involves hard constraints in propositional logic and an objective function containing weighted clauses, i.e., OR terms.
 In our case, it even is a \textsc{Max One}~\cite{khanna1997complete} problem since the `clauses' in the objective are plain binary variables.
 
@@ -2382,8 +2382,8 @@ To transform the actual feature-cardinality constraint (cf.~Equation~\ref{eq:csd
 \paragraph{Alternative subgroup descriptions}
 
 The objective function for alternative subgroup descriptions (cf.~Equation~\ref{eq:csd:smt-hamming}) already is a weighted sum of the subgroup-membership variables~$b_i^{(a)}$.
-In particular, for negative data objects, i.e., with $y_i = 0$, the weight of $\lnot b_i^{(a)}$ is~$1 / m$.
-For positive data objects, i.e., with $y_i = 1$, the weight of $b_i^{(a)}$ is~$1 / m$.
+In particular, for negative data objects, i.e., with $y_i = 0$, the weight of the literal $\lnot b_i^{(a)}$ is~$1 / m$.
+For positive data objects, i.e., with $y_i = 1$, the weight of the literal $b_i^{(a)}$ is~$1 / m$.
 Since~$m$ is a constant, we can also use~1 as the weight.
 
 We can encode the dissimilarity constraint on the feature selection (cf.~Equation~\ref{eq:csd:smt-constraint-dissimilarity}) with a cardinality encoding from the literature~\cite{sinz2005towards}.
@@ -2398,7 +2398,7 @@ Next, let $\mathit{lb}_j \in \{0, 1\}^{|v_j|}$ and $\mathit{ub}_j \in \{0, 1\}^{
 I.e., instead of two bound variables per feature, there are two bound variables for each unique feature value now.
 $\mathit{lb}^l_j$ indicates whether the $l$-th unique value of Feature~$j$ is the lower bound.
 Vice versa, $\mathit{ub}^l_j$ indicates whether the $l$-th unique value of Feature~$j$ is the upper bound.
-In case this encoding generates too many variables, we may discretize the feature first, e.g., by binning its values, and representing each bin by one value, e.g., the bin's mean.
+In case this encoding generates too many variables, one may discretize the feature first, e.g., by binning its values, and representing each bin by one value, e.g., the bin's mean.
 
 The bound constraints (cf.~Equations~\ref{eq:csd:smt-constraint-bounds-monotonic} and~\ref{eq:csd:maxsat-constraint-bounds-monotonic}) take the following form:
 %
@@ -2427,21 +2427,16 @@ We formulate the subgroup-membership expressions (cf.~Equations~\ref{eq:csd:smt-
 In particular, for a data object to be a member of the subgroup, each feature's lower bound needs to be lower or equal to the actual value~$X_{ij}$, while the upper bound needs to be higher or equal.
 For the binary lower-bound variables $\mathit{lb}^l_j$, this means that any of the bound variables representing values lower or equal to $X_{ij}$ needs to be~1; vice versa for the upper bounds.
 
-Finally, for feature-cardinality constraints, we express the definitions of the feature-selection variables~$s_j$ (cf.~Equations~\ref{eq:csd:smt-constraint-feature-selection} and~\ref{eq:csd:maxsat-constraint-feature-selection}) as follows:
+Finally, for feature-cardinality constraints, we define the feature-selection variables~$s_j$ (cf.~Equations~\ref{eq:csd:smt-constraint-feature-selection} and~\ref{eq:csd:maxsat-constraint-feature-selection}) as follows:
 %
 \begin{equation}
-	\begin{aligned}
-		\forall j, \text{ with } \max_{i \in \{1, \dots, m\}} X_{ij} = v_{l^{\text{min}}}: & & s^{\text{lb}}_j &\leftrightarrow \left( \bigvee_{l \in \{l^{\text{min}} + 1, \dots, |v_j|\}} \mathit{lb}^l_j \right) \\
-		\forall j, \text{ with } \min_{i \in \{1, \dots, m\}} X_{ij} = v_{l^{\text{max}}}: & & s^{\text{ub}}_j &\leftrightarrow \left( \bigvee_{l \in \{ 1, \dots, l^{\text{max}} - 1\}} \mathit{ub}^l_j \right) \\
-		\forall j: & & s_j &\leftrightarrow \left( s^{\text{lb}}_j \lor s^{\text{ub}}_j \right) \\
-		\text{with index:} & & j &\in \{1, \dots, n\}
-	\end{aligned}
+	\forall j \in \{1, \dots, n\}:~ s_j \leftrightarrow \left( \lnot \mathit{lb}^1_j \lor \lnot \mathit{ub}^{|v_j|}_j \right)
 	\label{eq:csd:maxsat-numeric-constraint-feature-selection}
 \end{equation}
 %
-In particular, we check whether the bounds correspond to a feature value that is larger than the minimum or smaller than the maximum value of that feature, which indicates whether the bounds exclude at least one data object from the subgroup or not.
+In particular, we check whether the lower bound is not the minimum or the upper bound is not the maximum value of that feature, which indicates whether the bounds exclude at least one data object from the subgroup or not.
 The actual feature-cardinality constraint (cf.~Equation~\ref{eq:csd:smt-constraint-feature-cardinalty}) does not need to be specifically adapted for non-binary features in MaxSAT.
-The same goes for the definition of alternative subgroup descriptions (cf.~Equations~\ref{eq:csd:smt-hamming} and Equation~\ref{eq:csd:smt-constraint-dissimilarity}).
+The same goes for the definition of alternative subgroup descriptions (cf.~Equations~\ref{eq:csd:smt-hamming} and Equation~\ref{eq:csd:smt-constraint-dissimilarity}), which only uses the original binary decision variables by default.
 
 \subsection{Proofs}
 \label{sec:csd:appendix:proofs}

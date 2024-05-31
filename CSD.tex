@@ -620,17 +620,17 @@ Fourth, we formalize and analyze alternative subgroup descriptions (cf.~Section~
 To find optimal subgroups exactly, one can encode subgroup discovery as a white-box optimization problem and employ a solver.
 Here, we propose a Satisfiability Modulo Theories (SMT)~\cite{barrett2018satisfiability} encoding, which is straightforward given the problem definition (cf.~Definition~\ref{def:csd:subgroup-discovery}).
 SMT allows expressions in first-order logic with particular interpretations, e.g., arrays, arithmetic, or bit vectors~\cite{barrett2018satisfiability}.
-For our encoding of subgroup discovery, we use linear real arithmetic (LRA).
+Our encoding of subgroup discovery uses linear real arithmetic (LRA).
 Complementing this SMT encoding, Appendix~\ref{sec:csd:appendix:further-encodings} describes further encodings:
 SMT for categorical features (cf.~Section~\ref{sec:csd:appendix:further-encodings:smt-categorical}), mixed-integer linear programming (cf.~Section~\ref{sec:csd:appendix:further-encodings:milp}), and maximum satisfiability (cf.~Section~\ref{sec:csd:appendix:further-encodings:max-sat}).
 
-The optimization problems consists of an objective function and constraints.
+The optimization problem consists of an objective function and constraints.
 
 \paragraph{Objective function}
 
-As objective function, we use WRAcc, which should be maximized.
+As the objective function, we use WRAcc, which should be maximized.
 In the formula for WRACC (cf.~Equation~\ref{eq:csd:wracc}), $m$ and $m^+$ are constants, while $m_b$ and $m_b^+$ depend on the decision variables.
-The previously provided formula seems to be non-linear in the decision variables since $m_b$ appears in enumerator and denominator.
+The previously provided formula seems to be non-linear in the decision variables since $m_b$ appears in the numerator and denominator.
 However, one can reformulate the expression by multiplying its two factors, obtaining the following expression:
 %
 \begin{equation}
@@ -638,7 +638,7 @@ However, one can reformulate the expression by multiplying its two factors, obta
 	\label{eq:csd:smt-wracc}
 \end{equation}
 %
-In this new expression, the denominators are constant and the factor~$m^+$ in the enumerator is constant as well.
+In this new expression, the denominators are constant, and the factor~$m^+$ in the numerator is constant as well.
 Thus, the whole expression is linear in~$m_b^+$ and~$m_b$.
 We define these two quantities as linear expressions from binary decision variables~$b \in \{0, 1\}^m$ that denote subgroup membership.
 I.e., $b_i$~expresses whether the $i$-th data object is in the subgroup or not:
@@ -651,9 +651,9 @@ I.e., $b_i$~expresses whether the $i$-th data object is in the subgroup or not:
 	\label{eq:csd:smt-constraint-m-as-sum}
 \end{equation}
 %
-Since the values of the target variable~$y$ are fixed, the expression for~$m_b^+$ simply sums over the positive data objects only.
+Since the values of the target variable~$y$ are fixed, the expression for~$m_b^+$ only sums over the positive data objects.
 Further, one may define $m_b^+$ and~$m_b$ as separate integer variables or directly insert their expressions into Equation~\ref{eq:csd:smt-wracc}.
-We choose the latter formulation in our implementation and therefore wrote $:=$ in Equation~\ref{eq:csd:smt-constraint-m-as-sum} instead of using a proper propositional operator like $\leftrightarrow$.
+We chose the latter formulation in our implementation and therefore wrote $:=$ in Equation~\ref{eq:csd:smt-constraint-m-as-sum} instead of using a proper propositional operator like $\leftrightarrow$.
 
 The formula for nWRAcc (cf.~Equation~\ref{eq:csd:wracc-normalized}) is linear as well, having the same enumerator as Equation~\ref{eq:csd:smt-wracc} and a different constant in the denominator.
 
@@ -676,8 +676,8 @@ A data object is a member of the subgroup if all its feature values are containe
 	\label{eq:csd:smt-constraint-subgroup-membership}
 \end{equation}
 %
-Instead of defining separate decision variables~$b_i$ and binding them to the bounds with a equivalence constraint, one could also insert the Boolean expression into the right-hand-side of Equation~\ref{eq:csd:smt-constraint-m-as-sum} directly.
-In particular, $\mathit{lb}_j$ and $\mathit{ub}_j$ are the only decision variables that are strictly necessary in the optimization problem.
+Instead of defining separate decision variables~$b_i$ and binding them to the bounds with an equivalence constraint, one could also insert the Boolean expression into the right-hand-side of Equation~\ref{eq:csd:smt-constraint-m-as-sum} directly.
+In particular, $\mathit{lb}_j$ and $\mathit{ub}_j$ are the only decision variables strictly necessary for the optimization problem.
 However, for formulating some constraint types on subgroups (cf.~Section~\ref{sec:csd:approach:constraint-types}), it is helpful to be able to refer to~$b_i$.
 
 \paragraph{Complete optimization problem}
@@ -705,7 +705,7 @@ In our implementation, we add a small post-processing step.
 In particular, we do not use the solver-determined values of the variables $\mathit{lb}_j$ and $\mathit{ub}_j$ when evaluating subgroup quality.
 Instead, we set the lower and upper bounds to the minimum and maximum feature values of all data objects in the subgroup (i.e., with $b_i=1$).
 Thus, we ensure that the bounds correspond to actual feature values.
-This guarantee is not formally necessary, but consistent with the subgroup descriptions returned by heuristic search methods and baselines.
+This guarantee is not formally necessary but consistent with the subgroup descriptions returned by heuristic search methods and baselines.
 Also, we avoid potential minor numeric issues caused by extracting the values of real variables from the solver.
 Finally, if the subgroup does not contain any data objects, we use invalid bounds (i.e., $\mathit{ub}_j = -\infty < \infty = \mathit{lb}_j$) to ensure that the subgroup remains empty even for arbitrary new data objects.
 
@@ -713,7 +713,7 @@ Finally, if the subgroup does not contain any data objects, we use invalid bound
 \label{sec:csd:approach:constraint-types}
 
 A white-box formulation of subgroup discovery, like our SMT encoding, supports directly integrating a variety of constraint types in a declarative manner.
-In contrast, algorithmic search methods for subgroups need to explicitly check constraints or need to implicitly ensure that generated solution candidates satisfy constraints.
+In contrast, algorithmic search methods for subgroups need to explicitly check constraints or implicitly ensure that generated solution candidates satisfy constraints.
 Such implicit guarantees may only hold for particular constraint types or may require adapting the search method accordingly.
 
 \paragraph{Domain knowledge}
@@ -729,7 +729,7 @@ In our formulation of subgroup discovery as an SMT problem with linear real arit
 
 Various notions of subgroup quality can serve as an objective in subgroup discovery~\cite{atzmueller2015subgroup, herrera2011overview}.
 If one wants to consider several quality metrics simultaneously, one option is multi-objective optimization. However, the latter typically requires using different search methods than single-objective optimization.
-Also, there may be not one but a set of Pareto-optimal solutions or users may need to manually define trade-offs between objectives.
+Also, there may be not one but a set of Pareto-optimal solutions, or users may need to define trade-offs between objectives manually.
 Alternatively, one can keep a single primary objective and add the other objectives as inequality constraints, e.g., enforcing that their values are below or above user-defined thresholds.
 According to~\cite{meeng2021real}, such lower bounds on subgroup quality are a common constraint type in subgroup discovery.
 Without constraints, one may prune the set of discovered subgroups as a post-processing step~\cite{atzmueller2015subgroup}.
@@ -749,10 +749,10 @@ According to~\cite{meeng2021real}, lower bounds on subgroup membership are a com
 
 Regarding \emph{bounds}, one can define minimum or maximum values for the range of a feature in the subgroup, i.e., the difference between lower and upper bound, using the decision variables~$\mathit{lb}_j$ and~$\mathit{ub}_j$.
 Such constraints can prevent choosing ranges that are too small or too large for user needs.
-If the features are normalized, one can also constrain the volume of the subgroup, i.e., the product of all ranges, or the density, i.e., number of data objects per volume.
+If the features are normalized, one can also constrain the volume of the subgroup, i.e., the product of all ranges, or the density, i.e., the number of data objects per volume.
 Generally, however, a feature's bounded value range need not indicate how many data objects are excluded from the subgroup.
 Alternatively, one can constrain the subgroup membership implied by individual features' bounds, e.g., enforcing that selected features exclude at least a certain fraction of data objects.
-The latter constraint type may prevent setting over-sensitive bounds that only prune a small number of data objects from the subgroup, which may not generalize to unseen data.
+The latter constraint type may prevent setting oversensitive bounds that only exclude few data objects and do not generalize to unseen data.
 
 Regarding \emph{features selection}, one can limit the number of features used in the subgroup description, which is a common constraint type~\cite{meeng2021real} and also a metric for subgroup complexity~\cite{helal2016subgroup, herrera2011overview, ventura2018subgroup}, already proposed in the article introducing PRIM~\cite{friedman1999bump}.
 Section~\ref{sec:csd:approach:cardinality} discusses such feature-cardinality constraints in detail.
@@ -765,7 +765,7 @@ As for regularization, constraints for alternatives may relate to data objects, 
 We see two major notions of alternatives, which we call \emph{alternative subgroups} and \emph{alternative subgroup descriptions}.
 
 \emph{Alternative subgroups} aim to contain different sets of data objects.
-Since subgroups only intend to cover certain regions of the data, it is natural to search for multiple subgroups to cover multiple regions; see~\cite{atzmueller2015subgroup} for an overview of subgroup-set selection.
+Since subgroups only intend to cover specific regions of the data, it is natural to search for multiple subgroups to cover multiple regions; see~\cite{atzmueller2015subgroup} for an overview of subgroup-set selection.
 One can search for multiple subgroups sequentially or simultaneously.
 The `covering' approach allows sequential search for any subgroup-discovery method by removing all data objects contained in previous subgroups and repeating subgroup discovery~\cite{friedman1999bump}.
 Alternatively, one may reweight~\cite{gamberger2002expert, lavrac2004subgroup} or resample~\cite{scholz2005sampling} data objects based on their subgroup membership.
@@ -776,7 +776,7 @@ Besides measures for predictive quality like WRAcc, the diversity of subgroups~\
 One may also filter redundant subgroups as a post-processing step~\cite{bosc2018anytime, grosskreutz2012enhanced, hudson2023subgroup, leeuwen2013discovering}.
 In a white-box formulation of subgroup discovery, one can enforce diversity with appropriate constraints on subgroup membership (cf.~Equation~\ref{eq:csd:smt-constraint-subgroup-membership}), e.g., limiting the number of data objects that can be members of two subgroups simultaneously.
 
-In contrast, \emph{alternative subgroup descriptions} explicitly aim to contain a similar set of data objects, but use different subgroup descriptions, e.g., a different feature selection.
+In contrast, \emph{alternative subgroup descriptions} explicitly aim to contain a similar set of data objects but use different subgroup descriptions, e.g., a different feature selection.
 Section~\ref{sec:csd:approach:alternatives} discusses this constraint type in detail.
 Related to this concept, \cite{boley2009non}~introduces the notion of equivalent subgroup descriptions of minimal length, which cover exactly the same set of data objects.
 
@@ -804,7 +804,7 @@ To formalize this constraint type, we define feature selection~\cite{guyon2003in
 The bounds of unselected features can be considered infinite, effectively removing these features from the subgroup description.
 The \emph{feature cardinality} of the subgroup is the number of selected features.
 Related work also uses the terms \emph{depth} \cite{meeng2021real} or \emph{length} \cite{atzmueller2015subgroup, helal2016subgroup}, though partly referring to the number of conditions in the subgroup description rather than selected features.
-I.e., if there are a lower and an upper bound for a feature, some related work counts this feature twice instead of once.
+I.e., if there is a lower and an upper bound for a feature, some related work counts this feature twice instead of once.
 
 To formulate a feature-cardinality constraint, users provide an upper bound on the number of selected features:
 %
@@ -833,7 +833,7 @@ A feature is selected if its bounds exclude at least one data object from the su
 	\label{eq:csd:smt-constraint-feature-selection}
 \end{equation}
 %
-In this equation, minimum and maximum feature values are constants that one can determine before formulating the optimization problem.
+In this equation, minimum and maximum feature values are constants that can be determined before formulating the optimization problem.
 
 Given the definition of~$s_j$, setting an upper bound on the number of selected features (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) is straightforward:
 %
@@ -843,7 +843,7 @@ Given the definition of~$s_j$, setting an upper bound on the number of selected 
 \end{equation}
 %
 Instead of explicitly defining the decision variables $s_j$, $s^{\text{lb}}_j$, and $s^{\text{ub}}_j$, one could also insert the corresponding expressions into Equation~\ref{eq:csd:smt-constraint-feature-cardinalty} directly.
-However, we will use~$s_j$ for alternative subgroup descriptions (cf.~Section~\ref{sec:csd:approach:alternatives:smt}) as well, so we define corresponding variables in our implementation.
+However, we will also use~$s_j$ for alternative subgroup descriptions (cf.~Section~\ref{sec:csd:approach:alternatives:smt}), so we define corresponding variables in our implementation.
 
 The overall SMT encoding of subgroup discovery with a feature-cardinality constraint is the SMT encoding of unconstrained subgroup discovery (cf.~Equation~\ref{eq:csd:smt-problem-unconstrained-complete}) supplemented by the variables and constraints from Equations~\ref{eq:csd:smt-constraint-feature-selection} and~\ref{eq:csd:smt-constraint-feature-cardinalty}.
 
@@ -854,8 +854,8 @@ This step is consistent with the heuristic search methods and baselines (e.g., c
 \label{sec:csd:approach:cardinality:heuristics}
 
 The given feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) is \emph{antimonotonic}~\cite{ng1998exploratory} in the feature selection:
-If a set of selected features satisfies the constraint, all its subsets also satisfy the constraint.
-Vice versa, if a feature set violates the constraint, all its supersets also violate the constraint.
+If a set of selected features satisfies the constraint, all its subsets also satisfy it.
+Vice versa, if a feature set violates the constraint, all its supersets also violate it.
 This property allows to easily integrate the constraint into the three presented heuristic search methods, i.e., \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Beam Search} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}), and \emph{Best Interval} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:best-interval-subgroup-update}), which all iteratively enlarge the set of selected features.
 In particular, these search methods start with unrestricted subgroup bounds, i.e., an empty feature set, which satisfies the constraint for any~$k \geq 0$.
 Each iteration may either add bounds on one further feature or refine the bounds on an already selected feature.
@@ -885,7 +885,7 @@ In particular, we can rephrase Equation~\ref{eq:csd:wracc} as follows:
 \end{equation}
 %
 Thus, maximizing WRAcc corresponds to minimizing~$m_b / m$, i.e., the relative frequency of the data objects in the subgroup.
-Since the number of positive data objects in the subgroup is fixed, this objective amounts to including as few negative data objects as possible into the subgroup, i.e., minimizing the number of false positives, which is what our univariate heuristic does as well.
+Since the number of positive data objects in the subgroup is fixed, this objective amounts to including as few negative data objects as possible in the subgroup, i.e., minimizing the number of false positives, which is what our univariate heuristic does as well.
 
 The proposed heuristic only entails a linear runtime in the number of features, like the unconstrained \emph{MORS}, since it evaluates each feature independently.
 With quadratic runtime, one can also consider interactions between features and thereby potentially increase subgroup quality.
@@ -919,9 +919,9 @@ Since we need to combine bounds over all $n$~features, the size of the search sp
 	\label{prop:csd:complexity-unconstrained-exhaustive}
 \end{proposition}
 %
-For each of theses candidate subgroups, the cost of evaluating a quality function like WRAcc (cf.~Equation~\ref{eq:csd:wracc}) typically is $O(m \cdot n)$, i.e., requires a constant number of passes over the dataset and therefore has linear complexity in the dataset size.
+For each of these candidate subgroups, the cost of evaluating a quality function like WRAcc (cf.~Equation~\ref{eq:csd:wracc}) typically is $O(m \cdot n)$, i.e., requires a constant number of passes over the dataset and therefore has linear complexity in the dataset size.
 Additionally, the number of potential subgroups should be seen as an upper bound:
-There are also more efficient exhaustive search methods, which employ quality-based pruning to not explicitly evaluate all solution candidates while still implicitly covering the full search space~\cite{atzmueller2015subgroup}.
+More efficient exhaustive search methods employ quality-based pruning to not explicitly evaluate all solution candidates while still implicitly covering the full search space~\cite{atzmueller2015subgroup}.
 
 Next, we adapt the result from Proposition~\ref{prop:csd:complexity-unconstrained-exhaustive} to feature-cardinality constraints.
 Instead of combining bounds from all $n$~features, there are $\binom{n}{k} \leq n^k$ feature sets of size~$k$ with $O(m^{2k})$ bound candidates each:
@@ -932,7 +932,7 @@ Instead of combining bounds from all $n$~features, there are $\binom{n}{k} \leq 
 \end{proposition}
 %
 For the special case $k=1$, the size of the search space becomes $O(n \cdot m^2)$, which is leveraged by heuristic search methods that only consider updating the bounds of each feature separately instead of jointly (cf.~Section~\ref{sec:csd:fundamentals:heuristics}).
-With the update procedure of \emph{Best Interval} (cf.~Algorithm~\ref{al:csd:best-interval-subgroup-update}), the cost for~$k=1$ even reduces to $O(n \cdot m)$ since it only requires one pass over the unique values of each feature to implicitly evaluate all lower-upper-bound combinations for WRAcc.
+With the update procedure of \emph{Best Interval} (cf.~Algorithm~\ref{al:csd:best-interval-subgroup-update}), the cost for~$k=1$ even reduces to $O(n \cdot m)$ since it only requires one pass over the unique values of each feature to evaluate all lower-upper-bound combinations for WRAcc implicitly.
 The update procedure of \emph{Beam Search} (cf.~Algorithm~\ref{al:csd:beam-search-subgroup-update}) also requires $O(n \cdot m)$, by only checking updates of either lower or upper bound.
 
 \paragraph{Parameterized complexity}
@@ -948,7 +948,7 @@ Thus, the problem of subgroup discovery belongs to the parameterized complexity 
 %
 Due to the exponent~$2n$ in Proposition~\ref{prop:csd:complexity-unconstrained-exhaustive}, an exhaustive search may be infeasible in practice, even for a small, constant~$n$.
 Further, the complexity remains exponential in~$n$ if $m$~is fixed.
-I.e., the number of features has an exponential impact, while the number of data objects has a polynomial impact on the size of the search space.
+I.e., the number of features has an exponential impact on the size of the search space, while the number of data objects has a polynomial impact.
 
 With a feature-cardinality constraint, the problem retains $\mathcal{XP}$ membership.
 Considering Proposition~\ref{prop:csd:complexity-cardinality-exhaustive}, the parameter is~$k$ instead of~$n$ now:
@@ -1002,7 +1002,7 @@ If this similarity is very high, then the subgroup quality should also be simila
 Additionally, we constrain the new subgroup description to be alternative enough.
 We express this dissimilarity in terms of the subgroups' feature selection.
 The user chooses a dissimilarity threshold~$\tau \in \mathbb{R}_{\geq 0}$ and can thereby control alternatives.
-Further, we recommend to employ a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) when determining the original subgroup, so there are sufficiently many features left for the alternative description.
+Further, we recommend employing a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) when determining the original subgroup, so there are sufficiently many features left for the alternative description.
 The alternative may be feature-cardinality-constrained as well, to increase its interpretability.
 
 In a nutshell, alternative subgroup descriptions should produce similar predictions as the original subgroup but use different features.
@@ -1012,7 +1012,7 @@ In a nutshell, alternative subgroup descriptions should produce similar predicti
 One can search for multiple alternative subgroup descriptions sequentially.
 After determining the original subgroup, each iteration yields one further alternative.
 The user may prescribe a number of alternatives~$a \in \mathbb{N}$ a priori or interrupt the procedure whenever the alternatives are not interesting anymore, e.g., too dissimilar to the original subgroup.
-Each alternative should have similar subgroup membership as the original subgroup but a dissimilar feature selection compared to all \emph{existing subgroups}, i.e., subgroups found in prior iterations.
+Each alternative should have a similar subgroup membership as the original subgroup but a dissimilar feature selection compared to all \emph{existing subgroups}, i.e., subgroups found in prior iterations.
 The following definition captures this optimization problem:
 %
 \begin{definition}[Alternative-subgroup-description discovery]
@@ -1043,7 +1043,7 @@ Further, we normalize the similarity with the vector length, i.e., number of dat
 \end{equation}
 %
 If either $b'$ or $b''$ is constant, then this similarity measure is linear in its remaining argument, as discussed later (cf.~Equation~\ref{eq:csd:smt-hamming}).
-Further, if one considers one vector to be a prediction and the other one to be the ground truth, Equation~\ref{eq:csd:hamming-general} equals prediction accuracy for classification.
+Further, if one considers one vector to be a prediction and the other to be the ground truth, Equation~\ref{eq:csd:hamming-general} equals prediction accuracy for classification.
 
 Another popular similarity measure for sets or binary vectors is the Jaccard index~\cite{choi2010survey}, which relates the overlap of positive vector entries to their union:
 %
@@ -1066,11 +1066,11 @@ We employ the following \emph{deselection dissimilarity} in combination with an 
 \end{equation}
 %
 This dissimilarity counts how many of the previously selected features are \emph{not} selected in the new subgroup description.
-These features may either be replaced by other features or the total number of selected features may be reduced.
-The constraints ensures that at least $\tau_{\text{abs}} \in \mathbb{N}$ features are deselected but never more than there were selected before ($k^{\text{old}}$), which would be infeasible.
+These features may either be replaced by other features, or the total number of selected features may be reduced.
+The constraint ensures that at least $\tau_{\text{abs}} \in \mathbb{N}$ features are deselected but never more than there were selected before ($k^{\text{old}}$), which would be infeasible.
 For maximum dissimilarity, none of the previously selected features may be selected again.
 Note that this dissimilarity measure is asymmetric, i.e., $\text{dis}_{\text{des}}(s^{\text{new}}, s^{\text{old}}) \neq \text{dis}_{\text{des}}(s^{\text{old}}, s^{\text{new}})$.
-While this property would be an issue in a simultaneous search for multiple alternatives, i.e., without clear ordering, it is acceptable for sequential search, where `old' and `new' are well-defined.
+While this property would be an issue in a simultaneous search for multiple alternatives, i.e., without an explicit ordering, it is acceptable for sequential search, where `old' and `new' are well-defined.
 
 Conceptually, one could also employ a more common dissimilarity measure like the Jaccard distance or the Dice dissimilarity~\cite{choi2010survey}.
 The latter two are even symmetric and normalized to~$[0,1]$.
@@ -1085,7 +1085,7 @@ In particular, these dissimilarities can increase by selecting features that wer
 \subsubsection{SMT Encoding}
 \label{sec:csd:approach:alternatives:smt}
 
-We only need to slightly reformulate Equation~\ref{eq:csd:hamming-general} to obtain an objective function that is linear regarding the alternative subgroup-membership vector~$b^{(a)}$:
+We only need to reformulate Equation~\ref{eq:csd:hamming-general} slightly to obtain a linear objective function regarding the alternative subgroup-membership vector~$b^{(a)}$:
 %
 \begin{equation}
 	\begin{aligned}
@@ -1116,7 +1116,7 @@ Optionally, one may add a feature-cardinality constraint (cf.~Equation~\ref{eq:c
 \subsubsection{Integration into Heuristic Search Methods}
 \label{sec:csd:approach:alternatives:heuristics}
 
-The situation here is similar to that of integrating feature-cardinality constraints into heuristic search methods (cf.~Section~\ref{sec:csd:approach:cardinality:heuristics}).
+The situation here is similar to integrating feature-cardinality constraints into heuristic search methods (cf.~Section~\ref{sec:csd:approach:cardinality:heuristics}).
 In particular, the constraint for alternatives based on the deselection dissimilarity (cf.~Equation~\ref{eq:csd:constraint-dissimilarity}) is antimonotonic.
 I.e., the dissimilarity constraint is satisfied for an empty set of selected features, and once it is violated for a feature set, it remains violated for any superset.
 Thus, the constraint type is suitable for heuristic search that iteratively enlarges the set of selected features, like \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Beam Search} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}), and \emph{Best Interval} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:best-interval-subgroup-update}).
@@ -1148,7 +1148,8 @@ For the dissimilarity constraint, we would like to implement \emph{get\_permissi
 In general, uniform sampling from a constrained space is a computationally hard problem~\cite{ermon2012uniform}, though it may be feasible for the particular constraint type.
 We could also sample from the unconstrained space and then check the dissimilarity constraint, repeating sampling till a valid feature set is found.
 However, this strategy may produce a high fraction of invalid solution candidates, depending on how strong the constraint is for the particular dataset and user parameters.
-Another option is to switch to non-uniform sampling, e.g., only sample features not selected in any existing subgroup, which guarantees constraint satisfaction but does not cover the entire constrained search space since it ignores the feature-set overlap allowed by the dissimilarity threshold~$\tau$.
+Another option is to switch to non-uniform sampling, e.g., only sample features not selected in any existing subgroup.
+This guarantees constraint satisfaction but does not cover the entire constrained search space since it ignores the feature-set overlap allowed by the dissimilarity threshold~$\tau$.
 
 \subsubsection{Computational Complexity}
 \label{sec:csd:approach:alternatives:complexity}
@@ -1167,10 +1168,10 @@ Thus, the results from Propositions~\ref{prop:csd:complexity-unconstrained-exhau
 	\label{prop:csd:complexity-alternatives-exhaustive}
 \end{proposition}
 %
-The evaluation of each solution candidate differs from original subgroup descriptions, but has a similar complexity, i.e., $O(m \cdot n + a \cdot n)$ instead of~$O(m \cdot n)$.
+The evaluation of each solution candidate differs from the original subgroup descriptions but has a similar complexity, i.e., $O(m \cdot n + a \cdot n)$ instead of $O(m \cdot n)$.
 In particular, evaluating the subgroup-membership-similarity-based objective function (e.g.,~Equation~\ref{eq:csd:hamming-general}) should typically have a cost of~$O(m \cdot n)$, like subgroup-quality functions have.
-Different to the unconstrained case, some of the solution candidates violate the dissimilarity constraint (e.g.,~Equation~\ref{eq:csd:constraint-dissimilarity}) and need not be evaluated.
-The corresponding constraint check requires determining which features are selected and computing the dissimilarity.
+Unlike the unconstrained case, some solution candidates violate the dissimilarity constraint (e.g.,~Equation~\ref{eq:csd:constraint-dissimilarity}) and need not be evaluated.
+The corresponding constraint check requires determining the selected features and computing the dissimilarity.
 The former (cf.~Definition~\ref{def:csd:feature-selection}) runs in~$O(n)$ if the minimum and maximum feature values of the dataset are precomputed.
 The latter should typically entail a cost of~$O(n)$ per existing subgroup description for reasonably simple dissimilarity functions.
 

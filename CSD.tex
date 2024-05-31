@@ -1968,6 +1968,18 @@ Further, the original feature set should be minimized, i.e., a subset be found, 
 The authors prove $\mathcal{NP}$-hardness and propose two algorithms for their problem but do not pursue a solver-based search.
 We adapt their hardness proof to the perfect-subgroup-discovery problem with a feature-cardinality constraint (cf.~Proposition~\ref{prop:csd:complexity-cardinality-np-perfect-subgroup}), based on which we derive further proofs for problems with feature-cardinality constraints and alternative subgroup descriptions.
 
+\paragraph{Redescription mining}
+
+Redescription mining aims to find pairs or sets of descriptions that cover exactly or approximately the same data objects~\cite{galbrun2017redescription, ramakrishnan2004turning}.
+Our notion of alternative subgroup descriptions pursues a similarity goal.
+However, we search for alternative descriptions sequentially instead of simultaneously.
+Also, the original subgroup description usually optimizes subgroup quality, while redescription mining has no target variable, i.e., is unsupervised~\cite{ramakrishnan2004turning}.
+Further, redescription mining works with different dissimilarity criteria than we do, e.g., having features pre-partitioned into non-overlapping sets~\cite{galbrun2017redescription, gallo2008finding, mihelcic2023complexity} or requiring only one arbitrary part of the description to differ~\cite{parida2005redescription}.
+In contrast, we allow users controlling the overlap between feature sets with the parameter~$\tau$ (cf.~Equation~\ref{eq:csd:smt-constraint-dissimilarity}).
+Also, the language for redescriptions may be more complex than for subgroups, e.g., also involve logical negation ($\lnot$) and disjunction ($\lor$)~\cite{galbrun2017redescription, gallo2008finding}, while subgroup descriptions only use the logical AND ($\land$) over features.
+Finally, most existing approaches for redescription mining are algorithmic rather than using white-box optimization~\cite{galbrun2017redescription, mihelcic2023complexity}, though~\cite{guns2013kpattern} provides a constraint-programming formulation of this problem and other pattern-set mining problems.
+Several formulations and parametrizations of the redescription-mining problem are $\mathcal{NP}$-hard; see \cite{mihelcic2023complexity} for a detailed analysis.
+
 \subsection{Feature Selection}
 \label{sec:csd:related-work:feature-selection}
 
@@ -2007,18 +2019,6 @@ In contrast, alternative subgroup descriptions aim to reproduce subgroup members
 Approaches yielding multiple counterfactuals often foster diversity, e.g., by extending the optimization objective~\cite{mothilal2020explaining} or introducing constraints~\cite{karimi2020model, mohammadi2021scaling, russell2019efficient}.
 However, only some approaches have a user-friendly parameter to actively control the diversity of solutions.
 In particular, \cite{mohammadi2021scaling} offers a dissimilarity threshold comparable to our parameter~$\tau$ for alternative subgroup descriptions.
-
-\paragraph{Redescription mining}
-
-Redescription mining aims to find pairs or sets of descriptions that cover exactly or approximately the same data objects~\cite{galbrun2017redescription, ramakrishnan2004turning}.
-Our notion of alternative subgroup descriptions pursues a similarity goal.
-However, we search for alternative descriptions sequentially instead of simultaneously.
-Also, the original subgroup description usually optimizes subgroup quality, while redescription mining has no target variable, i.e., is unsupervised~\cite{ramakrishnan2004turning}.
-Further, redescription mining works with different dissimilarity criteria than we do, e.g., having features pre-partitioned into non-overlapping sets~\cite{galbrun2017redescription, gallo2008finding, mihelcic2023complexity} or requiring only one arbitrary part of the description to differ~\cite{parida2005redescription}.
-In contrast, we allow users controlling the overlap between feature sets with the parameter~$\tau$ (cf.~Equation~\ref{eq:csd:smt-constraint-dissimilarity}).
-Also, the language for redescriptions may be more complex than for subgroups, e.g., also involve logical negation ($\lnot$) and disjunction ($\lor$)~\cite{galbrun2017redescription, gallo2008finding}, while subgroup descriptions only use the logical AND ($\land$) over features.
-Finally, most existing approaches for redescription mining are algorithmic rather than using white-box optimization~\cite{galbrun2017redescription, mihelcic2023complexity}, though~\cite{guns2013kpattern} provides a constraint-programming formulation of this problem and other pattern-set mining problems.
-Several formulations and parametrizations of the redescription-mining problem are $\mathcal{NP}$-hard; see \cite{mihelcic2023complexity} for a detailed analysis.
 
 \section{Conclusions and Future Work}
 \label{sec:csd:conclusion}

@@ -1089,7 +1089,7 @@ We only need to slightly reformulate Equation~\ref{eq:csd:hamming-general} to ob
 %
 \begin{equation}
 	\begin{aligned}
-		\max \quad \text{sim}_{\text{nHamm}}(b^{(a)}, b^{(0)}) &= \frac{1}{m} \cdot \sum_{i=1}^m \left( b_i^{(a)} \leftrightarrow b_i^{(0)} \right) \\
+		\text{sim}_{\text{nHamm}}(b^{(a)}, b^{(0)}) &= \frac{1}{m} \cdot \sum_{i=1}^m \left( b_i^{(a)} \leftrightarrow b_i^{(0)} \right) \\
 		&= \frac{1}{m} \cdot \left( \sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 1}} b_i^{(a)} + \sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 0}} \lnot b_i^{(a)} \right)
 	\end{aligned}
 	\label{eq:csd:smt-hamming}
@@ -2192,7 +2192,7 @@ One can also constrain the number of categories in the subgroup, e.g., to either
 \subsubsection{Mixed-Integer Linear Programming (MILP)}
 \label{sec:csd:appendix:further-encodings:milp}
 
-The MILP formulation extends the SMT formulation.
+We start from the SMT formulation.
 Additional variables and constraints are necessary to linearize certain logical expressions and operators.
 
 \paragraph{Unconstrained subgroup discovery}
@@ -2250,12 +2250,12 @@ Since the latter does not improve the subgroup's quality in any case, we prevent
 \end{equation}
 %
 Finally, the last three inequalities in Equation~\ref{eq:csd:milp-constraint-subgroup-membership} tie $b^{\text{lb}}_{ij}$ and $b^{\text{ub}}_{ij}$ to $b_i$ and linearize the logical AND operators ($\land$) from Equation~\ref{eq:csd:smt-constraint-subgroup-membership}.
-In particular, these constraints ensure that a object is a member of the subgroup, i.e., $b_i = 1$, if and only if all feature values of the data object observe the lower and upper bounds, i.e., all corresponding $b^{\text{lb}}_{ij} = 1$ and $b^{\text{ub}}_{ij} = 1$.
+In particular, these constraints ensure that a data object is a member of the subgroup, i.e., $b_i = 1$, if and only if all feature values of the data object observe the lower and upper bounds, i.e., all corresponding $b^{\text{lb}}_{ij} = 1$ and $b^{\text{ub}}_{ij} = 1$.
 
 \paragraph{Feature-cardinality constraints}
 
 The feature-cardinality constraint of the SMT formulation (cf.~Equation~\ref{eq:csd:smt-constraint-feature-cardinalty}) already is a linear expression in the feature-selection variables~$s_j$, so we can keep it as-is.
-However, the constraints defining~$s_j$ (cf.~Equation~\ref{eq:csd:smt-constraint-feature-selection}) contain a logical OR operator ($\lor$) and comparison ($<$) expressions.
+However, the constraints defining~$s_j$ (cf.~Equation~\ref{eq:csd:smt-constraint-feature-selection}) contain a logical OR ($\lor$) operator and comparison ($<$) expressions.
 We linearize these constraints as follows:
 %
 \begin{equation}

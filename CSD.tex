@@ -398,7 +398,7 @@ Further, if this solution candidate improves upon the optimal solution candidate
 			$Q^{(l)} \leftarrow Q(\mathit{lb}, \mathit{ub}, X, y)$\; \label{al:csd:beam-search-subgroup-update:line:ub-replace-end} \label{al:csd:beam-search-subgroup-update:line:ub-end}
 		}
 	}
-	\caption{evaluate\_subgroup\_updates(\dots) for \emph{Beam Search}}
+	\caption{evaluate\_subgroup\_updates(\dots) for \emph{Beam Search}.}
 	\label{al:csd:beam-search-subgroup-update}
 \end{algorithm}
 
@@ -454,7 +454,7 @@ Each solution candidate that improves upon the minimum subgroup quality from the
 		$\mathit{cand\_has\_changed}^{(l)} \leftarrow$ \textbf{true}\;
 		$Q^{(l)} \leftarrow Q^{\text{opt}}$\; \label{al:csd:best-interval-subgroup-update:line:replace-end}
 	}
-	\caption{evaluate\_subgroup\_updates(\dots) for \emph{Best Interval}}
+	\caption{evaluate\_subgroup\_updates(\dots) for \emph{Best Interval}.}
 	\label{al:csd:best-interval-subgroup-update}
 \end{algorithm}
 
@@ -583,7 +583,7 @@ In particular, the bounds found by \emph{MORS} cannot be made tighter to exclude
 		}
 		\If{$Q(\mathit{lb}, \mathit{ub}, X, y) > Q^{\text{opt}}$}{ \label{al:csd:random-search:line:optimum-update-start}
 			$Q^{\text{opt}} \leftarrow Q(\mathit{lb}, \mathit{ub}, X, y)$\;
-			($\mathit{lb}^{\text{opt}},~ \mathit{ub}^{\text{opt}}) \leftarrow (\mathit{lb},~ \mathit{ub})$\; \label{al:csd:random-search:line:optimum-update-end}
+			$(\mathit{lb}^{\text{opt}},~ \mathit{ub}^{\text{opt}}) \leftarrow (\mathit{lb},~ \mathit{ub})$\; \label{al:csd:random-search:line:optimum-update-end}
 		}
 	}
 	\For{$j \leftarrow 1$ \KwTo $n$}{ \label{al:csd:random-search:line:bounds-infty-start}
@@ -1455,14 +1455,14 @@ In this section, we compare all six subgroup-discovery methods in the experiment
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
 		\includegraphics[width=\textwidth, trim=15 55 15 15, clip]{plots/csd-unconstrained-nwracc-all-datasets.pdf}
-		\caption{All datasets.}
+		\caption{All 27 datasets.}
 		\label{fig:csd:unconstrained-nwracc-all-datasets}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
 		\includegraphics[width=\textwidth, trim=15 55 15 15, clip]{plots/csd-unconstrained-nwracc-no-timeout-datasets.pdf}
-		\caption{Datasets without \emph{SMT} timeouts.}
+		\caption{17 datasets without \emph{SMT} timeouts.}
 		\label{fig:csd:unconstrained-nwracc-no-timeout-datasets}
 	\end{subfigure}
 	\caption{
@@ -1505,7 +1505,7 @@ While \emph{Random} mostly yields the same quality as not restricting the subgro
 			\bottomrule
 		\end{tabular}
 		\caption{
-			All datasets.
+			All 27 datasets.
 		}
 		\label{tab:csd:unconstrained-runtime-all-datasets}
 	\end{subtable}
@@ -1522,7 +1522,7 @@ While \emph{Random} mostly yields the same quality as not restricting the subgro
 			\bottomrule
 		\end{tabular}
 		\caption{
-			Datasets without \emph{SMT} timeouts.
+			17 datasets without \emph{SMT} timeouts.
 		}
 		\label{tab:csd:unconstrained-runtime-no-timeout-datasets}
 	\end{subtable}
@@ -1564,7 +1564,7 @@ This average preparation time is already greater than the average total runtime 
 	\caption{
 		Spearman correlation between runtime and metrics for dataset size,
 		over datasets and cross-validation folds, by subgroup-discovery method.
-		Results from the unconstrained experimental scenario, using datasets without \emph{SMT} timeouts.
+		Results from the unconstrained experimental scenario, using the 17 datasets without \emph{SMT} timeouts.
 	}
 	\label{tab:csd:unconstrained-runtime-correlation}
 \end{table}
@@ -1584,7 +1584,7 @@ In this section, we evaluate the impact of solver timeouts for \emph{SMT} search
 		\centering
 		\includegraphics[width=\textwidth, trim=15 25 15 10, clip]{plots/csd-timeouts-finished-tasks.pdf}
 		\caption{
-			Frequency of finished \emph{SMT} tasks by feature-cardinality threshold~$k$.
+			Frequency of finished \emph{SMT} tasks over datasets and cross-validation folds, by feature cardinality~$k$.
 		}
 		\label{fig:csd:timeouts-finished-tasks}
 	\end{subfigure}
@@ -1593,7 +1593,7 @@ In this section, we evaluate the impact of solver timeouts for \emph{SMT} search
 		\centering
 		\includegraphics[width=\textwidth, trim=15 25 15 10, clip]{plots/csd-timeouts-nwracc.pdf}
 		\caption{
-			Mean subgroup quality with 95\% confidence intervals based on datasets and cross-validation folds.
+			Mean subgroup quality, with 95\% confidence intervals based on datasets and cross-validation folds.
 			Results from the unconstrained experimental scenario.
 		}
 		\label{fig:csd:timeouts-nwracc}
@@ -1650,7 +1650,7 @@ In this section, we compare all six subgroup-discovery methods in the experiment
 		\label{fig:csd:cardinality-test-nwracc}
 	\end{subfigure}
 	\caption{
-		Mean subgroup quality with 95\% confidence intervals based on datasets and cross-validation folds, over feature-cardinality threshold~$k$, by subgroup-discovery method.
+		Mean subgroup quality, with 95\% confidence intervals based on datasets and cross-validation folds, by subgroup-discovery method and feature cardinality~$k$.
 		Results from the search for original subgroups.
 	}
 	\label{fig:csd:cardinality-nwracc}
@@ -1697,7 +1697,7 @@ The increasing tendency to overfit with larger~$k$ explains why mean training-se
 		\bottomrule
 	\end{tabular}
 	\caption{
-		Mean runtime over datasets and cross-validation folds, by subgroup-discovery method and feature-cardinality threshold~$k$.
+		Mean runtime over datasets and cross-validation folds, by subgroup-discovery method and feature cardinality~$k$.
 		Results from the search for original subgroups.
 	}
 	\label{tab:csd:cardinality-runtime}
@@ -1733,7 +1733,7 @@ Both employ a feature-cardinality threshold of~$k=3$.
 		\label{fig:csd:alternatives-jaccard}
 	\end{subfigure}
 	\caption{
-		Mean subgroup similarity of alternative subgroup descriptions to the original subgroup with 95\% confidence intervals based on datasets and cross-validation folds, over the number of alternatives, by subgroup-discovery method and dissimilarity threshold~$\tau_{\text{abs}}$.
+		Mean subgroup similarity of alternative subgroup descriptions to the original subgroup, with 95\% confidence intervals based on datasets and cross-validation folds, by subgroup-discovery method, number of alternative, and dissimilarity threshold~$\tau_{\text{abs}}$.
 	}
 	\label{fig:csd:alternatives-similarity}
 \end{figure}
@@ -1766,7 +1766,7 @@ Further, the observed trends exist for the solver-based search method \emph{SMT}
 		\label{fig:csd:alternatives-test-nwracc}
 	\end{subfigure}
 	\caption{
-		Mean subgroup quality of alternative subgroup descriptions with 95\% confidence intervals based on datasets and cross-validation folds, over the number of alternatives, by subgroup-discovery method and dissimilarity threshold~$\tau_{\text{abs}}$.
+		Mean subgroup quality of alternative subgroup descriptions, with 95\% confidence intervals based on datasets and cross-validation folds, by subgroup-discovery method, number of alternative, and dissimilarity threshold~$\tau_{\text{abs}}$.
 	}
 	\label{fig:csd:alternatives-nwracc}
 \end{figure}

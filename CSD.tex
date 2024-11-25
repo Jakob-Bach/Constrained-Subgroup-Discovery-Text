@@ -151,6 +151,12 @@ Section~\ref{sec:csd:related-work} reviews related work.
 Section~\ref{sec:csd:conclusion} concludes and discusses future work.
 Appendix~\ref{sec:csd:appendix} contains supplementary materials.
 
+\paragraph{Related versions}
+
+The dissertation~\cite{bach2025leveraging} contains a shortened version of this article, which retains all central experimental and theoretical results.
+In particular, the dissertation evaluates the same run of the experimental pipeline.
+Only the Appendices~\ref{sec:csd:appendix:further-encodings:smt-categorical} and~\ref{sec:csd:appendix:further-encodings:max-sat} appear exclusively in this arXiv version.
+
 \section{Fundamentals of Subgroup Discovery}
 \label{sec:csd:fundamentals}
 
@@ -930,7 +936,7 @@ Instead of combining bounds from all $n$~features, there are $\binom{n}{k} \leq 
 	\label{prop:csd:complexity-cardinality-exhaustive}
 \end{proposition}
 %
-For the special case $k=1$, the size of the search space becomes $O(m \cdot n^2)$, which is leveraged by heuristic search methods that only consider updating the bounds of each feature separately instead of jointly (cf.~Section~\ref{sec:csd:fundamentals:heuristics}).
+For the special case $k=1$, the size of the search space becomes $O(m^2 \cdot n)$, which is leveraged by heuristic search methods that only consider updating the bounds of each feature separately instead of jointly (cf.~Section~\ref{sec:csd:fundamentals:heuristics}).
 With the update procedure of \emph{Best Interval} (cf.~Algorithm~\ref{al:csd:best-interval-subgroup-update}), the cost for~$k=1$ even reduces to $O(m \cdot n)$ since it only requires one pass over the unique values of each feature to evaluate all lower-upper-bound combinations for WRAcc implicitly.
 The update procedure of \emph{Beam Search} (cf.~Algorithm~\ref{al:csd:beam-search-subgroup-update}) also requires $O(m \cdot n)$, by only checking updates of either lower or upper bound.
 
@@ -1428,7 +1434,8 @@ Further, PMLB encodes categorical features ordinally by default.
 \subsection{Implementation and Execution}
 \label{sec:csd:experimental-design:implementation}
 
-We implemented all subgroup-discovery methods, experiments, and evaluations in Python~3.8 and released the code online\footnote{\url{https://github.com/Jakob-Bach/Constrained-Subgroup-Discovery}}.
+We implemented all subgroup-discovery methods, experiments, and evaluations in Python~3.8.
+The code is available on \emph{GitHub}\footnote{\url{https://github.com/Jakob-Bach/Constrained-Subgroup-Discovery}} and additionally backed up in the \emph{Software Heritage archive}\footnote{\href{https://archive.softwareheritage.org/swh:1:dir:5527bcc4a86a1583e8bedf241f4738fc9b0e535c;origin=https://github.com/Jakob-Bach/Constrained-Subgroup-Discovery;visit=swh:1:snp:8f87dcdf0277985d373245e5a23a128efc861153;anchor=swh:1:rev:0c0e4a978c95d881c4c20eecdd5a1ae12ee08ac3}{swh:1:dir:5527bcc4a86a1583e8bedf241f4738fc9b0e535c}}.
 A requirements file in our repository specifies the versions of all dependencies.
 Further, we released the subgroup-discovery methods and evaluation metrics as the Python package \emph{csd}\footnote{\url{https://pypi.org/project/csd/}} on \emph{PyPI} to ease reuse.
 Finally, we published all experimental data\footnote{\url{https://doi.org/10.35097/caKKJCtoKqgxyvqG}}.

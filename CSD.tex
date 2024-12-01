@@ -1645,16 +1645,30 @@ In this section, we compare all six subgroup-discovery methods in the experiment
 	\centering
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim=15 55 15 15, clip]{plots/csd-cardinality-train-nwracc.pdf}
-		\caption{Training set.}
-		\label{fig:csd:cardinality-train-nwracc}
+		\includegraphics[width=\textwidth, trim=15 55 15 15, clip]{plots/csd-cardinality-train-nwracc-all-datasets.pdf}
+		\caption{All 27 datasets, training set.}
+		\label{fig:csd:cardinality-train-nwracc-all-datasets}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim=15 55 15 15, clip]{plots/csd-cardinality-test-nwracc.pdf}
-		\caption{Test set.}
-		\label{fig:csd:cardinality-test-nwracc}
+		\includegraphics[width=\textwidth, trim=15 55 15 15, clip]{plots/csd-cardinality-test-nwracc-all-datasets.pdf}
+		\caption{All 27 datasets, test set.}
+		\label{fig:csd:cardinality-test-nwracc-all-datasets}
+	\end{subfigure}
+	\\
+	\begin{subfigure}[t]{0.48\textwidth}
+		\centering
+		\includegraphics[width=\textwidth, trim=15 55 15 15, clip]{plots/csd-cardinality-train-nwracc-no-timeout-datasets.pdf}
+		\caption{13 datasets without \emph{SMT} timeouts, training set.}
+		\label{fig:csd:cardinality-train-nwracc-no-timeout-datasets}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[t]{0.48\textwidth}
+		\centering
+		\includegraphics[width=\textwidth, trim=15 55 15 15, clip]{plots/csd-cardinality-test-nwracc-no-timeout-datasets.pdf}
+		\caption{13 datasets without \emph{SMT} timeouts, test set.}
+		\label{fig:csd:cardinality-test-nwracc-no-timeout-datasets}
 	\end{subfigure}
 	\caption{
 		Mean subgroup quality, with 95\% confidence intervals based on datasets and cross-validation folds, by subgroup-discovery method and feature cardinality~$k$.
@@ -1666,10 +1680,10 @@ In this section, we compare all six subgroup-discovery methods in the experiment
 \paragraph{Subgroup quality}
 
 Figure~\ref{fig:csd:cardinality-nwracc} displays the mean subgroup quality, averaging over datasets and cross-validation folds, for different values of the feature-cardinality threshold~$k$.
-For most subgroup-discovery methods, mean training-set nWRAcc (cf.~Figure~\ref{fig:csd:cardinality-train-nwracc}) increases with~$k$, though the marginal utility decreases.
+For most subgroup-discovery methods, mean training-set nWRAcc (cf.~Figure~\ref{fig:csd:cardinality-train-nwracc-all-datasets}) increases with~$k$, though the marginal utility decreases.
 In particular, even with $k=1$, the mean nWRAcc is already clearly above 50\% of the nWRAcc achieved with all features.
 Further, the quality increase between $k=1$ and $k=2$ is usually the largest.
-On the test set (cf.~Figure~\ref{fig:csd:cardinality-test-nwracc}), the benefit of setting a larger~$k$ is even smaller.
+On the test set (cf.~Figure~\ref{fig:csd:cardinality-test-nwracc-all-datasets}), the benefit of setting a larger~$k$ is even smaller.
 E.g., the mean test-set nWRAcc of \emph{Beam}, \emph{BI}, and \emph{SMT} barely improves beyond $k=2$.
 These results indicate that sparse subgroup descriptions already yield a high subgroup quality.
 
@@ -1680,8 +1694,9 @@ Thus, each feature excludes a certain fraction of data objects from the subgroup
 The more features are used in the subgroup description, the smaller the expected number of data objects in the subgroup becomes.
 Since the number of subgroup members is one factor in WRAcc (cf.~Equation~\ref{eq:csd:wracc}), quality naturally decreases for smaller subgroups.
 
-Figure~\ref{fig:csd:cardinality-nwracc} also reveals that the heuristic search methods \emph{Beam} and \emph{BI} still yield higher average subgroup quality than the solver-based search \emph{SMT} due to timeouts, for any feature-cardinality setting.
-Further, the heuristic \emph{PRIM} exhibits a larger increase of subgroup quality over~$k$ than \emph{Beam} and \emph{BI}, thereby narrowing the quality gap to the latter.
+Figures~\ref{fig:csd:cardinality-train-nwracc-all-datasets} and~\ref{fig:csd:cardinality-test-nwracc-all-datasets} also reveal that the heuristic search methods \emph{Beam} and \emph{BI} still yield higher average subgroup quality than the solver-based search \emph{SMT} due to timeouts, for any feature-cardinality setting.
+Even excluding the datasets with \emph{SMT} timeouts (cf.~Figures~\ref{fig:csd:cardinality-train-nwracc-no-timeout-datasets} and~\ref{fig:csd:cardinality-test-nwracc-no-timeout-datasets}), these two heuristics yield nearly the same average subgroup quality as \emph{SMT} for constrained~$k$ and have an advantage on the test set with unconstrained~$k$.
+The heuristic \emph{PRIM} exhibits a larger increase of subgroup quality over~$k$ than \emph{Beam} and \emph{BI}, thereby narrowing the quality gap to the latter.
 The baseline \emph{MORS} displays the least effect of~$k$ on mean test-set nWRAcc, showing very stable subgroup quality.
 
 Finally, the results indicate that limiting~$k$ reduces overfitting.

@@ -53,13 +53,13 @@ We observe that heuristic search methods often yield high-quality subgroups with
 
 \paragraph{Motivation}
 
-The interpretability of prediction models has significantly gained importance in recent years~\cite{carvalho2019machine, molnar2020interpretable}.
+The interpretability of prediction models has gained importance in recent years~\cite{carvalho2019machine, molnar2020interpretable}.
 There are various ways to foster interpretability in machine-learning pipelines.
-In particular, some machine-learning models are simple enough to be intrinsically interpretable~\cite{carvalho2019machine}.
-Subgroup-discovery methods fall into this category.
-The goal of subgroup discovery is to find `interesting' subgroups, i.e., subsets of a dataset, e.g., data objects where the prediction target takes a particular value~\cite{atzmueller2015subgroup}.
-Further, such subgroups should be described with a combination of simple conditions on feature values.
-E.g., Figure~\ref{fig:csd:exemplary-subgroup} displays a rectangle-shaped subgroup description for a two-dimensional, real-valued dataset with a binary prediction target.
+In particular, some machine-learning models are simple enough to be intrinsically interpretable~\cite{carvalho2019machine}, like subgroup descriptions.
+Subgroup discovery aims to identify `interesting' subsets of a dataset~\cite{atzmueller2015subgroup}, such as data objects sharing a specific class label, that can be characterized by concise conditions on feature values.
+Subgroup-discovery methods have recently been employed in various fields, such as chemistry~\cite{li2021subgroup}, medicine~\cite{esnault2020qfinder}, database engineering~\cite{remil2021makes}, decision making~\cite{zuheros2023explainable}, and social sciences~\cite{kiefer2022subgroup}.
+
+Figure~\ref{fig:csd:exemplary-subgroup} displays an exemplary rectangle-shaped subgroup description for a two-dimensional, real-valued dataset with a binary prediction target.
 This subgroup is defined by $(\mathit{Feature\_1} \in [3.0, 5.1]) \land (\mathit{Feature\_2} \in [1.0, 1.8])$ and contains a considerably higher fraction of data objects with $\mathit{Target} = 1$ than the complete dataset.
 While such subgroup descriptions already tend to be understandable for users, we see further potential to increase interpretability with the help of constraints.
 

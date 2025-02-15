@@ -881,15 +881,19 @@ This step is consistent with the heuristic search methods and baselines (e.g., c
 \subsubsection{Integration into Heuristic Search Methods}
 \label{sec:csd:approach:cardinality:heuristics}
 
-The feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) is \emph{antimonotonic}~\cite{ng1998exploratory} in the feature selection:
+The feature-cardinality constraint (cf.~Equation~\ref{eq:csd:smt-constraint-feature-cardinalty}) has the form~$|F_s| \leq k$ for the feature set~$F_s$ induced by the selection decisions~$s \in \{0, 1\}^n$.
+Thus, the constraint is \emph{antimonotonic}~\cite{ng1998exploratory} regarding the set of selected features.
+In particular, the empty feature set satisfies the constraint for any~$k \geq 0$.
 If a selected feature set satisfies the constraint, all its subsets also satisfy it.
-Vice versa, if a feature set violates the constraint, all its supersets also violate it.
+Vice versa, if a feature set violates the constraint, all its supersets violate it as well.
+
 This property allows to easily integrate the constraint into the three heuristic search methods from Section~\ref{sec:csd:fundamentals:search:heuristics}, i.e., \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Beam Search} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}), and \emph{Best Interval} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:best-interval-subgroup-update}), which all iteratively enlarge the selected feature set.
-In particular, these search methods start with unrestricted subgroup bounds, i.e., an empty feature set, which satisfies the constraint for any~$k \geq 0$.
-Each iteration may either add bounds on one further feature or refine the bounds on an already selected feature.
+In particular, they start with unrestricted subgroup bounds, i.e., an empty feature set.
+Each iteration may either add bounds on one further feature, thereby increasing the feature-set size by one, or refine the bounds on an already selected feature, so the feature-set size remains constant.
+Features cannot be deselected, so the feature-set size is non-decreasing overall.
 Thus, one can prevent generation of invalid solution candidates by defining the function \emph{get\_permissible\_feature\_idxs(\dots)} (cf.~Line~\ref{al:csd:prim:line:permissible-features} in Algorithm~\ref{al:csd:prim} and Line~\ref{al:csd:generic-beam-search:line:permissible-features} in Algorithm~\ref{al:csd:generic-beam-search}) as follows:
-If already $k$~features are selected, only these features are permissible, i.e., may be refined.
-If less than $k$~features are selected, all features are permissible, as in the unconstrained search.
+If already $k$~features are selected, only these features are permissible, i.e., only their bounds may be refined.
+If less than $k$~features are selected, all features are permissible to be bounded, as in the unconstrained search.
 
 \subsubsection{Integration into Baselines}
 \label{sec:csd:approach:cardinality:baselines}
@@ -946,7 +950,7 @@ Since we need to combine bounds over all $n$~features, the size of the search sp
 	\label{prop:csd:complexity-unconstrained-exhaustive}
 \end{proposition}
 %
-For each of these candidate subgroups, the cost of evaluating a quality function like WRAcc (cf.~Equation~\ref{eq:csd:wracc}) typically is $O(m \cdot n)$, i.e., requires a constant number of passes over the dataset and therefore has linear complexity in the dataset size.
+For each of these candidate subgroups, the cost of evaluating a quality function like WRAcc (cf.~Equation~\ref{eq:csd:wracc}) typically is $O(m \cdot n)$ since it requires a constant number of passes over the dataset.
 Additionally, the number of potential subgroups should be seen as an upper bound:
 More efficient exhaustive search methods employ quality-based pruning to not explicitly evaluate all solution candidates while still implicitly covering the full search space~\cite{atzmueller2015subgroup}.
 
@@ -1022,6 +1026,7 @@ Finally, we analyze the time complexity of this problem (cf.~Section~\ref{sec:cs
 \paragraph{Overview}
 
 For alternative subgroup descriptions, we assume to have an \emph{original subgroup} given, with subgroup membership~$b^{(0)} \in \{0, 1\}^m$ of data objects and with feature selection~$s^{(0)} \in \{0, 1\}^n$.
+This subgroup may originate from any subgroup-discovery method.
 When searching alternatives, we do not optimize subgroup quality but the similarity to the original subgroup.
 We express this similarity in terms of subgroup membership.
 If this similarity is very high, then the subgroup quality should also be similar since evaluation metrics for subgroup quality typically base on subgroup membership.
@@ -1145,7 +1150,7 @@ Optionally, one may add a feature-cardinality constraint (cf.~Equation~\ref{eq:c
 \label{sec:csd:approach:alternatives:heuristics}
 
 The situation here is similar to integrating feature-cardinality constraints into heuristic search methods (cf.~Section~\ref{sec:csd:approach:cardinality:heuristics}).
-In particular, the constraint for alternatives based on the deselection dissimilarity (cf.~Equation~\ref{eq:csd:constraint-dissimilarity}) is antimonotonic.
+In particular, the constraint for alternatives based on the deselection dissimilarity (cf.~Equation~\ref{eq:csd:constraint-dissimilarity}) is antimonotonic in the subgroup's selected feature set.
 I.e., the dissimilarity constraint is satisfied for an empty set of selected features, and once it is violated for a feature set, it remains violated for any superset.
 Thus, the constraint type is suitable for heuristic search that iteratively enlarges the set of selected features, like \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Beam Search} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}), and \emph{Best Interval} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:best-interval-subgroup-update}).
 We only need to adapt the function \emph{get\_permissible\_feature\_idxs(\dots)} (cf.~Line~\ref{al:csd:prim:line:permissible-features} in Algorithm~\ref{al:csd:prim} and Line~\ref{al:csd:generic-beam-search:line:permissible-features} in Algorithm~\ref{al:csd:generic-beam-search}) to check the constraint.

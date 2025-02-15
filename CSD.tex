@@ -782,7 +782,7 @@ Generally, however, a feature's bounded value range need not indicate how many d
 Alternatively, one can constrain the subgroup membership implied by individual features' bounds, e.g., enforcing that selected features exclude at least a certain fraction of data objects.
 The latter constraint type may prevent setting oversensitive bounds that only exclude few data objects and do not generalize to unseen data.
 
-Regarding \emph{features selection}, one can limit the number of features used in the subgroup description, which is a common constraint type~\cite{meeng2021real} and also a metric for subgroup complexity~\cite{helal2016subgroup, herrera2011overview, ventura2018subgroup}, already proposed in the article introducing PRIM~\cite{friedman1999bump}.
+Regarding \emph{feature selection}, one can limit the number of features used in the subgroup description, which is a common constraint type~\cite{meeng2021real} and also a metric for subgroup complexity~\cite{helal2016subgroup, herrera2011overview, ventura2018subgroup}, already proposed in the article introducing PRIM~\cite{friedman1999bump}.
 Section~\ref{sec:csd:approach:cardinality} discusses such feature-cardinality constraints in detail.
 Instead of using this constraint type, one may also post-process subgroups to eliminate irrelevant features after search~\cite{friedman1999bump}.
 Further, instead of limiting the total number of used features, one may also introduce constraints to remove individual irrelevant features based on the number of data objects they represent correctly in absolute terms or relative to other features~\cite{lavrac2006relevancy}.
@@ -1921,10 +1921,14 @@ Second, we cover constrained subgroup discovery in general (cf.~Section~\ref{sec
 \subsubsection{Algorithmic Search Methods}
 \label{sec:csd:related-work:subgroup-discovery:algorithmic-methods}
 
+The terms `subgroup' and `subgroup discovery' have different meanings in different communities, and similar concepts have been reinvented over time.
+Our problem definition (Section~\ref{sec:csd:fundamentals:problem}) builds on related work in data mining; see~\cite{atzmueller2015subgroup, helal2016subgroup, herrera2011overview, ventura2018subgroup} for broad surveys of subgroup discovery in this field.
+There are also recent works independent from this research~\cite{asudeh2019assessing, lawless2022interpretable, pastor2021looking, sagadeeva2021sliceline}.
+These works are only loosely related to ours since their problem definition differs in the optimization objective, type of subgroup description, and employed constraints.
+
 Nearly all existing subgroup-discovery methods are algorithmic.
-In particular, there are heuristic search methods like PRIM~\cite{friedman1999bump} and Best Interval~\cite{mampaey2012efficient} as well as exhaustive search methods, like SD-Map~\cite{atzmueller2009fast, atzmueller2006sd}, MergeSD~\cite{grosskreutz2009subgroup}, and BSD~\cite{lemmerich2016fast, lemmerich2010fast}.
-See~\cite{atzmueller2015subgroup, helal2016subgroup, herrera2011overview, ventura2018subgroup} for surveys of subgroup-discovery methods.
-To the best of our knowledge, optimizing subgroup discovery with an SMT solver is novel.
+In particular, there are heuristic search methods, like PRIM~\cite{friedman1999bump} and Best Interval~\cite{mampaey2012efficient}, as well as exhaustive search methods, like SD-Map~\cite{atzmueller2009fast, atzmueller2006sd}, MergeSD~\cite{grosskreutz2009subgroup}, and BSD~\cite{lemmerich2016fast, lemmerich2010fast}.
+To the best of our knowledge, optimizing subgroup discovery with a general-purpose SMT solver is a novel concept.
 There are a few other white-box formulations of particular variants of subgroup discovery, which differ from our work in several aspects, as we discuss next.
 
 \subsubsection{White-Box Formulations}
@@ -2064,12 +2068,13 @@ The latter depends on the feature-selection method but typically assesses featur
 \subsection{Other Fields}
 \label{sec:csd:related-work:other}
 
-\paragraph{Constrained data mining}
+\paragraph{Alternatives and constraints in data mining}
 
 Working with constraints is an area of research for various sub-fields of data mining \cite{grossi2017survey}, e.g., for clustering \cite{dao2013declarative, dao2024review}, pattern mining \cite{ng1998exploratory, silva2016constrained}, explainable AI~\cite{deutch2019constraints, gorji2022sufficient, mothilal2020explaining, shrotri2022constraint}, and automated machine learning~\cite{neutatz2023automl}.
-There is also work in the other direction, i.e., using machine-learning techniques in constraint solving~\cite{popescu2022overview}.
+There is work in the other direction as well, i.e., using machine-learning techniques in constraint solving~\cite{popescu2022overview}.
+Finding alternative or diverse solutions is also a concern in various fields, e.g., clustering~\cite{bailey2014alternative}, subspace search~\cite{fouche2021efficient}, and explainable-AI paradigms like counterfactuals~\cite{guidotti2022counterfactual}, criticisms~\cite{kim2016examples}, and semifactuals~\cite{artelt2022even}.
 
-\paragraph{Classification}
+\paragraph{White-box classification}
 
 There are white-box formulations for various types of classification models~\cite{ignatiev2021reasoning}.
 E.g., there are formulations in propositional logic (SAT) for optimal decision trees, decision sets, and decision lists~\cite{narodytska2018learning, shati2021sat, yu2021learning}.

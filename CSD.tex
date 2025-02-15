@@ -1521,34 +1521,43 @@ In this section, we compare all eight subgroup-discovery methods in the experime
 
 \paragraph{Subgroup quality}
 
-Figure~\ref{fig:csd:unconstrained-nwracc-all-datasets} compares subgroup quality for the eight subgroup-discovery methods.
+Figure~\ref{fig:csd:unconstrained-nwracc-all-datasets} visualizes the subgroup quality achieved by the eight subgroup-discovery methods.
 On the training set, the two heuristic search methods \emph{Beam} and \emph{BI} have roughly the same median nWRAcc as the solver-based search method \emph{SMT}.
 In particular, the heuristics are even better than \emph{SMT} on some datasets but worse on others.
 The former can only happen when \emph{SMT} yields suboptimal solutions due to timeouts, as we analyze later (cf.~Section~\ref{sec:csd:evaluation:timeouts}).
 However, even if we limit our analysis to the 17 datasets without \emph{SMT} timeouts, \emph{Beam} and \emph{BI} are still remarkably close to the optimum quality (cf.~Figure~\ref{fig:csd:unconstrained-nwracc-no-timeout-datasets}).
-This result is not specific to \emph{SMT} but also holds for any other exhaustive search method.
+This result is not specific to \emph{SMT} but also sets up \emph{Beam} and \emph{BI} as serious competitors for any other exhaustive search method.
+
 On the test set, \emph{Beam} and \emph{BI} are even better than \emph{SMT} on median, also excluding timeout datasets, since their training-test nWRAcc difference is smaller.
 This result indicates that \emph{Beam} and \emph{BI} are less susceptible to overfitting, so their solutions generalize better.
-In detail, the average difference between training-set nWRAcc and test-set nWRAcc is 0.122 for \emph{SMT}, 0.101 for \emph{BI}, 0.095 for \emph{Beam}, 0.094 for \emph{MORS}, 0.068 for \emph{PRIM}, and 0.001 for \emph{Random}.
+In detail, the average difference between training-set nWRAcc and test-set nWRAcc is 0.122 for \emph{SMT}, 0.101 for \emph{BI}, 0.095 for \emph{Beam}, 0.094 for \emph{MORS}, 0.068 for \emph{PRIM}, 0.042 for \emph{SD-Map}, 0.041 for \emph{BSD}, and 0.001 for \emph{Random}.
 
-The heuristic search method \emph{PRIM} yields worse subgroup quality than \emph{Beam} and \emph{BI}.
-Although it follows an iterative subgroup-refinement procedure like the latter two methods, its refinement options are more limited.
+\emph{BSD} and \emph{SD-Map} yield worse average subgroup quality than \emph{Beam} and \emph{BI} as well.
+While the former two are exhaustive, they require discretization of numeric features.
+Thus, they effectively only have a fixed set of intervals to use as bounds instead of being able to choose the bounds independently at each possible feature value.
+As a positive side-effect, this limitation may have reduced their overfitting.
+\emph{PRIM}'s worse subgroup quality may equally arise from a reduced search space.
+Although it follows an iterative subgroup-refinement procedure like  \emph{Beam} and \emph{BI}, its refinement options are more limited.
 In particular, \emph{PRIM} always has to remove a fixed fraction~$\alpha$ of data objects from the subgroup (cf.~Algorithm~\ref{al:csd:prim}), while \emph{Beam} and \emph{BI} can remove more or less data objects.
-
-All three heuristic search methods clearly beat the two baselines \emph{MORS} and \emph{Random}.
+Finally, the two baselines \emph{MORS} and \emph{Random} yield the lowest quality of all eight subgroup-discovery methods.
 While \emph{Random} mostly yields the same quality as not restricting the subgroup at all, i.e., an nWRAcc of~0, \emph{MORS} is considerably above~0 and thus a suitable baseline for future studies comparing subgroup-discovery methods.
 
 \begin{table}[t]
 	\centering
 	\begin{subtable}{\textwidth}
 		\centering
-		\begin{tabular}{lrrrrrr}
+		\begin{tabular}{lrrr}
 			\toprule
-			Aggregate & BI & Beam & MORS & PRIM & Random & SMT \\
+			Method & Mean & Standard dev. & Median \\
 			\midrule
-			Mean & 34.95~s & 30.47~s & 0.01~s & 1.26~s & 0.91~s & 849.02~s \\
-			Standard dev. & 103.61~s & 85.69~s & 0.00~s & 1.51~s & 0.95~s & 929.60~s \\
-			Median & 2.60~s & 2.95~s & 0.01~s & 0.66~s & 0.51~s & 254.21~s \\
+			BI & 34.95~s & 103.61~s & 2.60~s \\
+			BSD & 55.70~s & 151.46~s & 1.06~s \\
+			Beam & 30.47~s & 85.69~s & 2.95~s \\
+			MORS & 0.01~s & 0.00~s & 0.01~s \\
+			PRIM & 1.26~s & 1.51~s & 0.66~s \\
+			Random & 0.91~s & 0.95~s & 0.51~s \\
+			SD-Map & 367.43~s & 1143.05~s & 4.08~s \\
+			SMT & 849.02~s & 929.60~s & 254.21~s \\
 			\bottomrule
 		\end{tabular}
 		\caption{
@@ -1559,13 +1568,18 @@ While \emph{Random} mostly yields the same quality as not restricting the subgro
 	\\ \vspace{\baselineskip}
 	\begin{subtable}{\textwidth}
 		\centering
-		\begin{tabular}{lrrrrrr}
+		\begin{tabular}{lrrr}
 			\toprule
-			Aggregate & BI & Beam & MORS & PRIM & Random & SMT \\
+			Method & Mean & Standard dev. & Median \\
 			\midrule
-			Mean & 12.40~s & 11.77~s & 0.01~s & 1.29~s & 0.82~s & 168.13~s \\
-			Standard dev. & 21.17~s & 20.47~s & 0.00~s & 1.62~s & 0.89~s & 243.11~s \\
-			Median & 2.60~s & 2.95~s & 0.01~s & 0.80~s & 0.56~s & 57.23~s \\
+			BI & 12.40~s & 21.17~s & 2.60~s \\
+			BSD & 44.02~s & 128.33~s & 1.57~s \\
+			Beam & 11.77~s & 20.47~s & 2.95~s \\
+			MORS & 0.01~s & 0.00~s & 0.01~s \\
+			PRIM & 1.29~s & 1.62~s & 0.80~s \\
+			Random & 0.82~s & 0.89~s & 0.56~s \\
+			SD-Map & 109.92~s & 290.69~s & 12.56~s \\
+			SMT & 168.13~s & 243.11~s & 57.23~s \\
 			\bottomrule
 		\end{tabular}
 		\caption{
@@ -1583,8 +1597,10 @@ While \emph{Random} mostly yields the same quality as not restricting the subgro
 \paragraph{Runtime}
 
 Table~\ref{tab:csd:unconstrained-runtime} summarizes the runtimes of the subgroup-discovery methods.
-On average, \emph{SMT} is an order of magnitude slower than \emph{Beam} and \emph{BI}, which are an order of magnitude slower than \emph{PRIM} and the baseline \emph{Random}.
-The baseline \emph{MORS} runs in negligible time and, therefore, is a good tool for instantaneously obtaining a lower bound on subgroup quality.
+On average, \emph{SMT} is an order of magnitude slower than \emph{Beam} and \emph{BI}.
+The exhaustive search methods with discretization, i.e., \emph{BSD} and \emph{SD-Map}, fall in between.
+The heuristic \emph{PRIM} and the baseline \emph{Random} are yet another order of magnitude faster than \emph{Beam} and \emph{BI}.
+Finally, the baseline \emph{MORS} runs in negligible time and, therefore, is a good tool for instantaneously obtaining a lower bound on subgroup quality.
 Taking subgroup quality into consideration, the heuristic search methods offer a good quality in a short time.
 Among the three heuristics, \emph{PRIM} is the fastest but yields the lowest subgroup quality, so users should decide which runtime is acceptable.
 
@@ -1600,10 +1616,12 @@ This average preparation time is already greater than the average total runtime 
 		Method & $\Sigma n^u$ & $m \cdot n$ & $m$ & $n$ \\
 		\midrule
 		BI & 0.95 & 0.51 & 0.32 & 0.67 \\
+		BSD & 0.46 & 0.60 & 0.44 & 0.42 \\
 		Beam & 0.96 & 0.49 & 0.30 & 0.66 \\
 		MORS & 0.27 & 0.57 & 0.51 & 0.26 \\
 		PRIM & 0.84 & 0.56 & 0.29 & 0.76 \\
 		Random & 0.58 & 0.69 & 0.42 & 0.77 \\
+		SD-Map & 0.43 & 0.65 & 0.47 & 0.45 \\
 		SMT & 0.39 & 0.73 & 0.70 & 0.23 \\
 		\bottomrule
 	\end{tabular}
@@ -1617,7 +1635,7 @@ This average preparation time is already greater than the average total runtime 
 
 To determine which factors influence runtime, we analyze the Spearman correlation between runtime and four simple metrics for dataset size.
 In particular, Table~\ref{tab:csd:unconstrained-runtime-correlation} considers the number of data objects~$m$, the number of features~$n$, the product of these two quantities~$m \cdot n$, and the number of unique values per feature summed over the features~$\Sigma n^u$.
-For the three heuristic search methods, the latter metric shows a high correlation to runtime, while \emph{SMT} exhibits the highest runtime correlation to~$m \cdot n$.
+For the three heuristic search methods, the latter metric shows a high correlation to runtime, while the three exhaustive search methods exhibit the highest runtime correlation to~$m \cdot n$.
 
 \subsection{Solver Timeouts}
 \label{sec:csd:evaluation:timeouts}
@@ -1680,37 +1698,37 @@ However, since the test-set nWRAcc still increases with the timeout, choosing lo
 In this section, we compare all eight subgroup-discovery methods in the experimental scenario with feature-cardinality constraints.
 \emph{SMT} uses its default maximum solver timeout of 2048~s.
 
-\begin{figure}[t]
+\begin{figure}[p]
 	\centering
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim=15 55 15 15, clip]{plots/csd-cardinality-train-nwracc-all-datasets.pdf}
+		\includegraphics[width=\textwidth, trim=15 60 15 15, clip]{plots/csd-cardinality-train-nwracc-all-datasets.pdf}
 		\caption{All 27 datasets, training set.}
 		\label{fig:csd:cardinality-train-nwracc-all-datasets}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim=15 55 15 15, clip]{plots/csd-cardinality-test-nwracc-all-datasets.pdf}
+		\includegraphics[width=\textwidth, trim=15 60 15 15, clip]{plots/csd-cardinality-test-nwracc-all-datasets.pdf}
 		\caption{All 27 datasets, test set.}
 		\label{fig:csd:cardinality-test-nwracc-all-datasets}
 	\end{subfigure}
-	\\
+	\\ \vspace{\baselineskip}
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim=15 55 15 15, clip]{plots/csd-cardinality-train-nwracc-no-timeout-datasets.pdf}
+		\includegraphics[width=\textwidth, trim=15 60 15 15, clip]{plots/csd-cardinality-train-nwracc-no-timeout-datasets.pdf}
 		\caption{13 datasets without \emph{SMT} timeouts, training set.}
 		\label{fig:csd:cardinality-train-nwracc-no-timeout-datasets}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[t]{0.48\textwidth}
 		\centering
-		\includegraphics[width=\textwidth, trim=15 55 15 15, clip]{plots/csd-cardinality-test-nwracc-no-timeout-datasets.pdf}
+		\includegraphics[width=\textwidth, trim=15 60 15 15, clip]{plots/csd-cardinality-test-nwracc-no-timeout-datasets.pdf}
 		\caption{13 datasets without \emph{SMT} timeouts, test set.}
 		\label{fig:csd:cardinality-test-nwracc-no-timeout-datasets}
 	\end{subfigure}
 	\caption{
-		Mean subgroup quality, with 95\% confidence intervals based on datasets and cross-validation folds, by subgroup-discovery method and feature cardinality~$k$.
+		Mean subgroup quality over datasets and cross-validation folds, by subgroup-discovery method and feature cardinality~$k$.
 		Results from the search for original subgroups.
 	}
 	\label{fig:csd:cardinality-nwracc}
@@ -1722,8 +1740,8 @@ Figure~\ref{fig:csd:cardinality-nwracc} displays the mean subgroup quality, aver
 For most subgroup-discovery methods, mean training-set nWRAcc (cf.~Figure~\ref{fig:csd:cardinality-train-nwracc-all-datasets}) increases with~$k$, though the marginal utility decreases.
 In particular, even with $k=1$, the mean nWRAcc is already clearly above 50\% of the nWRAcc achieved with all features.
 Further, the quality increase between $k=1$ and $k=2$ is usually the largest.
-On the test set (cf.~Figure~\ref{fig:csd:cardinality-test-nwracc-all-datasets}), the benefit of setting a larger~$k$ is even smaller.
-E.g., the mean test-set nWRAcc of \emph{Beam}, \emph{BI}, and \emph{SMT} barely improves beyond $k=2$.
+On the test set (cf.~Figure~\ref{fig:csd:cardinality-test-nwracc-all-datasets}), the benefit of a larger~$k$ is even smaller:
+The mean test-set nWRAcc of all methods except \emph{PRIM} barely improves beyond $k=2$.
 These results indicate that sparse subgroup descriptions already yield a high subgroup quality.
 
 The baseline \emph{Random} even improves subgroup quality with lower~$k$ due to its design (cf.~Algorithm~\ref{al:csd:random-search}):
@@ -1734,26 +1752,29 @@ Since the number of subgroup members is one factor in WRAcc (cf.~Equation~\ref{e
 
 Figures~\ref{fig:csd:cardinality-train-nwracc-all-datasets} and~\ref{fig:csd:cardinality-test-nwracc-all-datasets} also reveal that the heuristic search methods \emph{Beam} and \emph{BI} still yield higher average subgroup quality than the solver-based search \emph{SMT} due to timeouts, for any feature-cardinality setting.
 Even excluding the datasets with \emph{SMT} timeouts (cf.~Figures~\ref{fig:csd:cardinality-train-nwracc-no-timeout-datasets} and~\ref{fig:csd:cardinality-test-nwracc-no-timeout-datasets}), these two heuristics yield nearly the same average subgroup quality as \emph{SMT} for constrained~$k$ and have an advantage on the test set with unconstrained~$k$.
+\emph{BSD} and \emph{SD-Map} do not beat \emph{Beam} and \emph{BI} either, suffering from their discretized search space.
 The heuristic \emph{PRIM} exhibits a larger increase of subgroup quality over~$k$ than \emph{Beam} and \emph{BI}, thereby narrowing the quality gap to the latter.
 The baseline \emph{MORS} displays the least effect of~$k$ on mean test-set nWRAcc, showing very stable subgroup quality.
 
 Finally, the results indicate that limiting~$k$ reduces overfitting.
 For example, for \emph{Beam}, the mean difference between training-set and test-set nWRAcc is 0.095 without a feature-cardinality constraint, 0.073 for $k=3$, and 0.045 for $k=1$.
 The increasing tendency to overfit with larger~$k$ explains why mean training-set nWRAcc increases more than mean test-set nWRAcc over~$k$ in Figure~\ref{fig:csd:cardinality-nwracc}.
-\emph{PRIM} shows the smallest increase of overfitting over~$k$, \emph{MORS} and \emph{SMT} the largest.
+From the eight subgroup-discovery methods, \emph{BSD} and \emph{SD-Map} show the smallest increase of overfitting over~$k$, \emph{MORS} and \emph{SMT} the largest.
 
 \begin{table}[t]
 	\centering
 	\begin{tabular}{lrrrrrr}
 		\toprule
-		$k$ & BI & Beam & MORS & PRIM & Random & SMT \\
+		$k$ & 1 & 2 & 3 & 4 & 5 & no \\
 		\midrule
-		1 & 7.81~s & 6.81~s & 0.01~s & 0.08~s & 0.63~s & 648.16~s \\
-		2 & 11.74~s & 10.06~s & 0.01~s & 0.17~s & 0.64~s & 911.28~s \\
-		3 & 14.20~s & 12.78~s & 0.01~s & 0.26~s & 0.65~s & 1091.75~s \\
-		4 & 16.68~s & 14.65~s & 0.01~s & 0.35~s & 0.66~s & 1113.40~s \\
-		5 & 18.66~s & 16.12~s & 0.01~s & 0.46~s & 0.66~s & 1117.39~s \\
-		no & 34.95~s & 30.47~s & 0.01~s & 1.26~s & 0.91~s & 849.02~s \\
+		BI & 7.8~s & 11.7~s & 14.2~s & 16.7~s & 18.7~s & 35.0~s \\
+		BSD & 0.9~s & 0.9~s & 0.9~s & 2.7~s & 29.5~s & 55.7~s \\
+		Beam & 6.8~s & 10.1~s & 12.8~s & 14.6~s & 16.1~s & 30.5~s \\
+		MORS & 0.0~s & 0.0~s & 0.0~s & 0.0~s & 0.0~s & 0.0~s \\
+		PRIM & 0.1~s & 0.2~s & 0.3~s & 0.3~s & 0.5~s & 1.3~s \\
+		Random & 0.6~s & 0.6~s & 0.6~s & 0.7~s & 0.7~s & 0.9~s \\
+		SD-Map & 2.3~s & 3.3~s & 9.6~s & 54.0~s & 345.2~s & 367.4~s \\
+		SMT & 648.2~s & 911.3~s & 1091.7~s & 1113.4~s & 1117.4~s & 849.0~s \\
 		\bottomrule
 	\end{tabular}
 	\caption{
@@ -1765,7 +1786,7 @@ The increasing tendency to overfit with larger~$k$ explains why mean training-se
 
 \paragraph{Runtime}
 
-As Table~\ref{tab:csd:cardinality-runtime} displays, the heuristic search methods \emph{Beam}, \emph{BI}, and \emph{PRIM} become faster the smaller~$k$ is.
+As Table~\ref{tab:csd:cardinality-runtime} displays, the three heuristic search methods as well as \emph{BSD} and \emph{SD-Map} become faster the smaller~$k$ is.
 The baseline \emph{Random} shows a similar trend, though less prominent, while \emph{MORS} yields results instantaneously in any case.
 In contrast, the picture for the solver-based search method \emph{SMT} is less clear.
 While its average runtime clearly increases from~$k=1$ till $k=3$, it roughly remains constant for $k \in \{4, 5\}$ and even decreases without a feature-cardinality constraint, only remaining higher than for $k = 1$.
@@ -1880,10 +1901,12 @@ In particular, there are more finished tasks when searching for alternative subg
 
 \paragraph{Unconstrained subgroup discovery (cf.~Section~\ref{sec:csd:evaluation:unconstrained})}
 
-We recommend using heuristic search methods rather than solver-based search.
-In particular, \emph{Beam} and \emph{BI} were an order of magnitude faster than \emph{SMT} and still yielded higher test-set subgroup quality since they overfit less.
-The latter result not only impedes \emph{SMT} but other exhaustive search methods as well.
-\emph{PRIM} was faster than \emph{Beam} and \emph{BI} but yielded lower subgroup quality.
+We recommend using the heuristic search methods \emph{Beam} and \emph{BI}, which were overall best.
+These two methods from the literature yielded close-to-optimal quality while being significantly faster than our exhaustive, solver-based search method \emph{SMT}.
+Additionally, heuristic solutions were less prone to overfitting than optimal solutions from exhaustive search.
+These results highlight the heuristics as serious competitors for any exhaustive search method from the literature, not only our method \emph{SMT}.
+Further, \emph{Beam} and \emph{BI} beat the quality of the exhaustive competitors \emph{BSD} and \emph{SD-Map}, which required discretizing numeric features beforehand.
+The heuristic search method \emph{PRIM} was faster than \emph{Beam} and \emph{BI} but yielded lower subgroup quality.
 Our novel baseline \emph{MORS} provided instantaneous, non-trivial lower bounds for subgroup quality.
 
 \paragraph{Solver timeouts (cf.~Section~\ref{sec:csd:evaluation:timeouts})}
@@ -1895,15 +1918,16 @@ However, the average subgroup quality with this solver timeout was lower than fo
 \paragraph{Feature-cardinality constraints (cf.~Section~\ref{sec:csd:evaluation:cardinality})}
 
 Using more features in subgroup descriptions showed a decreasing marginal utility regarding subgroup quality.
-For \emph{Beam}, \emph{BI}, and \emph{SMT}, test-set subgroup quality was already close to the unconstrained scenario at $k=2$, while \emph{PRIM} benefited more from larger~$k$.
-A smaller~$k$ made the heuristic search methods faster and generally reduced overfitting.
-The baseline \emph{MORS} showed stable test-set subgroup quality regarding~$k$, while \emph{Random} even increased subgroup quality with smaller~$k$.
+For most subgroup-discovery methods, subgroups with as few as $k=2$ feature in their description often yielded already a similar quality as unconstrained subgroups, i.e., using all features.
+Further, feature-cardinality constraints reduced overfitting and sped up the heuristic search methods as well as \emph{BSD} and \emph{SD-Map}.
+These result speak for using small feature sets in subgroup descriptions, which may also benefit interpretability for users.
 
 \paragraph{Alternative subgroup descriptions (cf.~Section~\ref{sec:csd:evaluation:alternatives})}
 
 The heuristic \emph{Beam} was one to two orders of magnitude faster than solver-based \emph{SMT} when searching for alternative subgroup descriptions, while both search methods found alternatives faster than original subgroups.
 The quality and similarity of alternative subgroup descriptions strongly depended on two user parameters, i.e., the number of alternatives~$a$ and the dissimilarity threshold on feature selection~$\tau_{\text{abs}}$.
 The difference in quality and similarity between the original and the first alternative was higher than among the first few alternatives.
+In particular, there may be several promising alternatives from which users may choose one.
 
 \section{Related Work}
 \label{sec:csd:related-work}
@@ -2111,6 +2135,7 @@ Further, we proved $\mathcal{NP}$-hardness of the optimization problem with cons
 Finally, we evaluated heuristic and solver-based search with 27 binary-classification datasets.
 In particular, we analyzed four experimental scenarios:
 unconstrained subgroup discovery, our two constraint types, and timeouts for solver-based search.
+Section~\ref{sec:csd:evaluation:summary} summarized key results.
 
 \subsection{Future Work}
 \label{sec:csd:conclusion:future-work}
@@ -2126,6 +2151,8 @@ In such studies, one could also interpret alternative subgroup descriptions qual
 \paragraph{Constraint types}
 
 We formalized, analyzed, and evaluated two constraint types, i.e., feature-cardinality constraints (cf.~Sections~\ref{sec:csd:approach:cardinality} and~\ref{sec:csd:evaluation:cardinality}) and alternative subgroup descriptions (cf.~Sections~\ref{sec:csd:approach:alternatives} and~\ref{sec:csd:evaluation:alternatives}).
+While our solver-based approach was not convincing for these two, it retains the conceptual advantage that constraints can be added and combined declaratively instead of needing to integrate individual constraint types into the search procedure.
+The two constraint types studied in this article were antimonotonic, which eased their integration into heuristic search methods.
 As mentioned in Section~\ref{sec:csd:approach:constraint-types}, there are further constraint types one could investigate, e.g., domain-specific constraints, secondary objectives, or alternatives in the sense of covering different data objects rather than covering the same data objects differently.
 
 For alternative subgroup descriptions, one could analyze other dissimilarities, e.g., symmetric ones rather than the asymmetric deselection dissimilarity we used (cf.~Equation~\ref{eq:csd:constraint-dissimilarity}).

@@ -151,11 +151,15 @@ Section~\ref{sec:csd:related-work} reviews related work.
 Section~\ref{sec:csd:conclusion} concludes and discusses future work.
 Appendix~\ref{sec:csd:appendix} contains supplementary materials.
 
-\paragraph{Related versions}
+\paragraph{Other versions}
 
-The dissertation~\cite{bach2025leveraging} contains a shortened version of this article, which retains all central experimental and theoretical results.
-In particular, the dissertation evaluates the same run of the experimental pipeline.
-Only the Appendices~\ref{sec:csd:appendix:further-encodings:smt-categorical} and~\ref{sec:csd:appendix:further-encodings:max-sat} appear exclusively in this arXiv version.
+There is a conference version of this article~\cite{bach2025subgroup}, which retains the most important experimental and theoretical results.
+It evaluates the same run of the experimental pipeline as this arXiv version (v2).
+
+The dissertation~\cite{bach2025leveraging} contains a shortened rendition of the first arXiv version, though longer than the conference version.
+It lacks the comparison against the exhaustive algorithmic search methods \emph{BSD} and \emph{SD-Map}.
+
+Appendix~\ref{sec:csd:appendix:further-encodings:smt-categorical}, \ref{sec:csd:appendix:further-encodings:max-sat}, and~\ref{sec:csd:appendix:competitor-runtime} appear exclusively in this arXiv version.
 
 \section{Fundamentals of Subgroup Discovery}
 \label{sec:csd:fundamentals}
@@ -2128,6 +2132,7 @@ In that regard, one could seek an approximation complexity result, e.g., members
 In this section, we provide supplementary materials.
 Appendix~\ref{sec:csd:appendix:further-encodings} describes further problem encodings of subgroup discovery, complementing Section~\ref{sec:csd:approach:smt}.
 Appendix~\ref{sec:csd:appendix:proofs} contains proofs for propositions from Section~\ref{sec:csd:approach}.
+Appendix~\ref{sec:csd:appendix:competitor-runtime} summarizes the runtime experiments with subgroup-discovery libraries that led to integrating \emph{BSD} and \emph{SD-Map} into the main experiments (cf.~Section~\ref{sec:csd:evaluation}).
 
 \subsection{Further Problem Encodings of Subgroup Discovery}
 \label{sec:csd:appendix:further-encodings}
@@ -2623,6 +2628,9 @@ Thus, if the optimal alternative subgroup description for~$I'$ is not a perfect 
 Overall, an algorithm for alternative-subgroup-description discovery (cf.~Definition~\ref{def:csd:alternative-subgroup-description-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) solves perfect-alternative-subgroup-description discovery (cf.~Definition~\ref{def:csd:perfect-alternative-subgroup-description-discovery}) with the same constraint with negligible overhead.
 Since the latter problem is $\mathcal{NP}$-complete (cf.~Propositions~\ref{prop:csd:complexity-perfect-alternatives-np-perfect-subgroup} and~\ref{prop:csd:complexity-perfect-alternatives-np-imperfect-subgroup}) and the former resides in~$\mathcal{NP}$, the former is $\mathcal{NP}$-complete.
 \end{proof}
+
+\subsection{Competitor-Runtime Experiments}
+\label{sec:csd:appendix:competitor-runtime}
 
 \renewcommand*{\bibfont}{\small} % use a smaller font for bib than for main text
 \printbibliography

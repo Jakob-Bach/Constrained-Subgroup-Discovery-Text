@@ -42,7 +42,7 @@ Second, we propose the novel optimization problem of finding alternative subgrou
 We describe how to integrate both constraint types into heuristic subgroup-discovery methods.
 Further, we propose a novel Satisfiability Modulo Theories (SMT) formulation of subgroup discovery as a white-box optimization problem, which allows solver-based search for subgroups and is open to a variety of constraint types.
 Additionally, we prove that both constraint types lead to an $\mathcal{NP}$-hard optimization problem.
-Finally, we employ 27 binary-classification datasets to compare heuristic and solver-based search for unconstrained and constrained subgroup discovery.
+Finally, we employ 27 binary-classification datasets to compare algorithmic and solver-based search for unconstrained and constrained subgroup discovery.
 We observe that heuristic search methods often yield high-quality subgroups within a short runtime, also in scenarios with constraints.
 \end{abstract}
 %
@@ -119,11 +119,11 @@ Fourth, we analyze the time complexity of the subgroup-discovery problem with ea
 In particular, we prove several $\mathcal{NP}$-completeness results and thereby show that finding optimal solutions under these constraint types is computationally challenging.
 
 Fifth, we conduct comprehensive experiments with 27 binary-classification datasets from the Penn Machine Learning Benchmarks (PMLB)~\cite{olson2017pmlb, romano2021pmlb}.
-We compare solver-based and heuristic subgroup-discovery methods in different experimental scenarios:
+We compare solver-based and seven algorithmic subgroup-discovery methods in different experimental scenarios:
 without constraints, with a feature-cardinality constraint, and for searching alternative subgroup descriptions.
 In particular, we evaluate the runtime of subgroup discovery and the quality of the discovered subgroups.
-We also analyze how the subgroup quality in solver-based search depends on the timeout of the solver.
-We publish all code and data online (cf.~Section~\ref{sec:csd:experimental-design:implementation}).
+We also analyze how the subgroup quality in solver-based search depends on the solver's timeout.
+We publish all code and data (cf.~Section~\ref{sec:csd:experimental-design:implementation}).
 
 \paragraph{Experimental results}
 
@@ -164,9 +164,9 @@ Appendix~\ref{sec:csd:appendix:further-encodings:smt-categorical}, \ref{sec:csd:
 \section{Fundamentals of Subgroup Discovery}
 \label{sec:csd:fundamentals}
 
-In this section, we describe fundamentals for our work.
+In this section, we describe fundamentals.
 First, we introduce the optimization problem of subgroup discovery (cf.~Section~\ref{sec:csd:fundamentals:problem}).
-Second, we describe common heuristic search methods to solve this problem (cf.~Section~\ref{sec:csd:fundamentals:heuristics}).
+Second, we describe common algorithmic search methods to solve this problem (cf.~Section~\ref{sec:csd:fundamentals:search}).
 
 \subsection{Problem of Subgroup Discovery}
 \label{sec:csd:fundamentals:problem}
@@ -263,11 +263,14 @@ One normalization, which we use in our experiments, is a max-normalization to th
 %
 Alternatively, one can also min-max-normalize the range to~$[0, 1]$~\cite{carmona2018unifying, ventura2018subgroup}.
 
-\subsection{Heuristic Search Methods}
-\label{sec:csd:fundamentals:heuristics}
+\subsection{Search Methods}
+\label{sec:csd:fundamentals:search}
 
-In general, there are heuristic and exhaustive search methods for subgroup discovery~\cite{atzmueller2015subgroup}.
-In this section, we discuss three popular heuristic search methods, which we will employ in our experiments.
+To discover subgroups, there are heuristic search methods (cf.~Section~\ref{sec:csd:fundamentals:search:heuristics}), like PRIM~\cite{friedman1999bump} and Best Interval~\cite{mampaey2012efficient}, as well as exhaustive search methods (cf.~Section~\ref{sec:csd:fundamentals:search:exhaustive}), like SD-Map~\cite{atzmueller2009fast, atzmueller2006sd}, MergeSD~\cite{grosskreutz2009subgroup}, and BSD~\cite{lemmerich2016fast, lemmerich2010fast}.
+In this section, we discuss five search methods that are relevant for our experiments; see~\cite{atzmueller2015subgroup, helal2016subgroup, herrera2011overview, ventura2018subgroup} for comprehensive surveys on subgroup-discovery methods.
+
+\subsubsection{Heuristic Search Methods}
+\label{sec:csd:fundamentals:search:heuristics}
 
 \begin{algorithm}[p]
 	\DontPrintSemicolon
@@ -479,11 +482,26 @@ In particular, \emph{Best Interval} updates lower and upper bounds for a given F
 Thus, this procedure optimizes over all potential combinations of lower and upper bounds.
 However, it still only requires one pass over the unique values of Feature~$j$ rather than quadratic cost, due to theoretical properties of the WRAcc function~\cite{mampaey2012efficient}.
 
+\subsubsection{Exhaustive Search Methods}
+\label{sec:csd:fundamentals:search:exhaustive}
+
+\paragraph{SD-Map}
+
+\emph{SD-Map}~\cite{atzmueller2006sd} is an exhaustive search method based on the pattern-mining algorithm \emph{FP-growth}~\cite{han2000mining}.
+It assumes that numeric features are discretized and produces equality conditions of the form $X_{ij} = v$ instead of the numeric intervals we focus on (Definition~\ref{def:csd:subgroup}).
+The extension \emph{SD-Map*}~\cite{atzmueller2009fast} adds support for numeric targets and quality-based pruning of the search space.
+
+\paragraph{Bitset-based Subgroup Discovery (BSD)}
+
+\emph{BSD}~\cite{lemmerich2010fast} is another exhaustive search method that produces equality conditions in the subgroup description.
+It combines a branch-and-bound strategy with a special binary data representation and pruning techniques to speed up the search.
+\emph{NumBSD}~\cite{lemmerich2016fast} can handle numeric targets, though the features are still assumed to be discrete.
+
 \section{Baselines}
 \label{sec:csd:baselines}
 
 In this section, we propose and analyze two baselines for subgroup discovery, \emph{MORS} (cf.~Section~\ref{sec:csd:baselines:mors}) and \emph{Random Search} (cf.~Section~\ref{sec:csd:baselines:random-search}).
-They are conceptually simpler than the heuristic search methods (cf.~Section~\ref{sec:csd:fundamentals:heuristics}) and serve as further reference points in our experiments.
+They are conceptually simpler than the heuristic search methods (cf.~Section~\ref{sec:csd:fundamentals:search:heuristics}) and serve as further reference points in our experiments.
 While they technically also are heuristics, we use the term \emph{baselines} to refer to these two methods specifically.
 
 \begin{algorithm}[t]
@@ -866,7 +884,7 @@ This step is consistent with the heuristic search methods and baselines (e.g., c
 The feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) is \emph{antimonotonic}~\cite{ng1998exploratory} in the feature selection:
 If a selected feature set satisfies the constraint, all its subsets also satisfy it.
 Vice versa, if a feature set violates the constraint, all its supersets also violate it.
-This property allows to easily integrate the constraint into the three heuristic search methods from Section~\ref{sec:csd:fundamentals:heuristics}, i.e., \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Beam Search} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}), and \emph{Best Interval} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:best-interval-subgroup-update}), which all iteratively enlarge the selected feature set.
+This property allows to easily integrate the constraint into the three heuristic search methods from Section~\ref{sec:csd:fundamentals:search:heuristics}, i.e., \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Beam Search} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}), and \emph{Best Interval} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:best-interval-subgroup-update}), which all iteratively enlarge the selected feature set.
 In particular, these search methods start with unrestricted subgroup bounds, i.e., an empty feature set, which satisfies the constraint for any~$k \geq 0$.
 Each iteration may either add bounds on one further feature or refine the bounds on an already selected feature.
 Thus, one can prevent generation of invalid solution candidates by defining the function \emph{get\_permissible\_feature\_idxs(\dots)} (cf.~Line~\ref{al:csd:prim:line:permissible-features} in Algorithm~\ref{al:csd:prim} and Line~\ref{al:csd:generic-beam-search:line:permissible-features} in Algorithm~\ref{al:csd:generic-beam-search}) as follows:
@@ -940,7 +958,7 @@ Instead of combining bounds from all $n$~features, there are $\binom{n}{k} \leq 
 	\label{prop:csd:complexity-cardinality-exhaustive}
 \end{proposition}
 %
-For the special case $k=1$, the size of the search space becomes $O(m^2 \cdot n)$, which is leveraged by heuristic search methods that only consider updating the bounds of each feature separately instead of jointly (cf.~Section~\ref{sec:csd:fundamentals:heuristics}).
+For the special case $k=1$, the size of the search space becomes $O(m^2 \cdot n)$, which is leveraged by heuristic search methods that only consider updating the bounds of each feature separately instead of jointly (cf.~Section~\ref{sec:csd:fundamentals:search:heuristics}).
 With the update procedure of \emph{Best Interval} (cf.~Algorithm~\ref{al:csd:best-interval-subgroup-update}), the cost for~$k=1$ even reduces to $O(m \cdot n)$ since it only requires one pass over the unique values of each feature to evaluate all lower-upper-bound combinations for WRAcc implicitly.
 The update procedure of \emph{Beam Search} (cf.~Algorithm~\ref{al:csd:beam-search-subgroup-update}) also requires $O(m \cdot n)$, by only checking updates of either lower or upper bound.
 
@@ -1280,7 +1298,7 @@ Finally, we briefly outline our implementation (cf.~Section~\ref{sec:csd:experim
 \subsection{Overview}
 \label{sec:csd:experimental-design:overview}
 
-In our experiments, we evaluate six subgroup-discovery methods on 27 binary-classification datasets.
+In our experiments, we evaluate eight subgroup-discovery methods on 27 binary-classification datasets.
 We measure the subgroup quality in terms of nWRAcc and also record the methods' runtime.
 We analyze four \emph{experimental scenarios}:
 First, we compare all subgroup-discovery methods without constraints.
@@ -1292,18 +1310,28 @@ We vary the number of alternatives~$a$ and the dissimilarity threshold~$\tau_{\t
 \subsection{Subgroup-Discovery Methods}
 \label{sec:csd:experimental-design:methods}
 
-We employ six subgroup-discovery methods:
-A solver-based one using our SMT encoding (cf.~Section~\ref{sec:csd:approach:smt}), three heuristic search methods from related work (cf.~Section~\ref{sec:csd:fundamentals:heuristics}), and our two baselines (cf.~Section~\ref{sec:csd:baselines}).
+We employ eight subgroup-discovery methods:
+a solver-based one using our SMT encoding (cf.~Section~\ref{sec:csd:approach:smt}),
+two exhaustive search methods from related work (cf.~Section~\ref{sec:csd:fundamentals:search:exhaustive}),
+three heuristic search methods from related work (cf.~Section~\ref{sec:csd:fundamentals:search:heuristics}), and our two baselines (cf.~Section~\ref{sec:csd:baselines}).
 
 \paragraph{Solver-based search}
 
 For solver-based search, denoted as \emph{SMT}, we employ the solver \emph{Z3}~\cite{bjorner2015nuz, deMoura2008z3} with our SMT encoding of subgroup discovery (cf.~Equation~\ref{eq:csd:smt-problem-unconstrained-complete}).
-Unlike the other five subgroup-discovery methods, this method is exhaustive, i.e., it finds the global optimum, if granted sufficient time.
-In practice, however, we set solver timeouts to control the runtime (cf.~Section~\ref{sec:csd:experimental-design:scenarios}).
+This search method is exhaustive, i.e., it finds the global optimum, if granted sufficient time.
+In practice, however, we set solver timeouts to control the runtime (cf.~Section~\ref{sec:csd:experimental-design:scenarios}), so the method may not be truly exhaustive.
+
+\paragraph{Exhaustive algorithmic search}
+
+We evaluate two exhaustive algorithmic search methods from related work (cf.~Section~\ref{sec:csd:fundamentals:search:exhaustive}), i.e., \emph{BSD}~\cite{lemmerich2010fast} and \emph{SD-Map}~\cite{atzmueller2006sd}, based on their implementation in the package \emph{SD4Py}~\cite{hudson2023subgroup}.
+We chose these two methods after comparing the runtimes of several algorithms from four Python packages for subgroup discovery (cf.~Section~\ref{sec:csd:appendix:competitor-runtime}).
+Both methods require discretization of numeric features, which makes them non-exhaustive regarding the full numeric search space in our experiments.
+We use their built-in equal-width discretization and tune it by choosing the best subgroup quality out of ten different bin counts. i.e., $\{2, 3, 4, 5, 10, 15, 20, 30, 40, 50\}$.
+Each subgroup description may comprise at most one bin for each feature.
 
 \paragraph{Heuristic search}
 
-We evaluate three heuristic search methods from related work:
+We evaluate three heuristic search methods from related work (cf.~Section~\ref{sec:csd:fundamentals:search:heuristics}):
 \emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Beam Search} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}), subsequently called \emph{Beam}, and \emph{Best Interval} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:best-interval-subgroup-update}), subsequently called \emph{BI}.
 We set the peeling fraction of \emph{PRIM} to~$\alpha = 0.05$, consistent with other implementations~\cite{arzamasov2021reds, kwakkel2017exploratory} and within the recommended value range proposed by its authors~\cite{friedman1999bump}.
 Further, we set the support threshold to~$\beta_0 = 0$, so there is no constraint on the subgroup's size.
@@ -1324,7 +1352,7 @@ Two of the scenarios do not involve all subgroup-discovery methods.
 
 \paragraph{Unconstrained subgroup discovery}
 
-Our first experimental scenario (cf. Section~\ref{sec:csd:evaluation:unconstrained} for results) compares all six subgroup-discovery methods without constraints.
+Our first experimental scenario (cf. Section~\ref{sec:csd:evaluation:unconstrained} for results) compares all eight subgroup-discovery methods without constraints.
 This comparison assesses the effectiveness of the solver-based search method \emph{SMT} for conventional subgroup discovery and serves as a reference point for subsequent experiments with constraints.
 All methods except \emph{MORS} use WRAcc (cf.~Equation~\ref{eq:csd:wracc}) as the subgroup-quality function~$Q(\mathit{lb}, \mathit{ub}, X, y)$ for search.
 \emph{MORS} optimizes its built-in objective (cf.~Definition~\ref{def:csd:minimal-optimal-recall-subgroup-discovery}).
@@ -1339,10 +1367,13 @@ Note that the timeout only applies to the optimization procedure, while our runt
 We evaluate twelve exponentially scaled timeout values, i.e., \{1~s, 2~s, 4~s, $\dots$, 2048~s\}.
 In the three other experimental scenarios, we employ the maximum timeout of 2048~s for \emph{SMT}.
 Since the heuristic search methods and baselines are significantly faster, we do not conduct a timeout analysis for them.
+The two exhaustive algorithmic search methods \emph{BSD} and \emph{SD-Map} are usually fast as well.
+However, they did not finish within two days in the unconstrained scenario for five datasets and do not have a timeout parameter.
+We replace these missing values with the results for a feature-cardinality threshold of~$k=5$.
 
 \paragraph{Feature-cardinality constraints}
 
-Our third experimental scenario (cf.~Section~\ref{sec:csd:evaluation:cardinality} for results) analyzes feature-cardinality constraints (cf.~Section~\ref{sec:csd:approach:cardinality}) for all six subgroup-discovery methods.
+Our third experimental scenario (cf.~Section~\ref{sec:csd:evaluation:cardinality} for results) analyzes feature-cardinality constraints (cf.~Section~\ref{sec:csd:approach:cardinality}) for all eight subgroup-discovery methods.
 In particular, we evaluate $k \in \{1, 2, 3, 4, 5\}$ selected features.
 These values of~$k$ are upper bounds (cf.~Equation~\ref{eq:csd:smt-constraint-feature-cardinalty}), i.e., the subgroup-discovery methods may select fewer features if selecting more does not improve subgroup quality.
 
@@ -1458,7 +1489,7 @@ Finally, we summarize key experimental results (cf.~Section~\ref{sec:csd:evaluat
 \subsection{Unconstrained Subgroup Discovery}
 \label{sec:csd:evaluation:unconstrained}
 
-In this section, we compare all six subgroup-discovery methods in the experimental scenario without constraints.
+In this section, we compare all eight subgroup-discovery methods in the experimental scenario without constraints.
 \emph{SMT} uses its default maximum solver timeout of 2048~s.
 
 \begin{figure}[t]
@@ -1485,7 +1516,7 @@ In this section, we compare all six subgroup-discovery methods in the experiment
 
 \paragraph{Subgroup quality}
 
-Figure~\ref{fig:csd:unconstrained-nwracc-all-datasets} compares subgroup quality for the six subgroup-discovery methods.
+Figure~\ref{fig:csd:unconstrained-nwracc-all-datasets} compares subgroup quality for the eight subgroup-discovery methods.
 On the training set, the two heuristic search methods \emph{Beam} and \emph{BI} have roughly the same median nWRAcc as the solver-based search method \emph{SMT}.
 In particular, the heuristics are even better than \emph{SMT} on some datasets but worse on others.
 The former can only happen when \emph{SMT} yields suboptimal solutions due to timeouts, as we analyze later (cf.~Section~\ref{sec:csd:evaluation:timeouts}).
@@ -1641,7 +1672,7 @@ However, since the test-set nWRAcc still increases with the timeout, choosing lo
 \subsection{Feature-Cardinality Constraints}
 \label{sec:csd:evaluation:cardinality}
 
-In this section, we compare all six subgroup-discovery methods in the experimental scenario with feature-cardinality constraints.
+In this section, we compare all eight subgroup-discovery methods in the experimental scenario with feature-cardinality constraints.
 \emph{SMT} uses its default maximum solver timeout of 2048~s.
 
 \begin{figure}[t]
@@ -2132,7 +2163,7 @@ In that regard, one could seek an approximation complexity result, e.g., members
 In this section, we provide supplementary materials.
 Appendix~\ref{sec:csd:appendix:further-encodings} describes further problem encodings of subgroup discovery, complementing Section~\ref{sec:csd:approach:smt}.
 Appendix~\ref{sec:csd:appendix:proofs} contains proofs for propositions from Section~\ref{sec:csd:approach}.
-Appendix~\ref{sec:csd:appendix:competitor-runtime} summarizes the runtime experiments with subgroup-discovery libraries that led to integrating \emph{BSD} and \emph{SD-Map} into the main experiments (cf.~Section~\ref{sec:csd:evaluation}).
+Appendix~\ref{sec:csd:appendix:competitor-runtime} summarizes the runtime experiments with subgroup-discovery packages that led to integrating \emph{BSD} and \emph{SD-Map} into the main experiments (cf.~Section~\ref{sec:csd:evaluation}).
 
 \subsection{Further Problem Encodings of Subgroup Discovery}
 \label{sec:csd:appendix:further-encodings}

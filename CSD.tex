@@ -2700,6 +2700,181 @@ Since the latter problem is $\mathcal{NP}$-complete (cf.~Propositions~\ref{prop:
 \subsection{Competitor-Runtime Experiments}
 \label{sec:csd:appendix:competitor-runtime}
 
+In this section, we describe the runtime experiments we conducted to find exhaustive subgroup-discovery methods as competitors for our solver-based approach~\emph{SMT} in our main experiments (cf.~Section~\ref{sec:csd:experimental-design:methods}).
+Section~\ref{sec:csd:appendix:competitor-runtime:experimental-design} explains the experimental design and Section~\ref{sec:csd:appendix:competitor-runtime:evaluation} presents the results.
+
+\subsubsection{Experimental Design}
+\label{sec:csd:appendix:competitor-runtime:experimental-design}
+
+\paragraph{Goal}
+
+The goal of the competitor-runtime experiments is to find subgroup-discovery methods that are suitable competitors for solver-based search in our main experimental pipeline.
+An ideal competitor should satisfy several criteria to enable a fair comparison:
+%
+\begin{enumerate}[noitemsep, label=(\arabic*)]
+	\item Support optimizing WRAcc~\cite{lavravc1999rule} as the subgroup-quality metric.
+	\item Support setting a feature-cardinality threshold.
+	\item Not have additional constraints, e.g., on the number of subgroup members.
+	\item Support a continuous search space where subgroup descriptions define intervals on features (cf.~Definition~\ref{def:csd:subgroup}).
+	\item Be reasonably fast.
+\end{enumerate}
+%
+Note that these criteria do not require the competitors to yield a certain subgroup quality, which would be studied in the main experiments anyway.
+Instead, (1)-(4) ensure that the competitors address the same optimization problem as we do, and (5) concerns the experiments' feasibility.
+
+\begin{table}[t]
+	\centering
+	\caption{
+		Datasets from PMLB used in our competitor-runtime experiments.
+		$m$~denotes the number of data objects and $n$~the number of features.
+	}
+	\begin{tabular}{lrr}
+		\toprule
+		Dataset & $m$ & $n$ \\
+		\midrule
+		backache & 180 & 32 \\
+		horse\_colic & 368 & 22 \\
+		ionosphere & 351 & 34 \\
+		iris & 150 & 4 \\
+		spect & 267 & 22 \\
+		spectf & 349 & 44 \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:csd:competitor-runtime-datasets}
+\end{table}
+
+\paragraph{Subgroup-discovery methods}
+
+We consider competitors from four Python packages for subgroup discovery, i.e., \emph{pysubdisc}, \emph{pysubgroup}~\cite{lemmerich2019pysubgroup}, \emph{sd4py}~\cite{hudson2023subgroup}, and \emph{subgroups}~\cite{lopez2024subgroups}.
+All four packages offer exhaustive subgroup-discovery methods that support WRAcc as the optimization objective, which are particularly interesting competitors for our solver-based search method \emph{SMT}.
+Additionally, \emph{pysubdisc}, \emph{pysubgroup}, and \emph{sd4py} provide beam search as a heuristic search method.
+For comparison, we include \emph{Beam} and \emph{SMT} from our main experiments (cf.~Section~\ref{sec:csd:experimental-design:methods}).
+Overall, we evaluate the following 17 subgroup-discovery methods in our competitor-runtime experiments:
+%
+\begin{itemize}[noitemsep]
+	\item \emph{csd} (our package): \emph{Beam}, \emph{SMT}
+	\item \emph{pysubdisc}: \emph{Beam}, \emph{BestFirst}, \emph{BreadthFirst}, \emph{DepthFirst}
+	\item \emph{pysubgroup}: \emph{Apriori}, \emph{Beam}, \emph{DepthFirst}, \emph{GPGrowth}
+	\item \emph{sd4py}: \emph{Beam}, \emph{BSD}, \emph{SDMap}
+	\item \emph{subgroups}: \emph{BSD}, \emph{SDMap}, \emph{SDMapStar}, \emph{VLSD}
+\end{itemize}
+%
+Note that we harmonized the method names between the packages, i.e., the actual function names in each package may differ slightly.
+
+The methods from \emph{sd4py} and \emph{subgroups} require discretization of numeric features.
+To this end, we create up to 50 bins per feature, with fewer bins if a feature has fewer unique values.
+\emph{sd4py} has a built-in equal-width discretization, while we manually employ equal-frequency discretization for \emph{subgroups}.
+
+The exhaustive search methods from \emph{subgroups} do not support a feature-cardinality threshold, so we run them without it.
+
+Finally, we generally leave the hyperparameters of all subgroup-discovery methods at their defaults except to adapt them to our main experiments.
+For example, we always set WRAcc as the objective and use a beam width of $w=10$ for all beam-search methods.
+
+\paragraph{Experimental task}
+
+We focus on finding competitors with a reasonable runtime.
+To this end, each experimental task in the competitor-runtime experiments combines one subgroup-discovery method with one cross-validation fold of a dataset (in five-fold cross-validation).
+Within each experimental task, we sequentially measure the runtime for a feature-cardinality threshold of $k \in \{1, 2, 3, 4, 5\}$.
+In particular, we exclude the unconstrained setting, which may take significantly longer.
+We run these experiments separately for each dataset and grant each task 9~hours of runtime to process these five cardinality settings.
+This runtime limit is considerably higher than the maximum solver timeout of 2048~s in our main experiments, even though the latter timeout applies to each cardinality setting individually instead of jointly.
+
+\paragraph{Datasets}
+
+To accompany potentially slow subgroup-discovery methods, we employ smaller datasets than in our main experiments.
+In particular, we use five of the smallest datasets from our main experiments, all with $m < 500$ data objects and $n < 50$ features, plus the even smaller \emph{iris} dataset with $m = 150$ and $n = 4$.
+Table~\ref{tab:csd:competitor-runtime-datasets} lists these datasets.
+For comparison: The maxima in our main experiments are considerably higher, i.e., $m = 9822$ and $n = 168$ (cf.~Table~\ref{tab:csd:datasets}).
+
+\paragraph{Implementation}
+
+We implemented an additional experimental pipeline for the competitor-runtime experiments.
+This pipeline parallelizes over the experimental tasks.
+The code and data are available together with the main experiments (cf.~Section~\ref{sec:csd:experimental-design:implementation}).
+We used the same hardware but Python~3.9 instead of Python~3.8 to support recent versions of all subgroup-discovery packages.
+
+\subsubsection{Evaluation}
+\label{sec:csd:appendix:competitor-runtime:evaluation}
+
+\begin{table}[t]
+	\centering
+	\caption{
+		Which subgroup-discovery methods finished their experimental task (feature-cardinality thresholds $k \in \{1, 2, 3, 4, 5\}$ evaluated sequentially) within 9~hours on which dataset?
+	}
+	\begin{tabular}{lllllll}
+		\toprule
+		Method & back. & horse. & iono. & iris & spect & spectf \\
+		\midrule
+		csd.Beam & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+		csd.SMT & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark &  \\
+		pysubdisc.Beam & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+		pysubdisc.BestFirst & \checkmark & \checkmark &  & \checkmark & \checkmark &  \\
+		pysubdisc.BreadthFirst & \checkmark & \checkmark &  & \checkmark & \checkmark &  \\
+		pysubdisc.DepthFirst & \checkmark & \checkmark &  & \checkmark & \checkmark &  \\
+		pysubgroup.Apriori &  &  &  & \checkmark & \checkmark &  \\
+		pysubgroup.Beam & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+		pysubgroup.DepthFirst &  &  &  & \checkmark & \checkmark &  \\
+		pysubgroup.GPGrowth &  &  &  & \checkmark &  &  \\
+		sd4py.BSD & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+		sd4py.Beam & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+		sd4py.SDMap & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+		subgroups.BSD & \checkmark & \checkmark &  & \checkmark & \checkmark &  \\
+		subgroups.SDMap &  &  &  & \checkmark &  &  \\
+		subgroups.SDMapStar &  &  &  & \checkmark &  &  \\
+		subgroups.VLSD &  &  &  & \checkmark &  &  \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:csd:competitor-timeouts}
+\end{table}
+
+\paragraph{Timeouts}
+
+Table~\ref{tab:csd:competitor-timeouts} displays which experimental tasks finished within the 9-hour timeout.
+Generally, all subgroup-discovery methods finished either on all or no cross-validation folds of a dataset.
+All methods finished on the \emph{iris} dataset, but fewer methods on the five other datasets.
+From the exhaustive search methods, i.e., without beam search, only \emph{sd4py.BSD} and \emph{sd4py.SDMap} finished on each of the six small datasets.
+
+\begin{table}[t]
+	\centering
+	\caption{
+		Runtime (in seconds) on the dataset~\emph{spect}, averaged over five cross-validation folds.
+		Missing subgroup-discovery methods compared to Table~\ref{tab:csd:competitor-timeouts} did not finish their experimental task within 9~hours.
+	}
+	\begin{tabular}{lrrrrr}
+		\toprule
+		Method & $k=1$ & $k=2$ & $k=3$ & $k=4$ & $k=5$ \\
+		\midrule
+		csd.Beam & 0.03 & 0.05 & 0.06 & 0.08 & 0.09 \\
+		csd.SMT & 3.58 & 3.92 & 3.63 & 3.49 & 3.50 \\
+		pysubdisc.Beam & 2.40 & 0.20 & 0.17 & 0.32 & 0.26 \\
+		pysubdisc.BestFirst & 1.61 & 0.27 & 2.12 & 26.39 & 829.56 \\
+		pysubdisc.BreadthFirst & 2.35 & 0.33 & 1.79 & 6.23 & 47.98 \\
+		pysubdisc.DepthFirst & 1.96 & 0.29 & 1.95 & 27.60 & 948.02 \\
+		pysubgroup.Apriori & 0.02 & 0.07 & 0.81 & 8.93 & 70.20 \\
+		pysubgroup.Beam & 0.02 & 0.12 & 0.23 & 0.35 & 0.50 \\
+		pysubgroup.DepthFirst & 0.02 & 0.23 & 3.65 & 45.06 & 412.13 \\
+		sd4py.BSD & 0.36 & 0.66 & 0.07 & 0.10 & 0.18 \\
+		sd4py.Beam & 0.45 & 0.85 & 0.26 & 0.27 & 0.19 \\
+		sd4py.SDMap & 0.45 & 0.89 & 0.29 & 0.55 & 0.49 \\
+		subgroups.BSD & 0.15 & 0.86 & 6.40 & 36.90 & 166.24 \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:csd:spect-runtime}
+\end{table}
+
+\paragraph{Runtime}
+
+For a more detailed view, Table~\ref{tab:csd:spect-runtime} displays the exact runtimes for the dataset~\emph{spect}, which had the second-most methods finishing with the 9-hour timeout.
+This table clearly shows the exponential runtime increase over the feature-cardinality threshold~$k$ for the exhaustive search methods from the packages \emph{pysubdisc}, \emph{pysubgroup}, and \emph{subgroups}, while \emph{sd4py} exhibits considerably smaller and less varying runtimes.
+
+\paragraph{Conclusion}
+
+Overall, these competitor-runtime experiments show that only the exhaustive search methods from \emph{sd4py} can be expected to have a reasonable runtime in our main experiments, which involve larger datasets and also an unrestricted feature-cardinality threshold, which corresponds to~$k = n \geq 20$ (number of features in the dataset, which is at least~20).
+Thus, we integrated \emph{sd4py}'s \emph{BSD}~\cite{lemmerich2010fast} and \emph{SDMap}~\cite{atzmueller2006sd} into our main experiments (cf.~Section~\ref{sec:csd:experimental-design:methods}).
+Both methods retain the potential weakness that they require discretization of numeric features, which reduces their search space.
+Thus, they may yield a lower quality than an exhaustive search on the full space but also be faster.
+In our main experiments, we rely on \emph{sd4py}'s built-in equal-width discretization but optimize subgroup quality over ten different numbers of bins.
+
 \renewcommand*{\bibfont}{\small} % use a smaller font for bib than for main text
 \printbibliography
 

@@ -1414,6 +1414,12 @@ For solver-based search, we also record whether the solver timed out.
 
 \begin{table}[p]
 	\centering
+	\caption{
+		Datasets from PMLB used in our experiments.
+		$m$~denotes the number of data objects and $n$~the number of features.
+		In dataset names, we replaced \emph{GAMETES\_Epistasis} with  \emph{GE\_} and \emph{GAMETES\_Heterogeneity} with \emph{GH\_} to reduce the table's width.
+		\emph{Timeouts} indicates whether at least one timeout occurred with \emph{SMT} as the subgroup-discovery method and the highest timeout setting (2048~s), optimizing the original subgroup without cardinality constraints (\emph{Max~$k$}) or in any cardinality setting (\emph{Any~$k$}).
+	}
 	\begin{tabular}{lrrll}
 		\toprule
 		\multirow{2}{*}{Dataset} & \multirow{2}{*}{$m$} & \multirow{2}{*}{$n$} & \multicolumn{2}{c}{Timeouts} \\
@@ -1449,12 +1455,6 @@ For solver-based search, we also record whether the solver timed out.
 		wdbc & 569 & 30 & No & No \\
 		\bottomrule
 	\end{tabular}
-	\caption{
-		Datasets from PMLB used in our experiments.
-		$m$~denotes the number of data objects and $n$~the number of features.
-		In dataset names, we replaced \emph{GAMETES\_Epistasis} with  \emph{GE\_} and \emph{GAMETES\_Heterogeneity} with \emph{GH\_} to reduce the table's width.
-		\emph{Timeouts} indicates whether at least one timeout occurred with \emph{SMT} as the subgroup-discovery method and the highest timeout setting (2048~s), optimizing the original subgroup without cardinality constraints (\emph{Max~$k$}) or in any cardinality setting (\emph{Any~$k$}).
-	}
 	\label{tab:csd:datasets}
 \end{table}
 
@@ -1544,53 +1544,53 @@ While \emph{Random} mostly yields the same quality as not restricting the subgro
 
 \begin{table}[t]
 	\centering
+	\caption{
+		Aggregated runtime (in seconds) over datasets and cross-validation folds, by subgroup-discovery method.
+		Results from the unconstrained experimental scenario.
+	}
 	\begin{subtable}{\textwidth}
 		\centering
+		\caption{
+			All 27 datasets.
+		}
 		\begin{tabular}{lrrr}
 			\toprule
 			Method & Mean & Standard dev. & Median \\
 			\midrule
-			BI & 34.95~s & 103.61~s & 2.60~s \\
-			BSD & 55.70~s & 151.46~s & 1.06~s \\
-			Beam & 30.47~s & 85.69~s & 2.95~s \\
-			MORS & 0.01~s & 0.00~s & 0.01~s \\
-			PRIM & 1.26~s & 1.51~s & 0.66~s \\
-			Random & 0.91~s & 0.95~s & 0.51~s \\
-			SD-Map & 367.43~s & 1143.05~s & 4.08~s \\
-			SMT & 849.02~s & 929.60~s & 254.21~s \\
+			BI & 34.95& 103.61& 2.60\\
+			BSD & 55.70& 151.46& 1.06\\
+			Beam & 30.47& 85.69& 2.95\\
+			MORS & 0.01& 0.00& 0.01\\
+			PRIM & 1.26& 1.51& 0.66\\
+			Random & 0.91& 0.95& 0.51\\
+			SD-Map & 367.43& 1143.05& 4.08\\
+			SMT & 849.02& 929.60& 254.21\\
 			\bottomrule
 		\end{tabular}
-		\caption{
-			All 27 datasets.
-		}
 		\label{tab:csd:unconstrained-runtime-all-datasets}
 	\end{subtable}
 	\\ \vspace{\baselineskip}
 	\begin{subtable}{\textwidth}
 		\centering
+		\caption{
+			17 datasets without \emph{SMT} timeouts.
+		}
 		\begin{tabular}{lrrr}
 			\toprule
 			Method & Mean & Standard dev. & Median \\
 			\midrule
-			BI & 12.40~s & 21.17~s & 2.60~s \\
-			BSD & 44.02~s & 128.33~s & 1.57~s \\
-			Beam & 11.77~s & 20.47~s & 2.95~s \\
-			MORS & 0.01~s & 0.00~s & 0.01~s \\
-			PRIM & 1.29~s & 1.62~s & 0.80~s \\
-			Random & 0.82~s & 0.89~s & 0.56~s \\
-			SD-Map & 109.92~s & 290.69~s & 12.56~s \\
-			SMT & 168.13~s & 243.11~s & 57.23~s \\
+			BI & 12.40& 21.17& 2.60\\
+			BSD & 44.02& 128.33& 1.57\\
+			Beam & 11.77& 20.47& 2.95\\
+			MORS & 0.01& 0.00& 0.01\\
+			PRIM & 1.29& 1.62& 0.80\\
+			Random & 0.82& 0.89& 0.56\\
+			SD-Map & 109.92& 290.69& 12.56\\
+			SMT & 168.13& 243.11& 57.23\\
 			\bottomrule
 		\end{tabular}
-		\caption{
-			17 datasets without \emph{SMT} timeouts.
-		}
 		\label{tab:csd:unconstrained-runtime-no-timeout-datasets}
 	\end{subtable}
-	\caption{
-		Aggregated runtime over datasets and cross-validation folds, by subgroup-discovery method.
-		Results from the unconstrained experimental scenario.
-	}
 	\label{tab:csd:unconstrained-runtime}
 \end{table}
 
@@ -1611,6 +1611,11 @@ This average preparation time is already greater than the average total runtime 
 
 \begin{table}[t]
 	\centering
+	\caption{
+		Spearman correlation between runtime and metrics for dataset size,
+		over datasets and cross-validation folds, by subgroup-discovery method.
+		Results from the unconstrained experimental scenario, using the 17 datasets without \emph{SMT} timeouts.
+	}
 	\begin{tabular}{lrrrr}
 		\toprule
 		Method & $\Sigma n^u$ & $m \cdot n$ & $m$ & $n$ \\
@@ -1625,11 +1630,6 @@ This average preparation time is already greater than the average total runtime 
 		SMT & 0.39 & 0.73 & 0.70 & 0.23 \\
 		\bottomrule
 	\end{tabular}
-	\caption{
-		Spearman correlation between runtime and metrics for dataset size,
-		over datasets and cross-validation folds, by subgroup-discovery method.
-		Results from the unconstrained experimental scenario, using the 17 datasets without \emph{SMT} timeouts.
-	}
 	\label{tab:csd:unconstrained-runtime-correlation}
 \end{table}
 
@@ -1763,24 +1763,24 @@ From the eight subgroup-discovery methods, \emph{BSD} and \emph{SD-Map} show the
 
 \begin{table}[t]
 	\centering
+	\caption{
+		Mean runtime (in seconds) over datasets and cross-validation folds, by subgroup-discovery method and feature cardinality~$k$.
+		Results from the search for original subgroups.
+	}
 	\begin{tabular}{lrrrrrr}
 		\toprule
 		$k$ & 1 & 2 & 3 & 4 & 5 & no \\
 		\midrule
-		BI & 7.8~s & 11.7~s & 14.2~s & 16.7~s & 18.7~s & 35.0~s \\
-		BSD & 0.9~s & 0.9~s & 0.9~s & 2.7~s & 29.5~s & 55.7~s \\
-		Beam & 6.8~s & 10.1~s & 12.8~s & 14.6~s & 16.1~s & 30.5~s \\
-		MORS & 0.0~s & 0.0~s & 0.0~s & 0.0~s & 0.0~s & 0.0~s \\
-		PRIM & 0.1~s & 0.2~s & 0.3~s & 0.3~s & 0.5~s & 1.3~s \\
-		Random & 0.6~s & 0.6~s & 0.6~s & 0.7~s & 0.7~s & 0.9~s \\
-		SD-Map & 2.3~s & 3.3~s & 9.6~s & 54.0~s & 345.2~s & 367.4~s \\
-		SMT & 648.2~s & 911.3~s & 1091.7~s & 1113.4~s & 1117.4~s & 849.0~s \\
+		BI & 7.8& 11.7& 14.2& 16.7& 18.7& 35.0\\
+		BSD & 0.9& 0.9& 0.9& 2.7& 29.5& 55.7\\
+		Beam & 6.8& 10.1& 12.8& 14.6& 16.1& 30.5\\
+		MORS & 0.0& 0.0& 0.0& 0.0& 0.0& 0.0\\
+		PRIM & 0.1& 0.2& 0.3& 0.3& 0.5& 1.3\\
+		Random & 0.6& 0.6& 0.6& 0.7& 0.7& 0.9\\
+		SD-Map & 2.3& 3.3& 9.6& 54.0& 345.2& 367.4\\
+		SMT & 648.2& 911.3& 1091.7& 1113.4& 1117.4& 849.0\\
 		\bottomrule
 	\end{tabular}
-	\caption{
-		Mean runtime over datasets and cross-validation folds, by subgroup-discovery method and feature cardinality~$k$.
-		Results from the search for original subgroups.
-	}
 	\label{tab:csd:cardinality-runtime}
 \end{table}
 
@@ -1864,24 +1864,24 @@ This phenomenon may result from the alternative subgroup descriptions not direct
 
 \begin{table}[t]
 	\centering
+	\caption{
+		Mean runtime (in seconds) over datasets and cross-validation folds, by subgroup-discovery method, dissimilarity threshold~$\tau_{\text{abs}}$, and number of alternative.
+		Results from the search for alternative subgroup descriptions.
+	}
 	\begin{tabular}{llrrrrrr}
 		\toprule
 		\multirow{2}{*}{Method} & \multirow{2}{*}{$\tau_{\text{abs}}$} & \multicolumn{6}{c}{Number of alternative} \\
 		\cmidrule(lr){3-8}
 		& &  0 & 1 & 2 & 3 & 4 & 5 \\
 		\midrule
-		\multirow[t]{3}{*}{Beam} & 1 & 12.8~s & 8.0~s & 7.6~s & 7.3~s & 7.3~s & 7.3~s \\
-		& 2 & 12.8~s & 7.7~s & 7.4~s & 7.2~s & 7.0~s & 6.8~s \\
-		& 3 & 12.8~s & 5.8~s & 5.1~s & 4.7~s & 4.1~s & 3.5~s \\
-		\multirow[t]{3}{*}{SMT} & 1 & 1091.7~s & 166.0~s & 221.5~s & 239.6~s & 258.1~s & 277.9~s \\
-		& 2 & 1105.2~s & 377.5~s & 463.5~s & 537.5~s & 599.4~s & 658.3~s \\
-		& 3 & 1107.4~s & 869.1~s & 670.8~s & 597.6~s & 588.1~s & 557.6~s \\
+		\multirow[t]{3}{*}{Beam} & 1 & 12.8& 8.0& 7.6& 7.3& 7.3& 7.3\\
+		& 2 & 12.8& 7.7& 7.4& 7.2& 7.0& 6.8\\
+		& 3 & 12.8& 5.8& 5.1& 4.7& 4.1& 3.5\\
+		\multirow[t]{3}{*}{SMT} & 1 & 1091.7& 166.0& 221.5& 239.6& 258.1& 277.9\\
+		& 2 & 1105.2& 377.5& 463.5& 537.5& 599.4& 658.3\\
+		& 3 & 1107.4& 869.1& 670.8& 597.6& 588.1& 557.6\\
 		\bottomrule
 	\end{tabular}
-	\caption{
-		Mean runtime over datasets and cross-validation folds, by subgroup-discovery method, dissimilarity threshold~$\tau_{\text{abs}}$, and number of alternative.
-		Results from the search for alternative subgroup descriptions.
-	}
 	\label{tab:csd:alteratives-runtime}
 \end{table}
 

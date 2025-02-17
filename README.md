@@ -10,3 +10,4 @@ This repository contains the LaTeX source code for the paper
 - related dissertation (research of this paper constitutes one main chapter) on [*KITopen*](https://doi.org/10.5445/IR/1000178649)
 - code for experiments on [*GitHub*](https://github.com/Jakob-Bach/Constrained-Subgroup-Discovery)
 - experimental data (v1) on [*RADAR4KIT*](https://doi.org/10.35097/caKKJCtoKqgxyvqG)
+- experimental data (v2) on [*RADAR4KIT*](https://doi.org/10.35097/8ppb5x50nyvw1wa7)

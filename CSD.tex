@@ -1475,10 +1475,10 @@ Further, PMLB encodes categorical features ordinally by default.
 \label{sec:csd:experimental-design:implementation}
 
 We implemented all subgroup-discovery methods, experiments, and evaluations in Python~3.8.
-The code is available on \emph{GitHub}\footnote{\url{https://github.com/Jakob-Bach/Constrained-Subgroup-Discovery}} and additionally backed up in the \emph{Software Heritage archive}\footnote{\href{https://archive.softwareheritage.org/swh:1:dir:5527bcc4a86a1583e8bedf241f4738fc9b0e535c;origin=https://github.com/Jakob-Bach/Constrained-Subgroup-Discovery;visit=swh:1:snp:8f87dcdf0277985d373245e5a23a128efc861153;anchor=swh:1:rev:0c0e4a978c95d881c4c20eecdd5a1ae12ee08ac3}{swh:1:dir:5527bcc4a86a1583e8bedf241f4738fc9b0e535c}}.
+The code is available on \emph{GitHub}\footnote{\url{https://github.com/Jakob-Bach/Constrained-Subgroup-Discovery}} and additionally backed up in the \emph{Software Heritage archive}\footnote{\href{https://archive.softwareheritage.org/swh:1:dir:8119c420804e9027b12cf3aaf82ce12157c049e1;origin=https://github.com/Jakob-Bach/Constrained-Subgroup-Discovery;visit=swh:1:snp:d9fd1a1757f1966b5e254154f41ddb4af476e124;anchor=swh:1:rev:bc3aafc904cc27214d458f93782104484ffc372d}{swh:1:dir:8119c420804e9027b12cf3aaf82ce12157c049e1}}.
 A requirements file in our repository specifies the versions of all dependencies.
 Further, we released the subgroup-discovery methods and evaluation metrics as the Python package \emph{csd}\footnote{\url{https://pypi.org/project/csd/}} on \emph{PyPI} to ease reuse.
-Finally, we published all experimental data\footnote{\url{https://doi.org/10.35097/caKKJCtoKqgxyvqG}}.
+Finally, we published all experimental data\footnote{\url{https://doi.org/10.35097/8ppb5x50nyvw1wa7}}.
 
 Our experimental pipeline parallelizes over datasets, cross-validation folds, and subgroup-discovery methods, while each of these experimental tasks runs single-threaded.
 We ran the pipeline on a server with 160~GB RAM and an \emph{AMD EPYC 7551} CPU, having 32~physical cores and a base clock of 2.0~GHz.

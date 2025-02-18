@@ -1000,7 +1000,7 @@ First, we tackle the search problem for perfect subgroups (cf.~Appendix~\ref{sec
 	\label{prop:csd:complexity-cardinality-np-perfect-subgroup}
 \end{proposition}
 %
-This hardness results under a feature-cardinality constraint contrasts with the polynomial runtime of unconstrained perfect-subgroup discovery (cf.~Proposition~\ref{prop:csd:complexity-unconstrained-perfect-subgroup}), which corresponds to a cardinality constraint with $k = n$.
+This hardness result under a feature-cardinality constraint contrasts with the polynomial runtime of unconstrained perfect-subgroup discovery (cf.~Proposition~\ref{prop:csd:complexity-unconstrained-perfect-subgroup}), which corresponds to a cardinality constraint with $k = n$.
 
 Generalizing Proposition~\ref{prop:csd:complexity-cardinality-np-perfect-subgroup}, the optimization problem of subgroup discovery with a feature-cardinality constraint is $\mathcal{NP}$-complete under a reasonable assumption on the notion of subgroup quality (cf.~Appendix~\ref{sec:csd:appendix:proofs:complexity-cardinality-np} for the proof):
 %
@@ -1330,7 +1330,7 @@ In practice, however, we set solver timeouts to control the runtime (cf.~Section
 
 We evaluate two exhaustive algorithmic search methods from related work (cf.~Section~\ref{sec:csd:fundamentals:search:exhaustive}), i.e., \emph{BSD}~\cite{lemmerich2010fast} and \emph{SD-Map}~\cite{atzmueller2006sd}, based on their implementation in the package \emph{SD4Py}~\cite{hudson2023subgroup}.
 We chose these two methods after comparing the runtimes of several algorithms from four Python packages for subgroup discovery (cf.~Section~\ref{sec:csd:appendix:competitor-runtime}).
-Both methods require discretization of numeric features, which makes them non-exhaustive regarding the full numeric search space in our experiments.
+Both methods require discretizing numeric features, which makes them non-exhaustive regarding the full numeric search space in our experiments.
 We use their built-in equal-width discretization and tune it by choosing the best subgroup quality out of ten different bin counts. i.e., $\{2, 3, 4, 5, 10, 15, 20, 30, 40, 50\}$.
 Each subgroup description may comprise at most one bin for each feature.
 
@@ -1533,12 +1533,12 @@ This result indicates that \emph{Beam} and \emph{BI} are less susceptible to ove
 In detail, the average difference between training-set nWRAcc and test-set nWRAcc is 0.122 for \emph{SMT}, 0.101 for \emph{BI}, 0.095 for \emph{Beam}, 0.094 for \emph{MORS}, 0.068 for \emph{PRIM}, 0.042 for \emph{SD-Map}, 0.041 for \emph{BSD}, and 0.001 for \emph{Random}.
 
 \emph{BSD} and \emph{SD-Map} yield worse average subgroup quality than \emph{Beam} and \emph{BI} as well.
-While the former two are exhaustive, they require discretization of numeric features.
+While the former two are exhaustive, they require discretizing numeric features.
 Thus, they effectively only have a fixed set of intervals to use as bounds instead of being able to choose the bounds independently at each possible feature value.
 As a positive side-effect, this limitation may have reduced their overfitting and runtime.
 \emph{PRIM}'s worse subgroup quality may equally arise from a reduced search space.
 Although it follows an iterative subgroup-refinement procedure like  \emph{Beam} and \emph{BI}, its refinement options are more limited.
-In particular, \emph{PRIM} always has to remove a fixed fraction~$\alpha$ of data objects from the subgroup (cf.~Algorithm~\ref{al:csd:prim}), while \emph{Beam} and \emph{BI} can remove more or less data objects.
+In particular, \emph{PRIM} always has to remove a fixed fraction~$\alpha$ of data objects from the subgroup (cf.~Algorithm~\ref{al:csd:prim}), while \emph{Beam} and \emph{BI} can remove more or fewer data objects.
 Finally, the two baselines \emph{MORS} and \emph{Random} yield the lowest quality of all eight subgroup-discovery methods.
 While \emph{Random} mostly yields the same quality as not restricting the subgroup at all, i.e., an nWRAcc of~0, \emph{MORS} is considerably above~0 and thus a suitable baseline for future studies comparing subgroup-discovery methods.
 
@@ -1918,9 +1918,9 @@ However, the average subgroup quality with this solver timeout was lower than fo
 \paragraph{Feature-cardinality constraints (cf.~Section~\ref{sec:csd:evaluation:cardinality})}
 
 Using more features in subgroup descriptions showed a decreasing marginal utility regarding subgroup quality.
-For most subgroup-discovery methods, subgroups with as few as $k=2$ feature in their description often yielded already a similar quality as unconstrained subgroups, i.e., using all features.
+For most subgroup-discovery methods, subgroups with as few as $k=2$ features in their description often yielded already a similar quality as unconstrained subgroups, i.e., using all features.
 Further, feature-cardinality constraints reduced overfitting and sped up the heuristic search methods as well as \emph{BSD} and \emph{SD-Map}.
-These result speak for using small feature sets in subgroup descriptions, which may also benefit interpretability for users.
+These results speak for using small feature sets in subgroup descriptions, which may also benefit interpretability for users.
 
 \paragraph{Alternative subgroup descriptions (cf.~Section~\ref{sec:csd:evaluation:alternatives})}
 
@@ -2113,7 +2113,7 @@ Searching for counterfactual explanations is an explainable-AI paradigm that tar
 Thus, counterfactuals provide alternative explanations on the local level, i.e., for individual data objects.
 In contrast, alternative subgroup descriptions aim to reproduce subgroup membership globally, striving for a similar prediction but a different feature selection.
 Approaches yielding multiple counterfactuals often foster diversity, e.g., by extending the optimization objective~\cite{mothilal2020explaining} or introducing constraints~\cite{karimi2020model, mohammadi2021scaling, russell2019efficient}.
-However, only some approaches have a user-friendly parameter to control the diversity of solutions actively.
+However, only some approaches have a user-friendly parameter to actively control the diversity of solutions.
 In particular, \cite{mohammadi2021scaling} offers a dissimilarity threshold comparable to our parameter~$\tau$ for alternative subgroup descriptions.
 
 \section{Conclusions and Future Work}
@@ -2471,7 +2471,7 @@ For binary features, the definition of the feature selection variables~$s_j$ (cf
 \end{equation}
 %
 I.e., a feature is selected regarding its lower bound if the lower bound is set to~1 and at least one feature value is~0, i.e., at least one feature value is excluded from the subgroup.
-Vice versa, a feature is selected regarding its upper bound if the upper bound is set to~0 and and at least one feature value is~1, i.e., at least one feature value is excluded from the subgroup.
+Vice versa, a feature is selected regarding its upper bound if the upper bound is set to~0 and at least one feature value is~1, i.e., at least one feature value is excluded from the subgroup.
 Since all values~$X_{ij}$ are known, we can evaluate the corresponding AND and OR terms before optimization.
 If a feature is~0 and~1 for at least one data object each, which should usually be the case, Equation~\ref{eq:csd:maxsat-constraint-feature-selection} becomes a much simpler expression:
 %
@@ -2701,14 +2701,14 @@ Since the latter problem is $\mathcal{NP}$-complete (cf.~Propositions~\ref{prop:
 \label{sec:csd:appendix:competitor-runtime}
 
 In this section, we describe the runtime experiments we conducted to find exhaustive subgroup-discovery methods as competitors for our solver-based approach~\emph{SMT} in the main experiments (cf.~Section~\ref{sec:csd:experimental-design:methods}).
-Section~\ref{sec:csd:appendix:competitor-runtime:experimental-design} explains the experimental design and Section~\ref{sec:csd:appendix:competitor-runtime:evaluation} presents the results.
+Section~\ref{sec:csd:appendix:competitor-runtime:experimental-design} explains the experimental design, and Section~\ref{sec:csd:appendix:competitor-runtime:evaluation} presents the results.
 
 \subsubsection{Experimental Design}
 \label{sec:csd:appendix:competitor-runtime:experimental-design}
 
 \paragraph{Goal}
 
-The goal of the competitor-runtime experiments is to find subgroup-discovery methods that are suitable competitors for solver-based search in our main experimental pipeline.
+The competitor-runtime experiments aim to find subgroup-discovery methods that are suitable competitors for solver-based search in our main experimental pipeline.
 An ideal competitor should satisfy several criteria to enable a fair comparison:
 %
 \begin{enumerate}[noitemsep, label=(\arabic*)]
@@ -2725,7 +2725,7 @@ Instead, (1)-(4) ensure that the competitors address the same optimization probl
 \begin{table}[t]
 	\centering
 	\caption{
-		Datasets from PMLB used in our competitor-runtime experiments.
+		Datasets used in our competitor-runtime experiments.
 		$m$~denotes the number of data objects and $n$~the number of features.
 	}
 	\begin{tabular}{lrr}
@@ -2762,7 +2762,7 @@ Overall, we evaluate the following 17 subgroup-discovery methods in our competit
 %
 Note that we harmonized the method names between the packages, i.e., the actual function names in each package may differ slightly.
 
-The methods from \emph{sd4py} and \emph{subgroups} require discretization of numeric features.
+The methods from \emph{sd4py} and \emph{subgroups} require discretizing numeric features.
 To this end, we create up to 50 bins per feature, with fewer bins if a feature has fewer unique values.
 \emph{sd4py} has a built-in equal-width discretization, while we manually employ equal-frequency discretization for \emph{subgroups}.
 
@@ -2873,7 +2873,7 @@ This table clearly shows an exponential runtime increase over the feature-cardin
 Overall, these competitor-runtime experiments show that only the exhaustive search methods from \emph{sd4py} can be expected to have a reasonable runtime in our main experiments.
 In particular, the latter involve larger datasets and also an unrestricted feature-cardinality threshold, which corresponds to~$k = n \geq 20$ (number of features in the dataset, which is at least~20).
 Thus, we integrated \emph{sd4py}'s \emph{BSD}~\cite{lemmerich2010fast} and \emph{SDMap}~\cite{atzmueller2006sd} into our main experiments (cf.~Section~\ref{sec:csd:experimental-design:methods}).
-Both methods retain the potential weakness that they require discretization of numeric features, which reduces their search space.
+Both methods retain the potential weakness that they require discretizing numeric features, which reduces their search space.
 Thus, they may yield a lower quality than an exhaustive search on the full space but also be faster.
 In our main experiments, we rely on \emph{sd4py}'s built-in equal-width discretization but optimize subgroup quality over ten different numbers of bins.
 

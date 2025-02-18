@@ -488,8 +488,8 @@ However, it still only requires one pass over the unique values of Feature~$j$ r
 \paragraph{SD-Map}
 
 \emph{SD-Map}~\cite{atzmueller2006sd} is an exhaustive search method based on the pattern-mining algorithm \emph{FP-growth}~\cite{han2000mining}.
-It assumes that numeric features are discretized and produces equality conditions of the form $X_{ij} = v$ instead of the numeric intervals we focus on (Definition~\ref{def:csd:subgroup}).
-The extension \emph{SD-Map*}~\cite{atzmueller2009fast} adds support for numeric targets and quality-based pruning of the search space.
+It assumes discretized features and produces subgroup descriptions with equality conditions of the form $X_{ij} = v$ instead of the numeric intervals we focus on (Definition~\ref{def:csd:subgroup}).
+\emph{SD-Map*}~\cite{atzmueller2009fast} adds support for numeric targets and quality-based pruning of the search space.
 
 \paragraph{Bitset-based Subgroup Discovery (BSD)}
 
@@ -1337,7 +1337,7 @@ Each subgroup description may comprise at most one bin for each feature.
 \paragraph{Heuristic search}
 
 We evaluate three heuristic search methods from related work (cf.~Section~\ref{sec:csd:fundamentals:search:heuristics}):
-\emph{PRIM} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Beam Search} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}), subsequently called \emph{Beam}, and \emph{Best Interval} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:best-interval-subgroup-update}), subsequently called \emph{BI}.
+\emph{PRIM}~\cite{friedman1999bump} (cf.~Algorithm~\ref{al:csd:prim}), \emph{Beam Search} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}), subsequently called \emph{Beam}, and \emph{Best Interval}~\cite{mampaey2012efficient} (cf.~Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:best-interval-subgroup-update}), subsequently called \emph{BI}.
 We set the peeling fraction of \emph{PRIM} to~$\alpha = 0.05$, consistent with other implementations~\cite{arzamasov2021reds, kwakkel2017exploratory} and within the recommended value range proposed by its authors~\cite{friedman1999bump}.
 Further, we set the support threshold to~$\beta_0 = 0$, so there is no constraint on the subgroup's size.
 For \emph{Beam} and \emph{BI}, we choose a beam width of $w=10$, falling between default values used in other implementations~\cite{arzamasov2021reds, lemmerich2019pysubgroup}.
@@ -1373,13 +1373,13 @@ We evaluate twelve exponentially scaled timeout values, i.e., \{1~s, 2~s, 4~s, $
 In the three other experimental scenarios, we employ the maximum timeout of 2048~s for \emph{SMT}.
 Since the heuristic search methods and baselines are significantly faster, we do not conduct a timeout analysis for them.
 The two exhaustive algorithmic search methods \emph{BSD} and \emph{SD-Map} are usually fast as well.
-However, they did not finish within two days in the unconstrained scenario for five datasets and do not have a timeout parameter.
+However, they did not finish within two days in the unconstrained scenario for five datasets, and they do not have a timeout parameter.
 We replace these missing values with the results for a feature-cardinality threshold of~$k=5$.
 
 \paragraph{Feature-cardinality constraints}
 
 Our third experimental scenario (cf.~Section~\ref{sec:csd:evaluation:cardinality} for results) analyzes feature-cardinality constraints (cf.~Section~\ref{sec:csd:approach:cardinality}) for all eight subgroup-discovery methods.
-In particular, we evaluate $k \in \{1, 2, 3, 4, 5\}$ selected features.
+In particular, we study $k \in \{1, 2, 3, 4, 5\}$ selected features.
 These values of~$k$ are upper bounds (cf.~Equation~\ref{eq:csd:smt-constraint-feature-cardinalty}), i.e., the subgroup-discovery methods may select fewer features if selecting more does not improve subgroup quality.
 
 \paragraph{Alternative subgroup descriptions}
@@ -1535,7 +1535,7 @@ In detail, the average difference between training-set nWRAcc and test-set nWRAc
 \emph{BSD} and \emph{SD-Map} yield worse average subgroup quality than \emph{Beam} and \emph{BI} as well.
 While the former two are exhaustive, they require discretization of numeric features.
 Thus, they effectively only have a fixed set of intervals to use as bounds instead of being able to choose the bounds independently at each possible feature value.
-As a positive side-effect, this limitation may have reduced their overfitting.
+As a positive side-effect, this limitation may have reduced their overfitting and runtime.
 \emph{PRIM}'s worse subgroup quality may equally arise from a reduced search space.
 Although it follows an iterative subgroup-refinement procedure like  \emph{Beam} and \emph{BI}, its refinement options are more limited.
 In particular, \emph{PRIM} always has to remove a fixed fraction~$\alpha$ of data objects from the subgroup (cf.~Algorithm~\ref{al:csd:prim}), while \emph{Beam} and \emph{BI} can remove more or less data objects.
@@ -1744,7 +1744,7 @@ On the test set (cf.~Figure~\ref{fig:csd:cardinality-test-nwracc-all-datasets}),
 The mean test-set nWRAcc of all methods except \emph{PRIM} barely improves beyond $k=2$.
 These results indicate that sparse subgroup descriptions already yield a high subgroup quality.
 
-The baseline \emph{Random} even improves subgroup quality with lower~$k$ due to its design (cf.~Algorithm~\ref{al:csd:random-search}):
+The baseline \emph{Random} even improves subgroup quality with lower~$k$ due to its particular design (cf.~Algorithm~\ref{al:csd:random-search}):
 It randomly samples bounds for each feature independently.
 Thus, each feature excludes a certain fraction of data objects from the subgroup.
 The more features are used in the subgroup description, the smaller the expected number of data objects in the subgroup becomes.
@@ -1893,7 +1893,7 @@ As for the original subgroups, \emph{Beam} search for alternatives is one to two
 For \emph{Beam}, runtime tends to decrease over the number of alternatives, while \emph{SMT} shows a less clear behavior.
 In particular, its runtime increases over alternatives for~$\tau_{\text{abs}} \in \{1, 2\}$, i.e., settings that allow reusing features from previous subgroup descriptions.
 In contrast, runtime decreases over alternatives for $\tau_{\text{abs}} = k = 3$, which forbids reusing any feature selected before.
-Finally, the number of \emph{SMT} tasks finished within the solver timeout behaves similar to the runtime.
+Finally, the number of \emph{SMT} tasks finished within the solver timeout behaves similarly to the runtime.
 In particular, there are more finished tasks when searching for alternative subgroup descriptions than for original subgroups.
 
 \subsection{Summary}
@@ -2032,7 +2032,7 @@ Additionally, we compare subgroup discovery with feature-cardinality constraints
 \subsubsection{Alternative Subgroup Descriptions}
 \label{sec:csd:related-work:subgroup-discovery:alternatives}
 
-To the best of our knowledge, alternative subgroup descriptions in the sense of this paper are a novel concept.
+To the best of our knowledge, alternative subgroup descriptions in the sense of this article are a novel concept.
 In particular, we aim to maximize the set similarity of contained data objects relative to an original subgroup while using a different subgroup description (cf.~Definition~\ref{def:csd:alternative-subgroup-description-discovery}).
 In contrast, there are various existing approaches striving for alternatives in the sense of diverse or non-redundant sets of subgroups, which aim to minimize rather than maximize the overlap of contained data objects~\cite{atzmueller2015subgroup} (cf.~Section~\ref{sec:csd:approach:constraint-types}).
 In the following, we discuss approaches that focus on subgroup descriptions.
@@ -2152,7 +2152,7 @@ In such studies, one could also interpret alternative subgroup descriptions qual
 
 We formalized, analyzed, and evaluated two constraint types, i.e., feature-cardinality constraints (cf.~Sections~\ref{sec:csd:approach:cardinality} and~\ref{sec:csd:evaluation:cardinality}) and alternative subgroup descriptions (cf.~Sections~\ref{sec:csd:approach:alternatives} and~\ref{sec:csd:evaluation:alternatives}).
 While our solver-based approach was not convincing for these two, it retains the conceptual advantage that constraints can be added and combined declaratively instead of needing to integrate individual constraint types into the search procedure.
-The two constraint types studied in this article were antimonotonic, which eased their integration into heuristic search methods.
+The two particular constraint types studied in this article were antimonotonic, which eased their integration into heuristic search methods.
 As mentioned in Section~\ref{sec:csd:approach:constraint-types}, there are further constraint types one could investigate, e.g., domain-specific constraints, secondary objectives, or alternatives in the sense of covering different data objects rather than covering the same data objects differently.
 
 For alternative subgroup descriptions, one could analyze other dissimilarities, e.g., symmetric ones rather than the asymmetric deselection dissimilarity we used (cf.~Equation~\ref{eq:csd:constraint-dissimilarity}).
@@ -2174,8 +2174,8 @@ In particular, we tackled the search problem for perfect subgroups (cf.~Proposit
 While our proof for the latter reduced from the former, one could try to explicitly prove hardness for optimizing imperfect subgroups.
 Further, while we presented a polynomial-time algorithm for finding perfect subgroups without constraints (cf.~Proposition~\ref{prop:csd:complexity-unconstrained-perfect-subgroup}), we did not analyze the unconstrained optimization problem of subgroup discovery (cf.~Definition~\ref{def:csd:subgroup-discovery}).
 
-We showed $\mathcal{NP}$-hardness for finding alternative subgroup descriptions.
-Again, we tackled the search problem for perfect alternatives first (cf.~Propositions~\ref{prop:csd:complexity-perfect-alternatives-np-perfect-subgroup} and~\ref{prop:csd:complexity-perfect-alternatives-np-imperfect-subgroup}) and reduced to the general optimization problem later (cf.~Proposition~\ref{prop:csd:complexity-alternatives-np}).
+We also showed $\mathcal{NP}$-hardness for finding alternative subgroup descriptions.
+Again, we tackled the search problem for perfect alternatives first (cf.~Propositions~\ref{prop:csd:complexity-perfect-alternatives-np-perfect-subgroup} and~\ref{prop:csd:complexity-perfect-alternatives-np-imperfect-subgroup}) before reducing to the general optimization problem later (cf.~Proposition~\ref{prop:csd:complexity-alternatives-np}).
 One could try to explicitly prove hardness for optimizing imperfect alternatives.
 Also, our proofs focused on scenarios where all originally selected features must not be selected in the alternative subgroup description, i.e., a specific value of the dissimilarity threshold~$\tau$.
 One could analyze scenarios with overlapping feature sets explicitly.
@@ -2300,7 +2300,7 @@ We start from the SMT formulation and introduce additional variables and constra
 \paragraph{Unconstrained subgroup discovery}
 
 We can keep all decision variables from the corresponding SMT formulation (cf.~Equation~\ref{eq:csd:smt-problem-unconstrained-complete}):
-the binary variables~$b_i$ for subgroup membership and the real-valued bound variables~$\mathit{lb}_j$ and~$\mathit{ub}_j$.
+the binary variables~$b_i$ for subgroup membership and the real-valued variables~$\mathit{lb}_j$ and~$\mathit{ub}_j$ for the bounds.
 The bound constraints (cf.~Equation~\ref{eq:csd:smt-constraint-bounds-monotonic}) remain unchanged as well.
 Further, we retain the optimization objective, which already is linear in~$b_i$ (cf.~Equations~\ref{eq:csd:smt-wracc} and~\ref{eq:csd:smt-constraint-m-as-sum}).
 However, we need to linearize the logical AND operators ($\land$) in the definition of subgroup membership~$b_i$ (cf.~Equation~\ref{eq:csd:smt-constraint-subgroup-membership}) by introducing auxiliary variables and further constraints.
@@ -2700,7 +2700,7 @@ Since the latter problem is $\mathcal{NP}$-complete (cf.~Propositions~\ref{prop:
 \subsection{Competitor-Runtime Experiments}
 \label{sec:csd:appendix:competitor-runtime}
 
-In this section, we describe the runtime experiments we conducted to find exhaustive subgroup-discovery methods as competitors for our solver-based approach~\emph{SMT} in our main experiments (cf.~Section~\ref{sec:csd:experimental-design:methods}).
+In this section, we describe the runtime experiments we conducted to find exhaustive subgroup-discovery methods as competitors for our solver-based approach~\emph{SMT} in the main experiments (cf.~Section~\ref{sec:csd:experimental-design:methods}).
 Section~\ref{sec:csd:appendix:competitor-runtime:experimental-design} explains the experimental design and Section~\ref{sec:csd:appendix:competitor-runtime:evaluation} presents the results.
 
 \subsubsection{Experimental Design}
@@ -2719,7 +2719,7 @@ An ideal competitor should satisfy several criteria to enable a fair comparison:
 	\item Be reasonably fast.
 \end{enumerate}
 %
-Note that these criteria do not require the competitors to yield a certain subgroup quality, which would be studied in the main experiments anyway.
+Note that these criteria do not require the competitors to yield a certain subgroup quality, which we would study in the main experiments anyway.
 Instead, (1)-(4) ensure that the competitors address the same optimization problem as we do, and (5) concerns the experiments' feasibility.
 
 \begin{table}[t]
@@ -2746,9 +2746,10 @@ Instead, (1)-(4) ensure that the competitors address the same optimization probl
 \paragraph{Subgroup-discovery methods}
 
 We consider competitors from four Python packages for subgroup discovery, i.e., \emph{pysubdisc}, \emph{pysubgroup}~\cite{lemmerich2019pysubgroup}, \emph{sd4py}~\cite{hudson2023subgroup}, and \emph{subgroups}~\cite{lopez2024subgroups}.
-All four packages offer exhaustive subgroup-discovery methods that support WRAcc as the optimization objective, which are particularly interesting competitors for our solver-based search method \emph{SMT}.
+All four packages offer exhaustive subgroup-discovery methods that support WRAcc as the optimization objective.
+Such methods are particularly interesting competitors for our solver-based search method \emph{SMT}.
 Additionally, \emph{pysubdisc}, \emph{pysubgroup}, and \emph{sd4py} provide beam search as a heuristic search method.
-For comparison, we include \emph{Beam} and \emph{SMT} from our main experiments (cf.~Section~\ref{sec:csd:experimental-design:methods}).
+For comparison, we also include \emph{Beam} and \emph{SMT} from our main experiments (cf.~Section~\ref{sec:csd:experimental-design:methods}).
 Overall, we evaluate the following 17 subgroup-discovery methods in our competitor-runtime experiments:
 %
 \begin{itemize}[noitemsep]
@@ -2788,7 +2789,7 @@ For comparison: The maxima in our main experiments are considerably higher, i.e.
 
 \paragraph{Implementation}
 
-We implemented an additional experimental pipeline for the competitor-runtime experiments.
+We implemented a dedicated experimental pipeline for the competitor-runtime experiments.
 This pipeline parallelizes over the experimental tasks.
 The code and data are available together with the main experiments (cf.~Section~\ref{sec:csd:experimental-design:implementation}).
 We used the same hardware but Python~3.9 instead of Python~3.8 to support recent versions of all subgroup-discovery packages.
@@ -2830,7 +2831,7 @@ We used the same hardware but Python~3.9 instead of Python~3.8 to support recent
 \paragraph{Timeouts}
 
 Table~\ref{tab:csd:competitor-timeouts} displays which experimental tasks finished within the 9-hour timeout.
-Generally, all subgroup-discovery methods finished either on all or no cross-validation folds of a dataset.
+Generally, each subgroup-discovery method finished either on all or no cross-validation folds of a dataset.
 All methods finished on the \emph{iris} dataset, but fewer methods on the five other datasets.
 From the exhaustive search methods, i.e., without beam search, only \emph{sd4py.BSD} and \emph{sd4py.SDMap} finished on each of the six small datasets.
 
@@ -2864,12 +2865,13 @@ From the exhaustive search methods, i.e., without beam search, only \emph{sd4py.
 
 \paragraph{Runtime}
 
-For a more detailed view, Table~\ref{tab:csd:spect-runtime} displays the exact runtimes for the dataset~\emph{spect}, which had the second-most methods finishing with the 9-hour timeout.
-This table clearly shows the exponential runtime increase over the feature-cardinality threshold~$k$ for the exhaustive search methods from the packages \emph{pysubdisc}, \emph{pysubgroup}, and \emph{subgroups}, while \emph{sd4py} exhibits considerably smaller and less varying runtimes.
+For a more detailed view, Table~\ref{tab:csd:spect-runtime} displays the exact runtimes for the dataset~\emph{spect}, which had the second-most methods finishing within the 9-hour timeout.
+This table clearly shows an exponential runtime increase over the feature-cardinality threshold~$k$ for the exhaustive search methods from the packages \emph{pysubdisc}, \emph{pysubgroup}, and \emph{subgroups}, while \emph{sd4py} exhibits considerably smaller and less varying runtimes.
 
-\paragraph{Conclusion}
+\paragraph{Conclusions}
 
-Overall, these competitor-runtime experiments show that only the exhaustive search methods from \emph{sd4py} can be expected to have a reasonable runtime in our main experiments, which involve larger datasets and also an unrestricted feature-cardinality threshold, which corresponds to~$k = n \geq 20$ (number of features in the dataset, which is at least~20).
+Overall, these competitor-runtime experiments show that only the exhaustive search methods from \emph{sd4py} can be expected to have a reasonable runtime in our main experiments.
+In particular, the latter involve larger datasets and also an unrestricted feature-cardinality threshold, which corresponds to~$k = n \geq 20$ (number of features in the dataset, which is at least~20).
 Thus, we integrated \emph{sd4py}'s \emph{BSD}~\cite{lemmerich2010fast} and \emph{SDMap}~\cite{atzmueller2006sd} into our main experiments (cf.~Section~\ref{sec:csd:experimental-design:methods}).
 Both methods retain the potential weakness that they require discretization of numeric features, which reduces their search space.
 Thus, they may yield a lower quality than an exhaustive search on the full space but also be faster.

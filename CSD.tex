@@ -417,7 +417,7 @@ Further, if this solution candidate improves upon the optimal solution candidate
 
 \paragraph{Beam Search}
 
-Beam search is a generic search strategy that is also common in subgroup discovery~\cite{atzmueller2005exploiting}.
+Beam search is a generic search strategy that is also common in subgroup discovery~\cite{atzmueller2015subgroup}.
 It maintains a set of currently best solution candidates, i.e., the beam, which it iteratively updates.
 The number of solution candidates in the beam is a user parameter, i.e., the beam width~$w \in \mathbb{N}$.
 We outline one way to implement it in Algorithms~\ref{al:csd:generic-beam-search} and~\ref{al:csd:beam-search-subgroup-update}, which we refer to as \emph{Beam Search} in the following.
@@ -991,7 +991,7 @@ Considering the size of the search space from Proposition~\ref{prop:csd:complexi
 
 \paragraph{NP-Hardness}
 
-\cite{boley2009non} showed that it is an $\mathcal{NP}$-hard problem to find a subgroup description with minimum feature cardinality that induces exactly the same subgroup membership as a given subgroup.
+\cite{boley2009non} showed $\mathcal{NP}$-hardness for finding a subgroup description minimizing feature cardinality while inducing exactly the same subgroup membership as a given subgroup description.
 We transfer this result to optimizing subgroup quality under a feature-cardinality constraint.
 First, we tackle the search problem for perfect subgroups (cf.~Appendix~\ref{sec:csd:appendix:proofs:complexity-cardinality-np-perfect-subgroup} for the proof):
 %
@@ -1100,7 +1100,7 @@ We employ the following \emph{deselection dissimilarity} in combination with an 
 %
 This dissimilarity counts how many of the previously selected features are \emph{not} selected in the new subgroup description.
 These features may either be replaced by other features, or the total number of selected features may be reduced.
-The constraint ensures that at least $\tau_{\text{abs}} \in \mathbb{N}$ features are deselected but never more than there were selected before ($k^{\text{old}}$), which would be infeasible.
+The constraint ensures that at least $\tau_{\text{abs}} \in \mathbb{N}$ features are deselected unless the number selected before ($k^{\text{old}}$) is smaller, to avoid infeasible solutions.
 For maximum dissimilarity, none of the previously selected features may be selected again.
 Note that this dissimilarity measure is asymmetric, i.e., $\text{dis}_{\text{des}}(s^{\text{new}}, s^{\text{old}}) \neq \text{dis}_{\text{des}}(s^{\text{old}}, s^{\text{new}})$.
 While this property would be an issue in a simultaneous search for multiple alternatives, i.e., without an explicit ordering, it is acceptable for sequential search, where `old' and `new' are well-defined.
@@ -1140,7 +1140,7 @@ Thus, we instantiate and adapt Equation~\ref{eq:csd:constraint-dissimilarity} as
 	\label{eq:csd:smt-constraint-dissimilarity}
 \end{equation}
 %
-In particular, we only sum over features that were selected in the existing subgroup and check whether they are deselected now.
+In particular, we only sum over features that were selected in the $l$-th existing subgroup and check whether they are deselected now.
 To tie the variables~$s^{(a)}_j$ to the subgroup's bounds, we use Equation~\ref{eq:csd:smt-constraint-feature-selection}, which we already employed for feature cardinality constraints.
 
 Finally, the overall SMT encoding of alternative-subgroup-description discovery (cf.~Definition~\ref{def:csd:alternative-subgroup-description-discovery}) combines the similarity objective (cf.~Equation~\ref{eq:csd:smt-hamming}) and dissimilarity constraints (cf.~Equation~\ref{eq:csd:smt-constraint-dissimilarity}) for alternatives with the previously introduced variables and constraints for bounds (cf.~Equation~\ref{eq:csd:smt-constraint-bounds-monotonic}), subgroup membership (cf.~Equation~\ref{eq:csd:smt-constraint-subgroup-membership}), and feature selection (cf.~Equation~\ref{eq:csd:smt-constraint-feature-selection}).
@@ -1533,7 +1533,7 @@ This result indicates that \emph{Beam} and \emph{BI} are less susceptible to ove
 In detail, the average difference between training-set nWRAcc and test-set nWRAcc is 0.122 for \emph{SMT}, 0.101 for \emph{BI}, 0.095 for \emph{Beam}, 0.094 for \emph{MORS}, 0.068 for \emph{PRIM}, 0.042 for \emph{SD-Map}, 0.041 for \emph{BSD}, and 0.001 for \emph{Random}.
 
 \emph{BSD} and \emph{SD-Map} yield worse average subgroup quality than \emph{Beam} and \emph{BI} as well.
-While the former two are exhaustive, they require discretizing numeric features.
+While the former two theoretically are exhaustive, they require discretizing numeric features.
 Thus, they effectively only have a fixed set of intervals to use as bounds instead of being able to choose the bounds independently at each possible feature value.
 As a positive side-effect, this limitation may have reduced their overfitting and runtime.
 \emph{PRIM}'s worse subgroup quality may equally arise from a reduced search space.
@@ -1889,8 +1889,8 @@ This phenomenon may result from the alternative subgroup descriptions not direct
 
 Table~\ref{tab:csd:alteratives-runtime} displays the average runtime for searching original and alternative subgroup descriptions.
 The search for alternatives is faster for both analyzed search methods, i.e., \emph{Beam} and \emph{SMT}.
-As for the original subgroups, \emph{Beam} search for alternatives is one to two orders of magnitude faster than the solver-based \emph{SMT} search.
-For \emph{Beam}, runtime tends to decrease over the number of alternatives, while \emph{SMT} shows a less clear behavior.
+As for the original subgroups, \emph{Beam} search for alternatives is one to two orders of magnitude faster than \emph{SMT}.
+For \emph{Beam}, runtime tends to decrease with an increasing~$\tau_{\text{abs}}$ and number of alternatives, while \emph{SMT} shows a less clear behavior.
 In particular, its runtime increases over alternatives for~$\tau_{\text{abs}} \in \{1, 2\}$, i.e., settings that allow reusing features from previous subgroup descriptions.
 In contrast, runtime decreases over alternatives for $\tau_{\text{abs}} = k = 3$, which forbids reusing any feature selected before.
 Finally, the number of \emph{SMT} tasks finished within the solver timeout behaves similarly to the runtime.
@@ -1903,7 +1903,7 @@ In particular, there are more finished tasks when searching for alternative subg
 
 We recommend using the heuristic search methods \emph{Beam} and \emph{BI}, which were overall best.
 These two methods from the literature yielded close-to-optimal quality while being significantly faster than our exhaustive, solver-based search method \emph{SMT}.
-Additionally, heuristic solutions were less prone to overfitting than optimal solutions from exhaustive search.
+Additionally, heuristic solutions were less prone to overfitting than the (training-set-) optimal solutions from exhaustive search.
 These results highlight the heuristics as serious competitors for any exhaustive search method from the literature, not only our method \emph{SMT}.
 Further, \emph{Beam} and \emph{BI} beat the quality of the exhaustive competitors \emph{BSD} and \emph{SD-Map}, which required discretizing numeric features beforehand.
 The heuristic search method \emph{PRIM} was faster than \emph{Beam} and \emph{BI} but yielded lower subgroup quality.
@@ -1918,8 +1918,9 @@ However, the average subgroup quality with this solver timeout was lower than fo
 \paragraph{Feature-cardinality constraints (cf.~Section~\ref{sec:csd:evaluation:cardinality})}
 
 Using more features in subgroup descriptions showed a decreasing marginal utility regarding subgroup quality.
-For most subgroup-discovery methods, subgroups with as few as $k=2$ features in their description often yielded already a similar quality as unconstrained subgroups, i.e., using all features.
-Further, feature-cardinality constraints reduced overfitting and sped up the heuristic search methods as well as \emph{BSD} and \emph{SD-Map}.
+For most subgroup-discovery methods, subgroups with as few as $k=2$ features in their description often yielded already a similar test-set quality as unconstrained subgroups.
+In particular, increasing $k$ caused stronger overfitting.
+Further, imposing feature-cardinality constraints sped up the heuristic search methods as well as \emph{BSD} and \emph{SD-Map}, while the picture for the solver-based search method \emph{SMT} was less clear.
 These results speak for using small feature sets in subgroup descriptions, which may also benefit interpretability for users.
 
 \paragraph{Alternative subgroup descriptions (cf.~Section~\ref{sec:csd:evaluation:alternatives})}
@@ -2026,7 +2027,7 @@ While several articles on subgroup discovery use a feature-cardinality constrain
 \cite{helal2016subgroup} compares five subgroup-discovery methods with categorical datasets and also evaluates feature cardinality but does not systematically constrain the latter to different values.
 \cite{meeng2021real} evaluates three subgroup-discovery methods, including a beam search and an exhaustive search.
 The authors use feature-cardinality constraints with~$k \in \{1, 2, 3, 4\}$ but mainly focus their evaluation on comparing strategies for handling numeric data.
-Also, they only use six classification datasets, five of them with at most ten numeric features, while we employ more and higher-dimensional datasets.
+Also, they only use 13 datasets, ten of which have at most ten numeric features, while we employ more and higher-dimensional datasets.
 Additionally, we compare subgroup discovery with feature-cardinality constraints to an unconstrained setting.
 
 \subsubsection{Alternative Subgroup Descriptions}
@@ -2580,7 +2581,7 @@ Thus, if the feature-cardinality constraint is satisfied in the perfect subgroup
 In contrast, if no feature set of the desired size~$k$ can describe a perfect subgroup, then at least one data object with prediction target~$y_i = 0$ has to be part of the subgroup.
 Thus, at least one element is not contained in any set forming the set cover, so no valid set cover of size~$k$ exists.
 
-Overall, a solution to the instance~$I'$ of the perfect-subgroup discovery problem (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) also solves the instance~$I$ of the decision problem \textsc{Set Covering} ~\cite{karp1972reducibility} with negligible computational overhead.
+Overall, a solution to the instance~$I'$ of the perfect-subgroup-discovery problem (cf.~Definition~\ref{def:csd:perfect-subgroup-discovery}) with a feature-cardinality constraint (cf.~Definition~\ref{def:csd:feature-cardinality-constraint}) also solves the instance~$I$ of the decision problem \textsc{Set Covering}~\cite{karp1972reducibility} with negligible computational overhead.
 In particular, an efficient solution algorithm for the former would also efficiently solve the latter.
 However, since the latter problem is $\mathcal{NP}$-hard~\cite{karp1972reducibility}, the former is as well.
 To be more precise, the perfect-subgroup-discovery problem with a feature-cardinality constraint resides in the complexity class $\mathcal{NP}$ and therefore is $\mathcal{NP}$-complete.

@@ -1,0 +1,168 @@
+\documentclass{article}
+
+\usepackage{amssymb}  % mathematical symbols
+\usepackage[style=numeric, backend=bibtex]{biblatex}
+\usepackage[a4paper, left=25mm, right=25mm, top=25mm, bottom=20mm]{geometry}
+\usepackage{hyperref} % links
+
+\title{\vspace{-15mm}Revision Plan for the Paper ``Subgroup Discovery with Small and Alternative Feature Sets''} % move title closer to top than it is by default
+\author{} % don't display an author
+\date{} % don't display a date
+
+\addbibresource{references_revision_plan.bib}
+
+\begin{document}
+
+\maketitle
+\vspace{-15mm}
+
+We thank the reviewers and the meta-reviewer for their valuable comments.
+In the following, we address all comments in the order and grouping used by the meta-reviewer.
+
+\paragraph{MR.R1. Support the motivation for alternative subgroup descriptions with a practical example (Rev3.O2).}
+
+We agree with \emph{(Rev3.O2)} that presenting many alternatives could overwhelm practitioners.
+However, we see finding alternative subgroup descriptions as an optional part of subgroup discovery and as an extension of existing methods.
+In particular, we start from a solution found by conventional subgroup discovery and then generate alternatives one by one as long as users desire.
+Thus, users can stop the search after each alternative, including the zeroth (i.e., original subgroup).
+Further, users can assess alternatives with subgroup quality, as for the original subgroup, and the similarity to the original subgroup, for which we use a metric with a range of $[0, 1]$ (cf.~Equation~8 in our article), which eases interpretation.
+Finally, we recommend searching alternatives with a feature-cardinality constraint, so the resulting subgroup descriptions are small and thus relatively easy to interpret for users.
+
+Having addressed how to mitigate the potential negative impact of alternatives, we now argue for their positive side.
+In particular, the general notion of alternative solutions is widespread in the field of explainable artificial intelligence (XAI), e.g., to provide additional insights into predictions, enable users to develop and test different hypotheses, appeal to different kinds of users, and foster trust in the predictions~\cite{kim2021multi, wang2019designing}.
+However, the concrete problem definitions of alternatives in such XAI approaches differ considerably from our alternative subgroup descriptions, which we exemplify by discussing counterfactuals in Section~7 (\emph{Related Work}).
+Searching for alternative solutions is also common in other fields of machine learning, such as clustering~\cite{bailey2014alternative} and feature selection~\cite{bach2024alternative}.
+
+To give a more concrete motivation for alternatives, consider that subgroup discovery is applied to scientific data, e.g., from chemistry~\cite{li2021subgroup} or medicine~\cite{esnault2020qfinder}, as we state in Section~1 (\emph{Introduction}).
+In this context, a subgroup captures samples exhibiting an interesting scientific phenomenon, and the subgroup description gives a possible explanation of which factors/quantities the phenomenon depends on.
+Thus, users may leverage the subgroup description to formulate a scientific hypothesis for the domain.
+Just considering one explanation may be misleading in such a situation.
+For example, one may be able to explain the same phenomenon (subgroup) with different quantities (features), particularly if quantities are correlated or in any other way interact with each other.
+Thus, obtaining alternative subgroup descriptions may broaden the users' perspective and prevent selecting the first-best explanation prematurely.
+
+When revising our article, we will improve the motivation for alternative subgroup descriptions in Section~1 (\emph{Introduction}) and discuss more related work on alternatives in Section~7 (\emph{Related Work}).
+
+\paragraph{MR.R2. Better highlight the paper's contributions and the solution's effectiveness (Rev2.O4, Rev3.O1, Rev3.O3).}
+
+Our article makes four major contributions, as listed in Section~1 (\emph{Introduction}):
+(1) the basic SMT encoding of subgroup discovery, (2) the formalization of two constraint types and their integration into the SMT encoding as well as heuristics search methods and baselines, (3) the complexity analyses for both constraint types, and (4) the comprehensive experimental evaluation.
+Thus, the empirical performance of the SMT encoding with a particular solver is only one of several novel aspects our article provides.
+Nevertheless, we freely admit that the SMT-solver-based search is not very efficient, as summarized in Section~8 (\emph{Conclusion}).
+Unlike heuristic search methods, it is guaranteed to find the optimal solution if granted sufficient time but can be worse in practice if a timeout is enforced (cf.~Figure~2a in our article).
+As the internals of the solver are a black box for us, it is hard to say how performance could be improved or if other constraint types could be processed more efficiently.
+
+Our experiments showed that the fast, heuristic search methods \emph{Beam} and \emph{BI} achieve close-to-optimal subgroup quality (cf.~Figure~2b in our article), i.e., are close to the SMT approach's quality even if the latter is not affected by timeouts.
+Due to the strength of these heuristics, we do not see the need to include further competitors.
+In particular, our results highlight these heuristics as serious competitors for any exhaustive search method from related work, not only our SMT approach, which is an interesting result per se.
+Finally, we draw the performance comparison not only for unconstrained subgroup discovery but also for two constraint types, which broadens the experimental contribution of our article.
+
+Conceptually, the SMT approach has the advantage that various constraint types can be included declaratively, i.e., without adapting the solver's search heuristics specifically to them.
+For example, besides limiting the number of features, one could enforce lower or upper bounds on the subgroup size, define secondary evaluation metrics whose value needs to pass a certain threshold, define constraints based on domain knowledge, or search for multiple subgroups that cover different data objects (in contrast to our alternative descriptions, which attempt to cover the same data objects differently).
+Our two analyzed constraint types have the advantage of being antimonotonic, which eases the integration into a range of heuristic search methods.
+However, other constraint types do not satisfy this property.
+For example, one could require to select an exact number of features (rather than $\leq$) or use another dissimilarity measure for alternative subgroup descriptions than the deselection dissimilarity (cf.~Equation~10 in our article), which we designed to be antimonotonic to enable a comparison of heuristic and solver-based search.
+
+When revising our article, we will extend the discussion of results and search methods to highlight the advantages and disadvantages of the solver-based solution clearly.
+
+Regarding the article's structure for presenting our contributions, particularly the positioning of the baselines' description \emph{(Rev2.O4 and Rev3.O3)}, refer to our answer for \emph{(MR.R7)} (improve presentation).
+
+\paragraph{MR.R3. Add missing related work (Rev2.O1).}
+
+In the following we discuss the related work proposed by \emph{(Rev1.O1)}~\cite{lawless2022interpretable, pastor2021looking} and \emph{(Rev2.O1)}~\cite{sagadeeva2021sliceline, asudeh2019assessing}.
+Generally, these works address problems different from those we do.
+In particular, the terms `subgroup' and `subgroup discovery' have different meanings in different communities, and none of the four proposed works draws a connection to existing subgroup-discovery methods from machine learning, like those surveyed in~\cite{atzmueller2015subgroup}.
+Nevertheless, we will shortly mention and discuss the four proposed references in Section~7 (\emph{Related Work}) when revising our article.
+
+\cite{lawless2022interpretable} belongs to the field of clustering.
+Their problem is unsupervised, i.e., without a target variable, which requires a different objective function than our supervised scenario.
+Further, rather than finding one interesting subset of data objects as the subgroup, clustering partitions the set of data objects completely and without overlap.
+The closest parallel to our work is that \cite{lawless2022interpretable}~simultaneously wants to find axis-parallel explanations for clusters, which are similar to subgroup descriptions.
+However, they combine a quality metric for these explanations with a clustering-specific, unsupervised notion of quality.
+
+\cite{pastor2021looking} assumes discrete feature values and only allows one value of each feature to be used in the subgroup description.
+In contrast, we use intervals on numeric features, i.e., lower and upper bounds.
+Their notion of `divergence' is similar to the more established concept of Weighted Relative Accuracy (WRAcc)~\cite{lavravc1999rule} (cf.~Equation~1 in our article), which we use as an evaluation metric in our experiments.
+Also, they assume subgroups to have a particular minimum size (= support).
+Without this threshold, as in our experiments, their frequent-pattern-mining approach would explicitly iterate over all possible subgroup descriptions without any pruning during the search, which would be infeasible.
+
+\cite{sagadeeva2021sliceline} shares several parallels with \cite{pastor2021looking}:
+They also assume discrete feature values and equality constraints in the subgroup description.
+Further, they also define a new quality function that pursues a similar concept as WRAcc, i.e., combining subgroup size with the relative error of the subgroup, but still differs from it.
+Finally, their approach also draws inspiration from itemset mining. 
+
+\cite{asudeh2019assessing} also assumes discrete feature values and equality constraints.
+Further, the two novel problems they propose are unsupervised.
+Both problems employ a threshold related to the number of subgroup members, while we leave the latter unconstrained.
+Their first problem additionally refers to features used in the subgroup description, but they want to maximize this number under additional constraints while we place upper bounds on it.
+
+\paragraph{MR.R4. Extend the experimental evaluation: adding the four new baselines in Rev1.O1 and Rev2.O2. Justify the exclusion of other baselines (Rev3.O4).}
+
+As stated in our answer for \emph{(MR.R3)} (related work), the four proposed competitors tackle different problem definitions than we do.
+In particular, they pursue different optimization objectives, mostly assume different input data and subgroup descriptions, and do not include the two constraint types that we focus on.
+Thus, these competitors are not suitable for integration into our experimental scenarios.
+
+As stated in our answer for \emph{(MR.R2)} (solution's effectiveness), the heuristic search methods we compare are already very strong regarding subgroup quality and runtime, so other competitors would not add much value or allow us to draw different conclusions.
+In preliminary experiments, we also tried to compare our SMT approach to other exhaustive search methods from the Python packages \texttt{pysubgroup}, \texttt{sd4py}, and \texttt{subgroups}, e.g., approaches using itemset-mining algorithms.
+However, these potential competitors were either considerably slower than our SMT-solver-based approach and/or did not support subgroup descriptions that define intervals on numeric attributes, so their solution space differs.
+We already provide this rationale in Paragraph \emph{Subgroup-discovery methods} of Section~5 (\emph{Experimental Design}) in our article.
+Further, as stated in Section~7 (\emph{Related Work}) of our article, our evaluation of feature-cardinality constraints is already broader than related work, as we employ six subgroup-discovery methods, five cardinality thresholds plus the comparison to the unconstrained scenario, and two dozen datasets.
+Finally, our second constraint type, leading to alternative subgroup descriptions, is novel and thus not considered in existing subgroup-discovery methods.
+To still enable a comparison, we adapt a beam search to the problem, which again forms a strong competitor for the SMT approach.
+
+Overall, we would not add further subgroup-discovery methods to our evaluation.
+
+\paragraph{MR.R5. Justify the focus on binary classification (Rev1.O2).}
+
+In general, subgroup discovery is possible for different types of prediction targets, e.g., binary, nominal, and numeric, with the former two being more common than the latter \cite{atzmueller2015subgroup}.
+As stated at the beginning of Section~2.1 (\emph{Problem of Subgroup Discovery}) of our article, we used only one target type to harmonize problem formalization and the experimental evaluation.
+The chosen binary-classification scenario can be seen as a special case of nominal and numeric targets.
+While other target types are interesting as well, they require other datasets and evaluation metrics, thereby extending the experimental evaluation significantly.
+Simultaneously, the conceptual contribution of including further target types would be low since the two constraint types we analyze are not related to the target.
+Only the encoding of subgroup quality in our SMT formulation of subgroup discovery would need to be adapted, and the baseline \emph{MORS} would no longer be applicable.
+
+Overall, we would not change the focus on binary classification in our article.
+
+\paragraph{MR.R6. Discuss the antimonotonicity of the feature-cardinality constraint (Rev2.O3) and the negative results (Rev2.O5).}
+
+These two points are independent of each other, i.e., the negative results for \emph{SMT} \emph{(Rev2.O5)} are not related to the antimonotonicity \emph{(Rev2.O3)}, which applies to the feature-cardinality constraint per se, not matter which subgroup-discovery method is used.
+Regarding negative results \emph{(Rev2.O5)}, refer to our answer for \emph{(MR.R2)} (solution's effectiveness).
+
+Regarding antimonotonicity \emph{(Rev2.O3)}, consider that the employed feature-cardinality constraint has the form~$|F_s| \leq k$ for the set of selected features~$F_s$ and a cardinality threshold~$k \in  \mathbb{N}$ (cf.~Equation~7 in our article).
+The desired antimonotonicity property refers to feature sets satisfying this constraint, not the associated subgroup quality or the number of data objects in the subgroup.
+In particular, the feature-cardinality constraint is satisfied for the empty feature set.
+If the constraint is satisfied for a feature set, it is also satisfied for any subset.
+Vice versa, if the constraint is violated for a feature set, it is also violated for any superset.
+Thus, the constraint type is antimonotonic~\cite{ng1998exploratory}.
+When revising our article, we will extend the explanation of antimonotonicity in Section~4.2 (\emph{Feature-Cardinality Constraints}).
+A similar argument applies to the dissimilarity constraint for alternative subgroup descriptions (cf.~Equation~10 in our article), which is also antimonotonic in the feature selection.
+
+\paragraph{MR.R7. Improve the presentation (Rev3.O3).}
+
+\emph{(Rev3.O3)} raised two points:
+(1) the description of the baselines before the novel contributions and (2) the lack of a discussion in the results section.
+
+Regarding (1), we clearly see the reviewer's point of presenting the main contributions earlier.
+However, the novel baseline \emph{MORS} is a minor contribution as well.
+Further, its rationale and the introduction of the concept of `perfect subgroups' lays the groundwork for our complexity analysis of both constraint types (e.g., Propositions~4 and~6), as stated at the beginning of Section~3.
+We see these first derivations as fundamentals for the main contributions of the article and therefore placed them earlier to not distract the flow later.
+Additionally, Section 4 (\emph{Constrained Subgroup Discovery}) describes not only the constraints but also how to integrate them into the SMT encoding and heuristic search methods.
+Thus, we want to describe the integration into the baselines there as well, but this decision requires the baseline to be introduced earlier.
+Overall, we would leave the baselines where they are at the moment, i.e., Section~3.
+
+Following the previous argument, we would also not move the integration of constraints into the baselines to a separate section, as proposed by \emph{(Rev2.O4)}.
+However, we understand that Sections~4.2 (\emph{Feature-Cardinality Constraints}) and 4.3 (\emph{Alternative Subgroup Descriptions}) could be hard to follow due to containing several contributions with only \texttt{paragraph} headings separating them.
+Thus, we will structure these two sections with (numbered) \texttt{subsubsection} headings instead and add short introductory paragraphs to Sections~4.2 and~4.3 (like at the beginning of Section~4 and other sections), which explain how the subsections are structured internally.
+
+Regarding (2), we initially decided to place the summary and discussion of results in Section~8 (\emph{Conclusion}) to end the article.
+Based on the reviewer's suggestion, we will move this text to a new subsection at the end of Section~6 (\emph{Evaluation}) to put it closer to the detailed description of experimental results.
+
+\paragraph{Rev1.O3. Subgroup dimensions are limited.}
+
+This point was not mentioned in the meta-review.
+We would like to comment on it regardless but are unsure whether we understand it correctly.
+If `dimension' refers to the number of features used in subgroup descriptions, the comment describes one constraint type that we introduce on purpose to analyze it, so we do not see an issue with it.
+However, we also compare it to the unconstrained scenario (cf. value `no' for $k$ in Figure~2).
+
+\printbibliography
+
+\end{document}

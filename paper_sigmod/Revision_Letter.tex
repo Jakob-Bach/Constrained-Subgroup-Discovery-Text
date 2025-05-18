@@ -1,0 +1,217 @@
+\documentclass{article}
+
+\usepackage{amssymb} % mathematical symbols
+\usepackage[style=numeric, backend=bibtex]{biblatex}
+\usepackage{booktabs} % nicely formatted tables (with top, mid, and bottom rule)
+\usepackage{caption} % simply loading this package improves spacing between tables and captions
+\usepackage{enumitem} % tighter enumerations
+\usepackage[a4paper, left=25mm, right=25mm, top=25mm, bottom=20mm]{geometry}
+\usepackage{soul} % demo of revision highlighting
+\usepackage{xcolor} % demo of revision highlighting
+\usepackage{hyperref} % links
+
+\title{\vspace{-15mm}Cover Letter for the Revision of the Paper ``Subgroup Discovery with Small and Alternative Feature Sets''} % move title closer to top than it is by default
+\author{} % don't display an author
+\date{} % don't display a date
+
+\addbibresource{references_revision_letter.bib}
+
+\begin{document}
+
+\maketitle
+\vspace{-15mm}
+
+We thank the reviewers for their valuable comments.
+In the following, we describe how we addressed the comments in our revised paper.
+Revisions are highlighted \sethlcolor{yellow}\hl{in yellow} there.
+Additionally, we created a diff file with the tool \texttt{latexdiff}.
+Our subsequent cover letter is structured according to the points of Reviewer \#2 in the revision-plan approval.
+
+\paragraph{1) Improve the motivation for the alternative subgroup descriptions in the introduction and discuss more related work on alternatives (Reviewer 3: O2)}
+
+We extended Paragraph~\emph{Problem statement} of Section~1 (\emph{Introduction}) with the motivating example from our revision plan's response to \emph{(MR.R1)}.
+Further, we slightly extended our explanation of alternative subgroup descriptions in Section~4.3.1 (\emph{Alternative Subgroup Descriptions: Concept}), also using points from our revision plan's response to \emph{(MR.R1)}.
+Finally, we revised Paragraph \emph{Further related work} of Section~7 (\emph{Related Work}) to highlight more approaches for finding alternative solutions outside subgroup discovery.
+(Work inside the field of subgroup discovery is already discussed broadly in the preceding Paragraph~\emph{Alternative subgroup descriptions}.)
+In particular, we added the four references~\cite{artelt2022even, bailey2014alternative, fouche2021efficient, kim2016examples}.
+
+\paragraph{2) Highlight the paper’s contributions (Reviewer 2: O4, Reviewer 3: O1,O3)}
+
+As a minor formatting change, we added line breaks between the contributions in Paragraph~\emph{Contributions} of Section~1 (\emph{Introduction}) to highlight them more.
+
+\emph{(Rev2.O4)} As argued in our revision plan's response to \emph{(MR.R7)} and in this cover letter's response to \emph{8)~Improve presentation} below, we still use Section~4 instead of a separate top-level section to describe the integration of constraints into the baselines \emph{MORS} and \emph{Random}.
+However, we made the internal structure of Sections~4.2 (\emph{Feature-Cardinality Constraints}) and~4.3 (\emph{Alternative Subgroup Descriptions}) more explicit:
+For each of these two subsections,  we elevated five \texttt{paragraph}s to the \texttt{subsubsection} level:
+(1)~\emph{Concept}, (2)~\emph{SMT Encoding}, (3)~\emph{Integration into Heuristic Search Methods}, (4)~\emph{Integration into Baselines}, and (5)~\emph{Computational Complexity}.
+Thus, the integration of constraints into the baselines is also in dedicated \texttt{subsubsection}s now (Sections~4.2.4 and~4.3.4).
+Further, we added introductory paragraphs to Sections~4.2 and~4.3, which give an overview of the following subsubsections and reference them.
+We hope this additional structuring eases seeing and separating the individual contributions.
+
+\emph{(Rev3.O1)} We extended the discussion of the experimental results based on our revision plan's response to \emph{(MR.R2)}.
+The discussion of the search methods can be found in Paragraph~\emph{Search methods} of the novel Section~6.3 (\emph{Summary and Discussion}).
+As stated in our revision plan's response, we are aware of our solver-based search method's unsatisfactory runtime in the experiments, and our discussion in the paper outlines this point.
+However, the SMT encoding itself is novel and only one of several contributions listed in Paragraph~\emph{Contributions} of Section~1 (\emph{Introduction}).
+
+\emph{(Rev3.O3)} Please see this cover letter's response to \emph{8)~Improve presentation} below.
+
+\paragraph{3) Add a discussion of results and search methods to highlight the advantages and disadvantages of the solver-based solution (Reviewer 2: O4, Reviewer 3: O1,O3)}
+
+Please see this cover letter's response to \emph{2) Highlight the paper’s contributions} above.
+
+\paragraph{4) Describe the missing related work and if and how they are different than and/or comparable with the problem addressed by the paper (Reviewer2: O1)}
+
+We extended Section~7 (\emph{Related Work}) with the works proposed by \emph{(Rev1.O1)}~\cite{lawless2022interpretable, pastor2021looking} and \emph{(Rev2.O1)}~\cite{asudeh2019assessing, sagadeeva2021sliceline}, based on our revision plan's response to \emph{(MR.R3)}.
+However, we only discuss the proposed works briefly in the paper, since they are loosely related to our work, so their discussion should not take up more space than more closely related work.
+In particular, the proposed works start from a different problem definition of subgroup discovery and do not analyze the two constraint types we focus on.
+(Our discussion of related work generally focuses on white-box formulations of subgroup discovery and the two constraint types, because our main contributions relate to these points, rather than arbitrary subgroup-discovery methods.)
+Thus, we mention the proposed works together with broad surveys on subgroup-discovery methods.
+To this end, we split the former Paragraph~\emph{Subgroup discovery} into two paragraphs, \emph{Subgroup discovery in general} and \emph{White-box formulations of subgroup discovery} at the beginning of Section~7 (\emph{Related Work}).
+For the suitability of the four proposed works as experimental competitors, please see the following point \emph{5)}.
+
+\pagebreak
+
+\paragraph{5) Provide empirical or theoretical analysis to show whether the potential competitors are prohibitively slow. If they do not support subgroup descriptions for numeric attributes, clarify this point as well (Reviewer 1: O1, Reviewer 2: O2, Reviewer 3: O4)}
+
+A competitor should satisfy several criteria to enable a fair comparison in our experimental pipeline:
+(1) support optimizing WRAcc~\cite{lavravc1999rule} as the subgroup-quality metric,
+(2) support setting a cardinality threshold,
+(3) not have additional constraints,
+(4) support a continuous search space where subgroup descriptions define intervals on features, and
+(5) be reasonably fast.
+
+The four approaches~\cite{asudeh2019assessing, lawless2022interpretable, pastor2021looking, sagadeeva2021sliceline} proposed by the reviewers are unsuitable in this regard.
+All four optimize different objectives than WRAcc.
+Two of them~\cite{asudeh2019assessing, lawless2022interpretable}~even optimize unsupervised, i.e., without a prediction target, while we consider a supervised scenario.
+\cite{pastor2021looking} considers subgroup quality only after exhaustively listing all subgroups with a minimum support.
+Further, \cite{asudeh2019assessing, pastor2021looking} require additional constraints on the number of subgroup members, and \cite{asudeh2019assessing, pastor2021looking, sagadeeva2021sliceline} do not support numeric features.
+
+Thus, we searched further competitors in four popular Python packages for subgroup discovery, i.e., \texttt{pysubdisc}, \texttt{pysubgroup}~\cite{lemmerich2019pysubgroup}, \texttt{sd4py}~\cite{hudson2023subgroup}, and \texttt{subgroups}~\cite{lopez2024subgroups}.
+All four packages offer exhaustive subgroup-discovery methods that support WRAcc as the optimization objective, which are particularly interesting competitors for our solver-based search method \emph{SMT}.
+Additionally, \texttt{pysubdisc}, \texttt{pysubgroup}, and \texttt{sd4py} provide beam search as a heuristic search method, but our experiments already contain a beam search.
+The exhaustive search methods from the four investigated packages have the following limitations:
+%
+\begin{itemize}[noitemsep]
+	\item \texttt{pysubdisc}: too slow
+	\item \texttt{pysubgroup}: too slow
+	\item \texttt{sd4py}: require discretizing numeric features
+	\item \texttt{subgroups}: require discretizing numeric features, do not support cardinality threshold, too slow
+\end{itemize}
+%
+For the runtime assessment, we implemented an additional experimental pipeline to compare multiple subgroup-discovery methods from each package against the \emph{Beam} and \emph{SMT} implementation in our package \texttt{csd}.
+The code for these competitor-runtime experiments is available together with our remaining experimental code, while the experimental data is available separately\footnote{\url{https://www.dropbox.com/scl/fi/m68zghlwaerjkighsluxi/competitor-runtime-data.zip?rlkey=qcgbrbemgnbt4ltnwl9lhd75b&st=03tmkeqf&dl=0}}.
+We used five of the smallest datasets from our main experiments, all with $m < 500$ data objects and $n < 50$ features, plus the even smaller \emph{iris} dataset with $m = 150$ and $n = 4$.
+(For comparison: The maxima in our main experiments are considerably higher, i.e., $m = 9822$ and $n = 168$.)
+Each experimental task in the competitor-runtime experiments combined one subgroup discovery method with one cross-validation fold of a dataset (in five-fold cross-validation).
+Within each experimental task, we sequentially measured the runtime for a feature-cardinality threshold of $k \in \{1, 2, 3, 4, 5\}$, i.e., without the unconstrained setting.
+We ran these experiments separately for each dataset and granted each task 9~hours of runtime to process these five cardinality settings, which is considerably more than the maximum solver timeout of 2048~s in our main experiments, even though the latter applies to each cardinality setting individually.
+
+\begin{table}[t]
+	\centering
+	\caption{Which subgroup-discovery methods finished their experimental task (feature-cardinality thresholds $k \in \{1, 2, 3, 4, 5\}$ evaluated sequentially) within 9~hours on which dataset?}
+	\begin{tabular}{lllllll}
+		\toprule
+		Method & backache & horse\_colic & ionosphere & iris & spect & spectf \\
+		\midrule
+		csd.Beam & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+		csd.SMT & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark &  \\
+		pysubdisc.Beam & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+		pysubdisc.BestFirst & \checkmark & \checkmark &  & \checkmark & \checkmark &  \\
+		pysubdisc.BreadthFirst & \checkmark & \checkmark &  & \checkmark & \checkmark &  \\
+		pysubdisc.DepthFirst & \checkmark & \checkmark &  & \checkmark & \checkmark &  \\
+		pysubgroup.Apriori &  &  &  & \checkmark & \checkmark &  \\
+		pysubgroup.Beam & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+		pysubgroup.DepthFirst &  &  &  & \checkmark & \checkmark &  \\
+		pysubgroup.GPGrowth &  &  &  & \checkmark &  &  \\
+		sd4py.BSD & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+		sd4py.Beam & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+		sd4py.SDMap & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+		subgroups.BSD & \checkmark & \checkmark &  & \checkmark & \checkmark &  \\
+		subgroups.SDMap &  &  &  & \checkmark &  &  \\
+		subgroups.SDMapStar &  &  &  & \checkmark &  &  \\
+		subgroups.VLSD &  &  &  & \checkmark &  &  \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:csd:competitor-timeouts}
+\end{table}
+
+Table~\ref{tab:csd:competitor-timeouts} displays which tasks finished within the 9-hour timeout.
+Generally, all subgroup-discovery methods finished either on all or no cross-validation folds of a dataset.
+All methods finished on the \emph{iris} dataset, but fewer methods on the five other datasets.
+From the exhaustive search methods, i.e., without beam search, only \emph{sd4py.BSD} and \emph{sd4py.SDMap} finished on each of the six small datasets.
+
+\begin{table}[ht]
+	\centering
+	\caption{
+		Runtime (in seconds) on the dataset~\emph{spect}, averaged over five cross-validation folds.
+		Missing subgroup-discovery methods compared to Table~\ref{tab:csd:competitor-timeouts} did not finish their experimental task within 9~hours.
+	}
+	\begin{tabular}{lrrrrr}
+		\toprule
+		Method & $k=1$ & $k=2$ & $k=3$ & $k=4$ & $k=5$ \\
+		\midrule
+		csd.Beam & 0.03 & 0.05 & 0.06 & 0.08 & 0.09 \\
+		csd.SMT & 3.58 & 3.92 & 3.63 & 3.49 & 3.50 \\
+		pysubdisc.Beam & 2.40 & 0.20 & 0.17 & 0.32 & 0.26 \\
+		pysubdisc.BestFirst & 1.61 & 0.27 & 2.12 & 26.39 & 829.56 \\
+		pysubdisc.BreadthFirst & 2.35 & 0.33 & 1.79 & 6.23 & 47.98 \\
+		pysubdisc.DepthFirst & 1.96 & 0.29 & 1.95 & 27.60 & 948.02 \\
+		pysubgroup.Apriori & 0.02 & 0.07 & 0.81 & 8.93 & 70.20 \\
+		pysubgroup.Beam & 0.02 & 0.12 & 0.23 & 0.35 & 0.50 \\
+		pysubgroup.DepthFirst & 0.02 & 0.23 & 3.65 & 45.06 & 412.13 \\
+		sd4py.BSD & 0.36 & 0.66 & 0.07 & 0.10 & 0.18 \\
+		sd4py.Beam & 0.45 & 0.85 & 0.26 & 0.27 & 0.19 \\
+		sd4py.SDMap & 0.45 & 0.89 & 0.29 & 0.55 & 0.49 \\
+		subgroups.BSD & 0.15 & 0.86 & 6.40 & 36.90 & 166.24 \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:csd:spect-runtime}
+\end{table}
+
+For more details, Table~\ref{tab:csd:spect-runtime} displays the exact runtimes for the dataset~\emph{spect}, which had the second-most methods finishing with the 9-hour timeout.
+This table clearly shows the exponential runtime increase over the feature-cardinality threshold~$k$ for the exhaustive search methods from the packages \texttt{pysubdisc}, \texttt{pysubgroup}, and \texttt{subgroups}, while \texttt{sd4py} exhibits considerably smaller and less varying runtimes.
+
+Overall, these competitor-runtime experiments showed that only the exhaustive search methods from \texttt{sd4py} could be expected to have a reasonable runtime in our main experiments, which involve larger datasets and also an unrestricted feature-cardinality threshold, which corresponds to~$k = n \geq 20$ (number of features in the dataset, which is at least~20).
+Thus, we integrated \emph{BSD}~\cite{lemmerich2010fast} and \emph{SD-Map}~\cite{atzmueller2006sd} in our main experiments.
+We extended Sections~2.2 (\emph{Fundamentals: Subgroup-Discovery Methods}), 5~(\emph{Experimental Design}), and 6~(\emph{Evaluation}) in our paper accordingly.
+In particular, \emph{BSD} and \emph{SD-Map} appear in Figure~2, Table~2, and Table~3, which evaluate feature-cardinality constraints (Section~6.1).
+We also updated the code and experimental data linked in the paper.
+Since the two new competitors do not support the search for alternative subgroup descriptions, they do not appear in Section~6.2.
+
+\emph{BSD} and \emph{SD-Map} retain the potential weakness that they require discretization of numeric features, which reduces their search space.
+Thus, they may yield a lower quality than an exhaustive search on the full space but also be faster.
+We rely on the built-in discretization of \texttt{sd4py} but optimize quality over ten different numbers of bins to improve subgroup quality.
+Nevertheless, \emph{BSD} and \emph{SD-Map} still do not beat the subgroup quality of the heuristic competitors~\emph{Beam} and~\emph{BI}, which do not discretize features.
+
+\paragraph{6) Explain why the focus of the paper is limited to binary classification (Reviewer 1: O2)}
+
+As stated at the beginning of Section~2.1 (\emph{Problem of Subgroup Discovery}) in our paper, choosing one type of data and target helps harmonize formalization and experimental evaluation.
+Binary classification, which is a special case of nominal and numeric targets, is a natural choice in this regard.
+We added the Paragraph~\emph{Problem definition} to the end of the new Section~6.3 (\emph{Summary and Discussion}).
+There, we discuss other problem definitions, i.e., feature and target types, based on our revision plan's response to \emph{(MR.R5)}.
+We referenced this discussion in Section~2.1 and shortened the latter slightly.
+
+\paragraph{7) Extend the explanation of antimonotonicity in section 4.2 (Reviewer 2.O3)}
+
+We considerably revised and extended Section~4.2.3 (\emph{Feature-Cardinality Constraints: Integration into Heuristic Search Methods}) to explain antimonotonicity, based on our revision plan's response to \emph{(MR.R6)}.
+We slightly adapted Section~4.3.3 (\emph{Alternative Subgroup Description: Integration into Heuristic Search Methods}), which also refers to antimonotonicity, accordingly.
+
+\paragraph{8) Improve presentation (Reviewer 3: O3)}
+
+\emph{(Rev3.O3)} raised two points:
+(1) The description of the two baselines \emph{MORS} and \emph{Random} before the novel contributions regarding constrained subgroup discovery.
+(2) The lack of a discussion in the results section.
+
+Regarding (1):
+As argued in our revision plan's response to \emph{(MR.R7)}, we left the description of the two baselines \emph{MORS} and \emph{Random} in Section~3, directly after presenting heuristic search methods from related work in Section~2.2.
+In particular, the baselines and heuristic search methods should be introduced before Section~4, where we (a) describe how to integrate constraints into them (Sections~4.2.3, 4.2.4, 4.3.3, and~4.3.4) and (b) use concepts from the \emph{MORS} section (Section~3.2) in the complexity analyses (Sections~4.2.5 and~4.3.5).
+We adapted Section~3's introductory paragraph to indicate that \emph{MORS} and \emph{Random} are baselines proposed by us and also mention them in Paragraph~\emph{Contributions} of Section~1 (\emph{Introduction}).
+Finally, we explicitly referenced the complexity-related sections for which the definitions and discussion around \emph{MORS} are relevant.
+
+Regarding (2):
+We moved the summary and discussion of experimental results from Section~8 (\emph{Conclusion}) to the novel Section~6.3 (\emph{Summary and Discussion}) in Section 6 (\emph{Evaluation}).
+We added paragraph headings and included further discussion points based on other reviewer comments, particularly to address \emph{2) Highlight the paper’s contributions} and \emph{6) Explain why the focus of the paper is limited to binary classification}.
+Section~8 retains a one-sentence summary of the experimental results.
+
+\printbibliography
+
+\end{document}

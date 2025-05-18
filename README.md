@@ -1,13 +1,26 @@
-# Text for Paper on Constrained Subgroup Discovery
+# Constrained Subgroup Discovery -- LaTeX Sources
 
-This repository contains the LaTeX source code for the paper
+This repository contains the LaTeX source code for two papers and related materials on constrained subgroup discovery:
 
-> Bach, Jakob. "Using Constraints to Discover Sparse and Alternative Subgroup Descriptions"
+> Bach, Jakob (2024): "Using Constraints to Discover Sparse and Alternative Subgroup Descriptions"
 
-**Links**
+is published on [*arXiv*](https://doi.org/10.48550/arXiv.2406.01411).
+You can find its source code in the folder `paper_arxiv/`.
+There are (as of May 2025) two versions of this paper (see the tags of this repo).
 
-- paper on [*arXiv*](https://doi.org/10.48550/arXiv.2406.01411)
-- related dissertation (research of this paper constitutes one main chapter) on [*KITopen*](https://doi.org/10.5445/IR/1000178649)
-- code for experiments on [*GitHub*](https://github.com/Jakob-Bach/Constrained-Subgroup-Discovery)
-- experimental data (v1) on [*RADAR4KIT*](https://doi.org/10.35097/caKKJCtoKqgxyvqG)
-- experimental data (v2) on [*RADAR4KIT*](https://doi.org/10.35097/8ppb5x50nyvw1wa7)
+**Additional links:**
+
+- Code for experiments on [*GitHub*](https://github.com/Jakob-Bach/Constrained-Subgroup-Discovery)
+- Experimental data (v1) on [*RADAR4KIT*](https://doi.org/10.35097/caKKJCtoKqgxyvqG)
+- Experimental data (v2) on [*RADAR4KIT*](https://doi.org/10.35097/8ppb5x50nyvw1wa7)
+
+> Bach, Jakob (2025): "Subgroup Discovery with Small and Alternative Feature Sets"
+
+is published in the [proceedings of the conference SIGMOD 2025](https://doi.org/10.1145/3725358).
+You can find its (camera-ready) source code in the folder `paper_sigmod/`.
+However, you cannot compile the paper without a `.bst`, `.cls`, and `.dtx` file from *ACM*, which we do not provide here due to copyright reasons.
+
+**Additional links:**
+
+- Code for experiments on [*GitHub*](https://github.com/Jakob-Bach/Constrained-Subgroup-Discovery)
+- Experimental data on [*RADAR4KIT*](https://doi.org/10.35097/nftgaf7w73hy2491)

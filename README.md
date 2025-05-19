@@ -1,12 +1,13 @@
 # Constrained Subgroup Discovery -- LaTeX Sources
 
-This repository contains the LaTeX source code for two papers and related materials on constrained subgroup discovery:
+This repository contains the LaTeX source code for two papers and related materials on constrained subgroup discovery.
+You can also find copies of the corresponding published versions as PDFs in the folder `final_versions/`.
 
 > Bach, Jakob (2024): "Using Constraints to Discover Sparse and Alternative Subgroup Descriptions"
 
 is published on [*arXiv*](https://doi.org/10.48550/arXiv.2406.01411).
 You can find its source code in the folder `paper_arxiv/`.
-There are (as of May 2025) two versions of this paper (see the tags of this repo).
+There are (as of May 2025) two published versions of this paper (use the tags of this repo if you want to obtain the LaTeX source code of a particular version).
 
 **Additional links:**
 

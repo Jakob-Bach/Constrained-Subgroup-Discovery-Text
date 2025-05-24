@@ -56,8 +56,50 @@
 
 \begin{frame}[t]{Subgroup Discovery}
 	\begin{itemize}
-		\item
+		\item Subgroup discovery: ``Identifying descriptions of subsets of a dataset that show an interesting behavior''~\cite{atzmueller2015subgroup}
+		%JB: unlike typical ML prediction models, need not cover full dataset with one subgroup (there may be multiple ones)
+		\begin{itemize}
+			\item Language for descriptions typically simple
+			%JB: e.g., restrict ranges of numerical features or select particular values of categorical features
+			\item `Interesting' according to some objective function
+			%JB: notion of subgroup quality
+		\end{itemize}
+		\pause
+		\vspace{\baselineskip}
+		\item Our scope: Binary classification with real-valued features
+		\begin{itemize}
+			\item Tabular dataset $X \in \mathbb{R}^{m \times n}$ (data objects $\times$ features)
+			%JB: there also are variants of subgroup discovery that are more like frequent itemset mining, with binary feature values and only value 1 used in subgroup descriptions
+			\item Prediction target $y \in \{0, 1\}^m$ (`interesting'/`positive' = 1)
+			%JB: in regression, interestingness could refer to low or high values of target
+			\pause
+			\item Subgroup description: Hyperrectangle
+			\item Subgroup quality: Weighted Relative Accuracy
+			\begin{itemize}
+				\item $\text{WRAcc} = \frac{m_b}{m} \cdot \left( \frac{m_b^+}{m_b} - \frac{m^+}{m} \right)$~\cite{lavravc1999rule}
+				%JB: first factor is subgroup size, second is relative accuracy (precision in subgroup vs overall)
+				\item \emph{+} $\leftrightarrow$ positive data object, \emph{b} $\leftrightarrow$ in subgroup (box)
+			\end{itemize}
+		\end{itemize}
+		\pause
+		\vspace{\baselineskip}
+		\item Our goal: Improve interpretability with constraints
+		%JB: on selected features
+		%JB: despite subgroup descriptions already being simple
+		\begin{itemize}
+			\item Limit number of features used in subgroup description
+			%JB: imagine dataset with 100 dimensions and all are bounded
+			%JB: kind of extension to traditional feature selection in ML (one binary decision for each feature; now values play a role)
+			\item Find alternative subgroup descriptions
+			%JB: alternative description for same subgroup, not an alternative subgroup
+		\end{itemize}
 	\end{itemize}
+	\pause[0] % \visible or \onslide did not work, so we reset pause counter to show figure immediately
+	\begin{tikzpicture}[remember picture,overlay]
+		\node[xshift=-270pt,yshift=-295pt] at (current page.north east) {
+			\includegraphics[width=0.45\textwidth, trim=70 15 90 15, clip]{plots/csd-exemplary-subgroup.pdf}
+		};
+	\end{tikzpicture}
 \end{frame}
 
 \appendix

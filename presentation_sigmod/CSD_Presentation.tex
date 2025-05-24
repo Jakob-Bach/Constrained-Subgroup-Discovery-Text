@@ -35,12 +35,13 @@
  
 \setlength{\leftmargini}{0.6cm} % change default indentation (so first-level items are left-aligned to boxes and slide titles)
 
-\setbeamerfont{itemize/enumerate subsubbody}{size=\small} % make third-level items' text as large as 2nd-level ones (default is \footnotesize, as defined in "beamerfontthemedefault.sty")
+\setbeamerfont{itemize/enumerate subbody}{size=\normalsize} % make 2nd-level items' text as large as 1st-level ones (default is \small, as defined in "beamerfontthemedefault.sty")
+\setbeamerfont{itemize/enumerate subsubbody}{size=\normalsize} % make 3rd-level items' text as large as 1st-level ones (default is \footnotesize, as defined in "beamerfontthemedefault.sty")
 
 % make bullet points slightly smaller and roughly center them relative to upper-case letters (instead of bottom alignment):
 \setbeamertemplate{itemize item}{\raisebox{2.17pt}{\color{kit-green}\footnotesize$\blacksquare$}}
-\setbeamertemplate{itemize subitem}{\raisebox{1.81pt}{\color{kit-green}\scriptsize$\blacksquare$}}
-\setbeamertemplate{itemize subsubitem}{\raisebox{1.81pt}{\color{kit-green}\scriptsize$\blacksquare$}}
+\setbeamertemplate{itemize subitem}{\raisebox{2.17pt}{\color{kit-green}\scriptsize$\blacksquare$}}
+\setbeamertemplate{itemize subsubitem}{\raisebox{2.17pt}{\color{kit-green}\scriptsize$\blacksquare$}}
 
 \setbeamercovered{invisible} % can set "transparent" to show later content of animated slide in gray
 
@@ -56,7 +57,7 @@
 
 \begin{frame}[t]{Subgroup Discovery}
 	\begin{itemize}
-		\item Subgroup discovery: ``Identifying descriptions of subsets of a dataset that show an interesting behavior''~\cite{atzmueller2015subgroup}
+		\item \textbf{Subgroup discovery:} ``Identifying descriptions of subsets of a dataset that show an interesting behavior''~\cite{atzmueller2015subgroup}
 		%JB: unlike typical ML prediction models, need not cover full dataset with one subgroup (there may be multiple ones)
 		\begin{itemize}
 			\item Language for descriptions typically simple
@@ -66,7 +67,7 @@
 		\end{itemize}
 		\pause
 		\vspace{\baselineskip}
-		\item Our scope: Binary classification with real-valued features
+		\item \textbf{Our scope:} Binary classification with real-valued features
 		\begin{itemize}
 			\item Tabular dataset $X \in \mathbb{R}^{m \times n}$ (data objects $\times$ features)
 			%JB: there also are variants of subgroup discovery that are more like frequent itemset mining, with binary feature values and only value 1 used in subgroup descriptions
@@ -83,23 +84,67 @@
 		\end{itemize}
 		\pause
 		\vspace{\baselineskip}
-		\item Our goal: Improve interpretability with constraints
+		\item \textbf{Our goal}: Improve interpretability with constraints
 		%JB: on selected features
 		%JB: despite subgroup descriptions already being simple
 		\begin{itemize}
 			\item Limit number of features used in subgroup description
+			%JB: "small"
 			%JB: imagine dataset with 100 dimensions and all are bounded
 			%JB: kind of extension to traditional feature selection in ML (one binary decision for each feature; now values play a role)
 			\item Find alternative subgroup descriptions
+			%JB: "alternative"
 			%JB: alternative description for same subgroup, not an alternative subgroup
 		\end{itemize}
 	\end{itemize}
 	\pause[0] % \visible or \onslide did not work, so we reset pause counter to show figure immediately
 	\begin{tikzpicture}[remember picture,overlay]
-		\node[xshift=-270pt,yshift=-295pt] at (current page.north east) {
+		\node[xshift=-260pt,yshift=-310pt] at (current page.north east) {
 			\includegraphics[width=0.45\textwidth, trim=70 15 90 15, clip]{plots/csd-exemplary-subgroup.pdf}
 		};
 	\end{tikzpicture}
+\end{frame}
+
+\begin{frame}[t]{Contributions and Related Work}
+	\begin{itemize}
+		\item \textbf{Contributions:}
+		%JB: formalization, proofs, and experiments
+		\begin{itemize}
+			\item Formalize subgroup discovery as an SMT (Satisfiability Modulo Theories) optimization problem
+			%JB: can be tackled with a solver instead of needing to develop a problem-specific algorithm (which may need further adaptation for particular constraint types)
+			\item Formalize two constraint types:
+			%JB: the two points mentioned on previous slide
+			%JB: all following contributions are for both constraint types each
+			\begin{itemize}
+				\item Feature-cardinality constraints
+				\item Alternative subgroup descriptions
+			\end{itemize}
+			%JB: besides SMT formalization, also show how to integrate constraints into existing, heuristics subgroup-discovery methods
+			\item Analyze computational complexity and show $\mathcal{NP}$-hardness
+			%JB: unfortunately, no time for these proofs in this 15-min presentation
+			\item Comprehensive experiments
+			% will be presented later
+		\end{itemize}
+		\pause
+		\vspace{\baselineskip}
+		\item \textbf{Related work:}
+		\begin{itemize}
+			\item Existing subgroup-discovery methods~\cite{atzmueller2015subgroup, helal2016subgroup, herrera2011overview, ventura2018subgroup} typically algorithmic (exhaustive or heuristic)
+			%JB: i.e., exhaustive routines do not use an off-the-shelf solver
+			%JB: further, term "subgroup" is a bit overloaded; also used in algorithmic fairness (predefined groups like race, gender), medicine, and re-inventions with slightly different problem definitions in different communities (like management of data)
+			\item Few white-box formulations of (other) variants of subgroup discovery~\cite{bonates2008maximum, eckstein2002maximum, guns2011itemset, koccak2020exploiting, louveaux2014combinatorial}
+			%JB: typically evaluation limited, e.g., not comparing to existing SD methods
+			%JB: also, different problem definitions (e.g., further constraints) and neither feature cardinality nor alternatives
+			\item Concept of feature cardinality well-established~\cite{herrera2011overview, meeng2021real}, but empirical studies varying it~\cite{friedman1999bump, lemmerich2010fast, meeng2021real, proencca2022robust} are limited
+			%JB: e.g., just one SD method
+			%JB: some studies also use just one fixed cardinality
+			%JB: don't want to say that studies narrow in general; just have a different focus
+			\item Concept of alternative subgroups well-established~\cite{atzmueller2015subgroup, belfodil2019fssd, bosc2018anytime, leeuwen2012diverse, lucas2018ssdp+}, but alternative descriptions~\cite{boley2009non, galbrun2017redescription, leeuwen2012diverse, lopez2023discovering} less so
+			%JB: former (also called "diverse") wants to capture different data objects / regions, not use different features
+			%JB: the referenced related work for alternative descriptions pursues different problem definitions than we do
+			%JB: alternatives are also a theme in other fields of ML, e.g., clustering, itemset mining, feature selection, and XAI
+		\end{itemize}
+	\end{itemize}
 \end{frame}
 
 \appendix

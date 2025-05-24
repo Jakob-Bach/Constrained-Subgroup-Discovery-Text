@@ -210,6 +210,44 @@
 	\end{itemize}
 \end{frame}
 
+\begin{frame}[t]{Experimental Design}
+	\begin{itemize}
+		\item \textbf{27 binary-classification datasets} (with 106--9822 data objects and 20--168 features) from \emph{PMLB}~\cite{olson2017pmlb, romano2021pmlb}
+		\pause
+		\vspace{\baselineskip}
+		\item \textbf{Eight subgroup-discovery methods:}
+		\begin{itemize}
+			\item Solver-based (novel): \emph{SMT} (using \emph{Z3}~\cite{bjorner2015nuz, deMoura2008z3} as optimizer)
+			\item Exhaustive search (related work): \emph{BSD}~\cite{lemmerich2010fast}, \emph{SD-Map}~\cite{atzmueller2006sd}
+			%JB: not actually exhaustive in our scenario since they require discretizing numeric features
+			\item Heuristics (related work): \emph{Beam}, \emph{BI}~\cite{mampaey2012efficient}, \emph{PRIM}~\cite{friedman1999bump}
+			%JB: iteratively and greedily restrict the subgroup's bounds, with one feature per iteration (PRIM: prune fixed fraction of data objects; Beam/BI: test all possible cuts)
+			\item Baselines (novel): \emph{MORS} (Minimal Optimal Recall Subgroup), \emph{Random}
+			%JB: MORS -- minimal bounds such that all positive data objects are in subgroup (exclude as many negative data objects as possible); intermediate problem between SD and perfect SD
+			%JB: Random -- repeated random sampling of bounds
+		\end{itemize}
+		\pause
+		\vspace{\baselineskip}
+		\item \textbf{Experimental scenarios:}
+		%JB: parameters varied systematically; all other hyperparameters fixed, i.e., no tuning
+		\begin{itemize}
+			\item Solver timeouts: \{1~s, 2~s, 4~s, $\dots$, 2048~s\}
+			\item Feature-cardinality constraints: $k \in \{1, 2, 3, 4, 5\}$
+			\item Alternative subgroup descriptions: $k=3$ features, $a=5$ alternatives, and dissimilarity threshold $\tau_{\text{abs}} \in \{1, 2, 3\}$
+			%JB: do not have time to describe details; in a nutshell: find $a$ other subgroup descriptions that should capture a similar set of data objects as a given description but use different features
+		\end{itemize}
+		\pause
+		\vspace{\baselineskip}
+		\item \textbf{Evaluation metrics:}
+		\begin{itemize}
+			\item Subgroup quality (nWRAcc~\cite{lavravc1999rule, mathonat2021anytime})
+			%JB: normalized version of WRAcc we discussed before (takes dataset imbalance into account, always has range [-1, 1])
+			\item Runtime
+			\item For alternatives: Similarity~\cite{choi2010survey} (Normalized Hamming and Jaccard)
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
 \appendix
 \beginbackup % subsequent slides do not impact overall slide count
 

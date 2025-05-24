@@ -121,7 +121,7 @@
 			\end{itemize}
 			%JB: besides SMT formalization, also show how to integrate constraints into existing, heuristics subgroup-discovery methods
 			\item Analyze computational complexity and show $\mathcal{NP}$-hardness
-			%JB: unfortunately, no time for these proofs in this 15-min presentation
+			%JB: unfortunately, no time for these proofs in this 15-min presentation; one proof is in Appendix of this presentation
 			\item Comprehensive experiments
 			% will be presented later
 		\end{itemize}
@@ -147,8 +147,138 @@
 	\end{itemize}
 \end{frame}
 
+\begin{frame}[t]{Formalization -- Basic Problem}
+	\vspace{-\baselineskip} % by default, equations are placed lower on slide
+	%JB: basic problem is "unconstrained" in sense of no additional constraints apart from ones inherent in problem
+	%JB: forms basis for adding feature-cardinality constraints
+	\begin{align*}
+		\onslide<5->{
+			\max &\quad & Q_{\text{WRAcc}} &= \frac{m_b^+}{m} - \frac{m_b \cdot m^+}{m^2} \tag*{(Objective: subgroup quality)} \\
+			%JB: we have seen this formula two slides ago (only a bit rearranged now)
+			%JB: linear since "m" and "m+" constant
+		}
+		\onslide<4->{
+			\text{s.t.:} &\quad & m_b &:= \sum_{i=1}^{m} b_i \quad\text{and}\quad m_b^+ := \sum_{\substack{i \in \{1, \dots, m\} \\ y_i = 1 }} b_i \tag*{(Num of data objects in subgroup)} \\
+			%JB: count b_i
+		}
+		\onslide<3->{
+			&\quad \forall i \in \{1, \dots, m\} & b_i &\leftrightarrow \bigwedge_{j \in \{1, \dots, n\}} \left( \left( X_{ij} \geq \mathit{lb}_j \right) \land \left( X_{ij} \leq \mathit{ub}_j \right) \right) \tag*{(i-th data object in subgroup?)} \\
+		}
+		\onslide<2->{
+			&\quad \forall j \in \{1, \dots, n\} & \mathit{lb}_j &\leq \mathit{ub}_j \tag*{(Constraint: relationship between bounds)} \\
+			%JB: technically, you could even leave constraint out in most situations, as solutions with UB < LB would contain zero data objects in box and therefore have WRAcc = 0, while even a box containing only one positive data object (and nothing else) has a WRAcc > 0; however, if feature values of all positive objects also exist with negative labels (no separation possible) and also there is no option to form an empty box (i.e., all combinations of feature values exist in caetgorical scenario), then best WRAcc may become < 0 (and we want this box instead of an invalid one with WRAcc = 0)
+		}
+		\onslide<3->{
+			&\quad & b &\in \{0, 1\}^m \tag*{(Auxiliary variables: subgroup membership)}  \\
+			%JB: not strictly necessary (expressions above could be inlined), but we used variables in implementation (though not for m_b and m_b^+, which therefore have := in definition)
+			%JB: b_i are also used when defining problem for alternative subgroup descriptions
+		}
+		\onslide<1->{
+			&\quad & \mathit{lb}, \mathit{ub} &\in \{\mathbb{R} \cup \{-\infty, +\infty\}\}^n \tag*{(Variables: lower/upper bounds of subgroup)}
+		}
+	\end{align*}
+\end{frame}
+
+\begin{frame}[t]{Formalization -- Feature-Cardinality Constraints}
+	\begin{itemize}
+		\item \textbf{Concept:} Limit number of features used (= selected) in subgroup description to $k \in \mathbb{N}$
+		%JB: "k" is a user parameter
+		%JB: theoretical result: problem is NP-hard under mild assumption on objective function
+		\item \textbf{Formally:} Limit number of features whose bounds exclude at least one data object from subgroup
+		%JB: i.e., technically, a feature appearing in subgroup description may still not be selected (cannot happen in our implementation because we post-process bounds of subgroups accordingly)
+		%JB: e.g., imagine lower bound at -5 while feature has range [0, 10] -> bound not active
+		\pause
+		\begin{equation*}
+			\begin{aligned}
+				\onslide<3->{
+					\forall j \in \{1, \dots, n\}: && s^{\text{lb}}_j &\leftrightarrow \left( \mathit{lb}_j > \min_{i \in \{1, \dots, m\}} X_{ij} \right) \\
+					\forall j \in \{1, \dots, n\}: &&s^{\text{ub}}_j &\leftrightarrow \left( \mathit{ub}_j < \max_{i \in \{1, \dots, m\}} X_{ij} \right) \\
+					%JB: min and max feature values are constants here
+				}
+				\onslide<4->{
+					\forall j \in \{1, \dots, n\}: && s_j &\leftrightarrow \left( s^{\text{lb}}_j \lor s^{\text{ub}}_j \right) \\
+				}
+				\onslide<5->{
+					&& \sum_{j=1}^n s_j &\leq k \\
+				}
+				\onslide<2->{
+					&& s, s^{\text{lb}}, s^{\text{ub}} &\in \{0, 1\}^n \\
+					%JB: like b_i, these variables are not strictly necessary (could be inlined) but our implementation uses them
+				}
+			\end{aligned}
+		\end{equation*}
+	\end{itemize}
+\end{frame}
+
 \appendix
 \beginbackup % subsequent slides do not impact overall slide count
+
+\begin{frame}[plain]
+	\centering
+	\Huge Appendix
+\end{frame}
+
+\begin{frame}[t]{Formalization -- Alternative Subgroup Descriptions}
+	\begin{itemize}
+		\item \textbf{Concept:} Cover similar set of data objects as given subgroup with different set of selected features
+		\begin{itemize}
+			\item Repeat sequentially to get $a \in \mathbb{N}$ alternatives for dissimilarity threshold~$\tau \in \mathbb{R}_{\geq 0}$
+		\end{itemize}
+		\vspace{\baselineskip}
+		\item \textbf{Chosen optimization objective:} Maximize normalized Hamming similarity (= prediction accuracy)
+		%JB: new objective! don't optimize subgroup quality anymore
+		\begin{equation*}
+			\text{sim}_{\text{nHamm}}(b^{(a)}, b^{(0)}) = \frac{1}{m} \cdot \sum_{i=1}^m \left( b_i^{(a)} \leftrightarrow b_i^{(0)} \right) = \frac{1}{m} \cdot \Big( \sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 1}} b_i^{(a)} + \sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 0}} \lnot b_i^{(a)} \Big)
+			%JB: reminder: b_i denotes whether data object in subgroup or not
+			%JB: (0) is orignal subgroup, (a) the alternative
+			%JB: is linear (logical NOT can be linearized easily), while Jaccard similarity is not
+		\end{equation*}
+		\vspace{\baselineskip}
+		\item \textbf{Chosen dissimilarity constraints:} From each existing feature set, deselect at least $\tau_{\text{abs}} \in \mathbb{N}$ (but $\leq k$) features
+		%JB: "deselect": do not select again
+		\begin{equation*}
+			\forall l \in \{0, \dots, a-1\}:~ \text{dis}_{\text{des}}(s^{(a)}, s^{(l)}) = \sum_{\substack{j \in \{1, \dots, n\} \\ s^{(l)}_j = 1}} \lnot s^{(a)}_j \geq \min \left( \tau_{\text{abs}},~k^{(l)} \right)
+			%JB: min prevents infeasibility
+			%JB: not a commonly used measure, not even symmetric
+			%JB: however, linear and antimonotonic (Dice and Jaccard are not), which eases integration into solver and heuristics
+		\end{equation*}
+		%JB: other constraints from subgroup discovery remain in problem as is
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[t]{Computational Complexity}
+	\begin{itemize}
+		\item Subgroup discovery with a feature-cardinality constraint is $\mathcal{NP}$-complete
+		\vspace{\baselineskip}
+		\item \textbf{Proof:} Reduction from \textsc{Set Covering}~\cite{karp1972reducibility}
+		\begin{itemize}
+			\item Set-covering problem: Given set of elements~$E = \{e_1, \dots, e_m\}$, set of sets~$\mathbb{S} = \{S_1,  \dots, S_n\}$ with $E = \bigcup_{S \in \mathbb{S}} S$, and a cardinality~$k \in \mathbb{N}$, does subset $\mathbb{C} \subseteq \mathbb{S}$ with $|\mathbb{C}| \leq k$ and $E = \bigcup_{S \in \mathbb{C}} S$ exist?
+			\item Perfect-subgroup discovery: Find subgroup containing all positive data objects ($y_i = 1$) and zero negatives ($y_i = 0$)
+			%JB: may not exist, i.e., search problem instead of optimization problem
+			\item Problem transformation:
+			%JB: from set covering to perfect-subgroup discovery
+			\begin{itemize}
+				\item Dataset~$X \in \{0, 1\}^{(m + 1) \times n}$ with $X_{ij} := (e_i \in S_j)$
+				%JB: elements become data objects, sets become features, set membership becomes feature value
+				%JB: binary is special case of real-valued
+				\item Data Object $m+1$ represents an element not contained in any set, i.e., $X_{(m+1)j} = 0$ for all~$j \in \{1, \dots, n\}$
+				\item Prediction target $y \in \{0, 1\}^{m+1}$ with $y_{m+1} = 1$ and $y_i = 0$ otherwise
+				%JB: indicates whether not contained in any set
+				%JB: further, parameter "k" remains as-is
+			\end{itemize}
+			\item Perfect subgroup only contains Data Object $m+1$ and uses $\mathit{lb}_j = \mathit{ub}_j = 0$ conditions for selected features
+			%JB: new data object only has 0 as feature values
+			%JB: bounds [0, 1] represent unselected features
+			\item Other data objects have value 1 for at least one selected feature $\rightarrow$ each element is in a selected set
+			\item I.e., algorithm for perfect-subgroup discovery also solves \textsc{Set Covering}
+			%JB: however, latter is NP-hard, so former is NP-hard as well (and NP-complete since in NP)
+			\item Finally, optimizing subgroup quality typically at least as hard as finding perfect subgroup
+			%JB: depends on notion of subgroup quality, but mild condition (perfect subgroup is unique optimum if exists), satisfied for WRAcc
+		\end{itemize}
+		\vspace{\baselineskip}
+		\item Finding alternative subgroup descriptions with a feature-cardinality constraint is $\mathcal{NP}$-complete as well
+	\end{itemize}
+\end{frame}
 
 \begin{frame}[t, allowframebreaks]{References}
 	\printbibliography

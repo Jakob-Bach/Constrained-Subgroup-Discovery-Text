@@ -1,3 +1,14 @@
+### Third-party LaTeX materials
+
+## ACM:
+acmart.cls
+acmart.dtx
+ACM-Reference-Format.bst
+
+## KIT/SDQ:
+logos/
+sdqbeamer.cls
+
 ### GitLab's default TeX .gitignore
 
 ## Core latex/pdflatex auxiliary files:

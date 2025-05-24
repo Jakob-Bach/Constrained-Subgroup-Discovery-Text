@@ -1,0 +1,72 @@
+% template cloned from https://gitlab.kit.edu/kit/kastel/sdq/dokumentvorlagen/praesentationen/beamer
+% commit: 7960880f39b47ec10eabeed2baf9468fb38312a5 (Mar 4, 2025)
+
+\documentclass[en, navbaroff, handout]{sdqbeamer}
+% class options:
+% - language: de (default), en
+% - navbar can be toggled on (default) / off
+% - footer font size: bigfoot (default), smallfoot (KIT layout)
+% - font for slide titles: franklin (default) / helvet
+% - show lines for alignining content on slides: kitgrid
+% - remove animation roll-out: handout (general "beamer" option, not specific for this class)
+
+\grouplogo{} % needs to be empty to be turned off
+\groupname{} % empty allows author and title to take more space
+%\groupnamewidth{89mm} % default
+
+\title[Subgroup Discovery with Small and Alternative Feature Sets]{Subgroup Discovery with Small and Alternative Feature Sets} % [footer]{title slide}
+\subtitle{SIGMOD 2025 | Berlin} 
+\author[Jakob Bach]{Jakob Bach} % [footer]{title slide}
+
+\date[2025-06-24]{June 24, 2025} % [footer]{title slide}
+
+%\usepackage{amsmath} % mathematical symbols and equations; apparently pre-loaded
+%\usepackage{amssymb} % mathematical symbols; apparently pre-loaded
+\usepackage[style=numeric, backend=bibtex]{biblatex}  % original template uses "biber" as backend
+\usepackage{booktabs} % nicely formatted tables (with top, mid, and bottom rule)
+%\usepackage{graphicx} % plots; apparently pre-loaded
+\usepackage{subcaption} % subfigures
+\usepackage{tikz} % used for non-float figure positioning
+%\usepackage{hyperref} % links and URLs; apparently pre-loaded
+
+\addbibresource{references.bib}
+
+\hypersetup{colorlinks=true, citecolor=kit-blue, urlcolor=kit-blue}
+ 
+\setlength{\leftmargini}{0.6cm} % change default indentation (so first-level items are left-aligned to boxes and slide titles)
+
+\setbeamerfont{itemize/enumerate subsubbody}{size=\small} % make third-level items' text as large as 2nd-level ones (default is \footnotesize, as defined in "beamerfontthemedefault.sty")
+
+% make bullet points slightly smaller and roughly center them relative to upper-case letters (instead of bottom alignment):
+\setbeamertemplate{itemize item}{\raisebox{2.17pt}{\color{kit-green}\footnotesize$\blacksquare$}}
+\setbeamertemplate{itemize subitem}{\raisebox{1.81pt}{\color{kit-green}\scriptsize$\blacksquare$}}
+\setbeamertemplate{itemize subsubitem}{\raisebox{1.81pt}{\color{kit-green}\scriptsize$\blacksquare$}}
+
+\setbeamercovered{invisible} % can set "transparent" to show later content of animated slide in gray
+
+\begin{document}
+
+\begin{frame}[title white horizontal, kitlogo=rgb]
+	% layout options: "white horizontal", "green horizontal", "white vertical", "blue vertical"
+	% KIT logo options: rgb, white, black
+	\titlepage
+\end{frame}
+
+\section{Talk}
+
+\begin{frame}[t]{Subgroup Discovery}
+	\begin{itemize}
+		\item
+	\end{itemize}
+\end{frame}
+
+\appendix
+\beginbackup % subsequent slides do not impact overall slide count
+
+\begin{frame}[t, allowframebreaks]{References}
+	\printbibliography
+\end{frame}
+
+\backupend
+
+\end{document}

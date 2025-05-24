@@ -18,8 +18,8 @@ There are (as of May 2025) two published versions of this paper (use the tags of
 > Bach, Jakob (2025): "Subgroup Discovery with Small and Alternative Feature Sets"
 
 is published in the [proceedings of the conference SIGMOD 2025](https://doi.org/10.1145/3725358).
-You can find its (camera-ready) source code in the folder `paper_sigmod/`.
-However, you cannot compile the paper without a `.bst`, `.cls`, and `.dtx` file from *ACM*, which we do not provide here due to copyright reasons.
+You can find the paper's (camera-ready) source code in the folder `paper_sigmod/` and the corresponding presentation in the folder `presentation_sigmod/`.
+However, you cannot compile these documents without some externals files (classes, styles, logos), which we do not provide here due to copyright reasons.
 
 **Additional links:**
 

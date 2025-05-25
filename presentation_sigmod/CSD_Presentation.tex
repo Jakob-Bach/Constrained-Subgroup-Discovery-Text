@@ -25,6 +25,7 @@
 \usepackage[style=numeric, backend=bibtex]{biblatex}  % original template uses "biber" as backend
 \usepackage{booktabs} % nicely formatted tables (with top, mid, and bottom rule)
 %\usepackage{graphicx} % plots; apparently pre-loaded
+\usepackage{multirow} % cells spanning multiple rows in tables
 \usepackage{subcaption} % subfigures
 \usepackage{tikz} % used for non-float figure positioning
 %\usepackage{hyperref} % links and URLs; apparently pre-loaded
@@ -248,6 +249,83 @@
 	\end{itemize}
 \end{frame}
 
+\begin{frame}[t]{Results -- Feature-Cardinality Constraints}
+	\begin{figure}
+		\centering
+		\begin{subfigure}[t]{0.32\textwidth}
+			\centering
+			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-cardinality-train-nwracc-all-datasets.pdf}
+			\caption{All 27 datasets, training set.}
+			\label{fig:csd:cardinality-train-nwracc-all-datasets}
+			%JB: on average, heuristics "Beam" (orange) and "BI" (purple) beat solver-based search "SMT" (dark green) due to timeouts (here, largest timeout setting of 2048~s)
+			%JB: "exhaustive" competitors "BSD" (pink) and "SD-Map" (gray) comparable to SMT (dark green), suffer from discretization (we apply their built-in equal-with binning and optimize over different number of bins, but still way smaller search space than being allowed to choose bounds arbitrarily)
+			%JB: other baselines and heuristics ("PRIM", "Random", "MORS") worse
+			%JB: increase of subgroup quality over "k" is small, i.e., small subgroup descriptions (with just 1 or 2 out of >= 20 features) already yield high quality (encouraging for interpretability)
+		\end{subfigure}
+		\pause
+		\hfill
+		\begin{subfigure}[t]{0.32\textwidth}
+			\centering
+			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-cardinality-train-nwracc-no-timeout-datasets.pdf}
+			\caption{13 datasets without \emph{SMT} timeouts, training set.}
+			\label{fig:csd:cardinality-train-nwracc-no-timeout-datasets}
+			%JB: datases with timeouts eliminated: "SMT" jumps up to "Beam" and "BI", while the new exhaustive competitors remain below (discretization issue not eliminated)
+			%JB: shows that heuristics still are very close to optimal quality
+		\end{subfigure}
+		\pause
+		\hfill
+		\begin{subfigure}[t]{0.32\textwidth}
+			\centering
+			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-cardinality-test-nwracc-all-datasets.pdf}
+			\caption{All 27 datasets, test set.}
+			\label{fig:csd:cardinality-test-nwracc-all-datasets}
+			%JB: "BSD" and "SD-Map" get closer to "Beam" and "BI" (particulalrly for higher "k"), better than "SMT"
+			%JB: reason: less overfitting (probably due to reduced search space), while "SMT" shows highest overfitting (train-test diff in quality)
+			%JB: quality increase over "k" also smaller due to overfitting
+		\end{subfigure}
+		\caption*{
+			Mean subgroup quality over datasets and cross-validation folds, by subgroup-discovery method and feature cardinality~$k$.
+			Results from the search for original subgroups.
+		}
+		\label{fig:csd:cardinality}
+	\end{figure}
+\end{frame}
+
+\begin{frame}[t]{Results -- Alternative Subgroup Descriptions}
+	\begin{figure}[t]
+		\centering
+		\begin{subfigure}[t]{0.32\textwidth}
+			\centering
+			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-alternatives-jaccard.pdf}
+			\caption{Jaccard similarity.}
+			\label{fig:csd:alternatives-jaccard}
+			%JB: here two just subgroup-discovery methods (our solver-based, one heuristic)
+			%JB: alternative subgroup descriptions less (data-object) similar to original the more alternatives desired and the higher (feature-selection) dissimilarity threshold
+			%JB: strongest decrease to first alternative
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}[t]{0.32\textwidth}
+			\centering
+			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-alternatives-train-nwracc.pdf}
+			\caption{Training-set subgroup quality (nWRAcc).}
+			\label{fig:csd:alternatives-train-nwracc}
+			%JB: similar trends for subgroup quality
+			%JB: heuristics similar or better quality than solver-based approach (while for Jaccard similarity, SMT seemed better, but that does not even transfer to Hamming similarity)
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}[t]{0.32\textwidth}
+			\centering
+			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-alternatives-test-nwracc.pdf}
+			\caption{Test-set subgroup quality (nWRAcc).}
+			\label{fig:csd:alternatives-test-nwracc}
+		\end{subfigure}
+		\caption*{
+			Mean similarity and quality of alternative subgroup descriptions, with 95\% confidence intervals based on datasets and cross-validation folds, by subgroup-discovery method, number of alternative, and dissimilarity threshold~$\tau_{\text{abs}}$.
+		}
+		\label{fig:csd:alternatives}
+	\end{figure}
+\end{frame}
+
 \appendix
 \beginbackup % subsequent slides do not impact overall slide count
 
@@ -316,6 +394,99 @@
 		\vspace{\baselineskip}
 		\item Finding alternative subgroup descriptions with a feature-cardinality constraint is $\mathcal{NP}$-complete as well
 	\end{itemize}
+\end{frame}
+
+\begin{frame}[t]{Results -- Solver Timeouts}
+	\begin{figure}
+		\centering
+		\begin{subfigure}[t]{0.32\textwidth}
+			\centering
+			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-timeouts-finished-tasks.pdf}
+			\caption{
+				Frequency of finished \emph{SMT} tasks over datasets and cross-validation folds, by feature cardinality~$k$.
+			}
+			\label{fig:csd:timeouts-finished-tasks}
+			%JB: increase of finished tasks with timeout, and decreasing marginal gain (note logarithmic x-axis) -> may tasks finish fast, but some take really long
+		\end{subfigure}
+		\hspace{1cm}
+		\begin{subfigure}[t]{0.32\textwidth}
+			\centering
+			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-timeouts-nwracc.pdf}
+			\caption{
+				Mean subgroup quality, with 95\% confidence intervals based on datasets and cross-validation folds.
+				Results without a feature-cardinality constraint.
+			}
+			\label{fig:csd:timeouts-nwracc}
+			%JB: subgroup quality also shows decreasing marginal gain
+		\end{subfigure}
+		\caption*{
+			Impact of solver timeouts for \emph{SMT} as the subgroup-discovery method.
+			Results from the search for original subgroups.
+		}
+		\label{fig:csd:timeouts}
+	\end{figure}
+\end{frame}
+
+\begin{frame}[t]{Results -- Runtime}
+	\begin{columns}[T]
+		\begin{column}{\kitthreecolumns}
+			\begin{table}
+				\centering
+				\caption*{
+					Mean runtime (in seconds) over datasets and cross-validation folds, by subgroup-discovery method and feature cardinality~$k$.
+					Results from the search for original subgroups.
+				}
+				\begin{tabular}{lrrrrrr}
+					\toprule
+					$k$ & 1 & 2 & 3 & 4 & 5 & no \\
+					\midrule
+					BI & 7.8 & 11.7 & 14.2 & 16.7 & 18.7 & 35.0 \\
+					BSD & 0.9 & 0.9 & 0.9 & 2.7 & 29.5 & 55.7 \\
+					Beam & 6.8 & 10.1 & 12.8 & 14.6 & 16.1 & 30.5 \\
+					MORS & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+					PRIM & 0.1 & 0.2 & 0.3 & 0.3 & 0.5 & 1.3 \\
+					Random & 0.6 & 0.6 & 0.6 & 0.7 & 0.7 & 0.9 \\
+					SD-Map & 2.3 & 3.3 & 9.6 & 54.0 & 345.2 & 367.4 \\
+					SMT & 648.2 & 911.3 & 1091.7 & 1113.4 & 1117.4 & 849.0 \\
+					\bottomrule
+				\end{tabular}
+				\label{tab:csd:cardinality-runtime}
+				%JB: "SMT" one to two orders of magnitude slower than "Beam"/"BI" (which yield better quality) and "BSD"/"SD-Map"
+				%JB: "Beam"/"BI" are one to two oders of magnitude slower than "PRIM"/"Random"
+				%JB: new baseline "MORS" practically finishes at once -> good for an initial lower bound on quality
+				%JB: among heuristics, "PRIM" fastest but also worst quality (tradeoff)
+				%JB: heuristics and "BSD"/SD-Map" speed up with smaller "k", "SMT" less clear (increase till k=3, stable for K=4 and k=5, unconstrained faster again)
+			\end{table}
+		\end{column}
+		\begin{column}{\kitthreecolumns}
+			\begin{table}[t]
+				\centering
+				\caption*{
+					Mean runtime (in seconds) over datasets and cross-validation folds, by subgroup-discovery method, dissimilarity threshold~$\tau_{\text{abs}}$, and number of alternative.
+					Results from the search for alternative subgroup descriptions.
+				}
+				\begin{tabular}{llrrrrrr}
+					\toprule
+					\multirow{2}{*}{Method} & \multirow{2}{*}{$\tau_{\text{abs}}$} & \multicolumn{6}{c}{Number of alternative} \\
+					\cmidrule(lr){3-8}
+					& & 0 & 1 & 2 & 3 & 4 & 5 \\
+					\midrule
+					\multirow[t]{3}{*}{Beam} & 1 & 12.8 & 8.0 & 7.6 & 7.3 & 7.3 & 7.3 \\
+					& 2 & 12.8 & 7.7 & 7.4 & 7.2 & 7.0 & 6.8 \\
+					& 3 & 12.8 & 5.8 & 5.1 & 4.7 & 4.1 & 3.5 \\
+					\multirow[t]{3}{*}{SMT} & 1 & 1091.7 & 166.0 & 221.5 & 239.6 & 258.1 & 277.9 \\
+					& 2 & 1105.2 & 377.5 & 463.5 & 537.5 & 599.4 & 658.3 \\
+					& 3 & 1107.4 & 869.1 & 670.8 & 597.6 & 588.1 & 557.6 \\
+					\bottomrule
+				\end{tabular}
+				\label{tab:csd:alteratives-runtime}
+				%JB: search for alternatives faster than for original subgroup
+				%JB: "Beam" again one to orders of magnitude faster than "SMT"
+				%JB: "Beam" decreasing runtime over number of alternatives and dissimilarity
+				%JB: "SMT" has increasing runtime over number of alternatives if overlap allowed and decreasing if forbidden
+			\end{table}
+		\end{column}
+	\end{columns}
 \end{frame}
 
 \begin{frame}[t, allowframebreaks]{References}

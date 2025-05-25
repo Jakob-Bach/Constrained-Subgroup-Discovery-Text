@@ -85,8 +85,8 @@
 		\end{itemize}
 		\pause
 		\vspace{\baselineskip}
-		\item \textbf{Our goal}: Improve interpretability with constraints
-		%JB: on selected features
+		\item \textbf{Our goal}: Introduce and analyze two constraint types to foster interpretability of subgroup descriptions
+		%JB: constraints on selected features
 		%JB: despite subgroup descriptions already being simple
 		\begin{itemize}
 			\item Limit number of features used in subgroup description
@@ -140,7 +140,7 @@
 			%JB: e.g., just one SD method
 			%JB: some studies also use just one fixed cardinality
 			%JB: don't want to say that studies narrow in general; just have a different focus
-			\item Concept of alternative subgroups well-established~\cite{atzmueller2015subgroup, belfodil2019fssd, bosc2018anytime, leeuwen2012diverse, lucas2018ssdp+}, but alternative descriptions~\cite{boley2009non, galbrun2017redescription, leeuwen2012diverse, lopez2023discovering} less so
+			\item Concept of alternative subgroups well-established~\cite{atzmueller2015subgroup, belfodil2019fssd, bosc2018anytime, leeuwen2012diverse, lucas2018ssdp+}, but alternative descriptions~\cite{boley2009non, galbrun2017redescription, leeuwen2012diverse, lopez2023discovering} less
 			%JB: former (also called "diverse") wants to capture different data objects / regions, not use different features
 			%JB: the referenced related work for alternative descriptions pursues different problem definitions than we do
 			%JB: alternatives are also a theme in other fields of ML, e.g., clustering, itemset mining, feature selection, and XAI
@@ -324,6 +324,37 @@
 		}
 		\label{fig:csd:alternatives}
 	\end{figure}
+\end{frame}
+
+\begin{frame}[t]{Summary}
+	\begin{itemize}
+		\item \textbf{Goal:} Introduce and analyze two constraint types to foster interpretability of subgroup descriptions
+		\begin{itemize}
+			\item Limit number of features used in subgroup description
+			\item Find alternative subgroup descriptions
+		\end{itemize}
+		\pause
+		\vspace{\baselineskip}
+		\item \textbf{Contributions:} Formalization (as SMT problem), complexity analyses, and experiments
+		\pause
+		\vspace{\baselineskip}
+		\item \textbf{Experimental results:}
+		\begin{itemize}
+			\item Heuristic search methods yield close-to-optimal subgroup quality in short time
+			\item Subgroup descriptions using few features yield similar subgroup quality as those using many features
+			\item Different subgroup descriptions (used features) may capture similar subgroup (set of data objects)
+		\end{itemize}
+		\pause
+		\vspace{\baselineskip}
+		\item \textbf{Resources:}
+		\begin{itemize}
+			\item Paper~\cite{bach2025subgroup} (longer arXiv version~\cite{bach2025using})
+			%JB: all main results are included in conference version
+			\item Code~\cite{bach2025constrained} (including Python package \texttt{csd} with six subgroup-discovery methods)
+			%JB: we implemented six methods from scratch, while two (BSD and SD-Map) were wrapped from another package (SD4Py)
+			\item Experimental data~\cite{bach2025experimental}
+		\end{itemize}
+	\end{itemize}
 \end{frame}
 
 \appendix

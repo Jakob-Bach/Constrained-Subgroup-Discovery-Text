@@ -71,6 +71,7 @@
 		\item \textbf{Our scope:} Binary classification with real-valued features
 		\begin{itemize}
 			\item Tabular dataset $X \in \mathbb{R}^{m \times n}$ (data objects $\times$ features)
+			%JB: data objects are rows, features are columns
 			%JB: there also are variants of subgroup discovery that are more like frequent itemset mining, with binary feature values and only value 1 used in subgroup descriptions
 			\item Prediction target $y \in \{0, 1\}^m$ (`interesting'/`positive' = 1)
 			%JB: in regression, interestingness could refer to low or high values of target
@@ -85,7 +86,7 @@
 		\end{itemize}
 		\pause
 		\vspace{\baselineskip}
-		\item \textbf{Our goal}: Introduce and analyze two constraint types to foster interpretability of subgroup descriptions
+		\item \textbf{Our focus}: Two constraint types to foster interpretability of subgroup descriptions
 		%JB: constraints on selected features
 		%JB: despite subgroup descriptions already being simple
 		\begin{itemize}
@@ -98,8 +99,7 @@
 			%JB: alternative description for same subgroup, not an alternative subgroup
 		\end{itemize}
 	\end{itemize}
-	\pause[0] % \visible or \onslide did not work, so we reset pause counter to show figure immediately
-	\begin{tikzpicture}[remember picture,overlay]
+	\onslide<2->\begin{tikzpicture}[remember picture,overlay]
 		\node[xshift=-260pt,yshift=-310pt] at (current page.north east) {
 			\includegraphics[width=0.45\textwidth, trim=70 15 90 15, clip]{plots/csd-exemplary-subgroup.pdf}
 		};
@@ -159,7 +159,7 @@
 			%JB: linear since "m" and "m+" constant
 		}
 		\onslide<4->{
-			\text{s.t.:} &\quad & m_b &:= \sum_{i=1}^{m} b_i \quad\text{and}\quad m_b^+ := \sum_{\substack{i \in \{1, \dots, m\} \\ y_i = 1 }} b_i \tag*{(Num of data objects in subgroup)} \\
+			\text{s.t.:} &\quad & m_b &:= \sum_{i=1}^{m} b_i \quad\text{and}\quad m_b^+ := \sum_{\substack{i \in \{1, \dots, m\} \\ y_i = 1 }} b_i \tag*{(Number of data objects in subgroup)} \\
 			%JB: count b_i
 		}
 		\onslide<3->{
@@ -219,8 +219,8 @@
 		\item \textbf{Eight subgroup-discovery methods:}
 		\begin{itemize}
 			\item Solver-based (novel): \emph{SMT} (using \emph{Z3}~\cite{bjorner2015nuz, deMoura2008z3} as optimizer)
-			\item Exhaustive search (related work): \emph{BSD}~\cite{lemmerich2010fast}, \emph{SD-Map}~\cite{atzmueller2006sd}
-			%JB: not actually exhaustive in our scenario since they require discretizing numeric features
+			\item Exhaustive* algorithms (related work): \emph{BSD}~\cite{lemmerich2010fast}, \emph{SD-Map}~\cite{atzmueller2006sd} (* both require discretized features)
+			%JB: not actually exhaustive in our scenario; besides discretization, can also not produce value-spanning conditions (since they select one value)
 			\item Heuristics (related work): \emph{Beam}, \emph{BI}~\cite{mampaey2012efficient}, \emph{PRIM}~\cite{friedman1999bump}
 			%JB: iteratively and greedily restrict the subgroup's bounds, with one feature per iteration (PRIM: prune fixed fraction of data objects; Beam/BI: test all possible cuts)
 			\item Baselines (novel): \emph{MORS} (Minimal Optimal Recall Subgroup), \emph{Random}
@@ -283,7 +283,7 @@
 			%JB: reason: less overfitting (probably due to reduced search space), while "SMT" shows highest overfitting (train-test diff in quality)
 			%JB: quality increase over "k" also smaller due to overfitting
 		\end{subfigure}
-		\caption*{
+		\onslide<1->\caption*{
 			Mean subgroup quality over datasets and cross-validation folds, by subgroup-discovery method and feature cardinality~$k$.
 			Results from the search for original subgroups.
 		}
@@ -291,44 +291,9 @@
 	\end{figure}
 \end{frame}
 
-\begin{frame}[t]{Results -- Alternative Subgroup Descriptions}
-	\begin{figure}[t]
-		\centering
-		\begin{subfigure}[t]{0.32\textwidth}
-			\centering
-			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-alternatives-jaccard.pdf}
-			\caption{Jaccard similarity.}
-			\label{fig:csd:alternatives-jaccard}
-			%JB: here two just subgroup-discovery methods (our solver-based, one heuristic)
-			%JB: alternative subgroup descriptions less (data-object) similar to original the more alternatives desired and the higher (feature-selection) dissimilarity threshold
-			%JB: strongest decrease to first alternative
-		\end{subfigure}
-		\hfill
-		\begin{subfigure}[t]{0.32\textwidth}
-			\centering
-			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-alternatives-train-nwracc.pdf}
-			\caption{Training-set subgroup quality (nWRAcc).}
-			\label{fig:csd:alternatives-train-nwracc}
-			%JB: similar trends for subgroup quality
-			%JB: heuristics similar or better quality than solver-based approach (while for Jaccard similarity, SMT seemed better, but that does not even transfer to Hamming similarity)
-		\end{subfigure}
-		\hfill
-		\begin{subfigure}[t]{0.32\textwidth}
-			\centering
-			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-alternatives-test-nwracc.pdf}
-			\caption{Test-set subgroup quality (nWRAcc).}
-			\label{fig:csd:alternatives-test-nwracc}
-		\end{subfigure}
-		\caption*{
-			Mean similarity and quality of alternative subgroup descriptions, with 95\% confidence intervals based on datasets and cross-validation folds, by subgroup-discovery method, number of alternative, and dissimilarity threshold~$\tau_{\text{abs}}$.
-		}
-		\label{fig:csd:alternatives}
-	\end{figure}
-\end{frame}
-
 \begin{frame}[t]{Summary}
 	\begin{itemize}
-		\item \textbf{Goal:} Introduce and analyze two constraint types to foster interpretability of subgroup descriptions
+		\item \textbf{Focus:} Two constraint types to foster interpretability of subgroup descriptions
 		\begin{itemize}
 			\item Limit number of features used in subgroup description
 			\item Find alternative subgroup descriptions
@@ -350,7 +315,7 @@
 		\begin{itemize}
 			\item Paper~\cite{bach2025subgroup} (longer arXiv version~\cite{bach2025using})
 			%JB: all main results are included in conference version
-			\item Code~\cite{bach2025constrained} (including Python package \texttt{csd} with six subgroup-discovery methods)
+			\item Code~\cite{bach2025constrained} (including Python package \texttt{csd} with subgroup-discovery methods)
 			%JB: we implemented six methods from scratch, while two (BSD and SD-Map) were wrapped from another package (SD4Py)
 			\item Experimental data~\cite{bach2025experimental}
 		\end{itemize}
@@ -425,6 +390,41 @@
 		\vspace{\baselineskip}
 		\item Finding alternative subgroup descriptions with a feature-cardinality constraint is $\mathcal{NP}$-complete as well
 	\end{itemize}
+\end{frame}
+
+\begin{frame}[t]{Results -- Alternative Subgroup Descriptions}
+	\begin{figure}[t]
+		\centering
+		\begin{subfigure}[t]{0.32\textwidth}
+			\centering
+			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-alternatives-jaccard.pdf}
+			\caption{Jaccard similarity.}
+			\label{fig:csd:alternatives-jaccard}
+			%JB: here two just subgroup-discovery methods (our solver-based, one heuristic)
+			%JB: alternative subgroup descriptions less (data-object) similar to original the more alternatives desired and the higher (feature-selection) dissimilarity threshold
+			%JB: strongest decrease to first alternative
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}[t]{0.32\textwidth}
+			\centering
+			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-alternatives-train-nwracc.pdf}
+			\caption{Training-set subgroup quality (nWRAcc).}
+			\label{fig:csd:alternatives-train-nwracc}
+			%JB: similar trends for subgroup quality
+			%JB: heuristics similar or better quality than solver-based approach (while for Jaccard similarity, SMT seemed better, but that does not even transfer to Hamming similarity)
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}[t]{0.32\textwidth}
+			\centering
+			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-alternatives-test-nwracc.pdf}
+			\caption{Test-set subgroup quality (nWRAcc).}
+			\label{fig:csd:alternatives-test-nwracc}
+		\end{subfigure}
+		\caption*{
+			Mean similarity and quality of alternative subgroup descriptions, with 95\% confidence intervals based on datasets and cross-validation folds, by subgroup-discovery method, number of alternative, and dissimilarity threshold~$\tau_{\text{abs}}$.
+		}
+		\label{fig:csd:alternatives}
+	\end{figure}
 \end{frame}
 
 \begin{frame}[t]{Results -- Solver Timeouts}

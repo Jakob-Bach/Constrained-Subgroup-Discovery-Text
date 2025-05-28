@@ -34,7 +34,10 @@
 
 \hypersetup{colorlinks=true, citecolor=kit-blue, urlcolor=kit-blue}
  
-\setlength{\leftmargini}{0.6cm} % change default indentation (so first-level items are left-aligned to boxes and slide titles)
+\setlength{\leftmargini}{\kitcolumnsep} % change default indentation (so first-level items are left-aligned to boxes and slide titles)
+
+\captionsetup{font=normalsize}  % increase caption size for plots and tables
+\subcaptionsetup{font=normalsize}
 
 \setbeamerfont{itemize/enumerate subbody}{size=\normalsize} % make 2nd-level items' text as large as 1st-level ones (default is \small, as defined in "beamerfontthemedefault.sty")
 \setbeamerfont{itemize/enumerate subsubbody}{size=\normalsize} % make 3rd-level items' text as large as 1st-level ones (default is \footnotesize, as defined in "beamerfontthemedefault.sty")
@@ -75,7 +78,6 @@
 			%JB: there also are variants of subgroup discovery that are more like frequent itemset mining, with binary feature values and only value 1 used in subgroup descriptions
 			\item Prediction target $y \in \{0, 1\}^m$ (`interesting'/`positive' = 1)
 			%JB: in regression, interestingness could refer to low or high values of target
-			\pause
 			\item Subgroup description: Hyperrectangle
 			\item Subgroup quality: Weighted Relative Accuracy
 			\begin{itemize}
@@ -84,8 +86,16 @@
 				\item \emph{+} $\leftrightarrow$ positive data object, \emph{b} $\leftrightarrow$ in subgroup (box)
 			\end{itemize}
 		\end{itemize}
-		\pause
-		\vspace{\baselineskip}
+	\end{itemize}
+	\onslide<2->\begin{tikzpicture}[remember picture,overlay]
+		\node[xshift=-260pt,yshift=-310pt] at (current page.north east) {
+			\includegraphics[width=0.45\textwidth, trim=70 10 90 10, clip]{plots/csd-exemplary-subgroup.pdf}
+		};
+	\end{tikzpicture}
+\end{frame}
+
+\begin{frame}[t]{Contributions}
+	\begin{itemize}
 		\item \textbf{Our focus}: Two constraint types to foster interpretability of subgroup descriptions
 		%JB: constraints on selected features
 		%JB: despite subgroup descriptions already being simple
@@ -98,16 +108,8 @@
 			%JB: "alternative"
 			%JB: alternative description for same subgroup, not an alternative subgroup
 		\end{itemize}
-	\end{itemize}
-	\onslide<2->\begin{tikzpicture}[remember picture,overlay]
-		\node[xshift=-260pt,yshift=-310pt] at (current page.north east) {
-			\includegraphics[width=0.45\textwidth, trim=70 15 90 15, clip]{plots/csd-exemplary-subgroup.pdf}
-		};
-	\end{tikzpicture}
-\end{frame}
-
-\begin{frame}[t]{Contributions and Related Work}
-	\begin{itemize}
+		\pause
+		\vspace{\baselineskip}
 		\item \textbf{Contributions:}
 		%JB: formalization, proofs, and experiments
 		\begin{itemize}
@@ -125,25 +127,6 @@
 			%JB: unfortunately, no time for these proofs in this 15-min presentation; one proof is in Appendix of this presentation
 			\item Comprehensive experiments
 			% will be presented later
-		\end{itemize}
-		\pause
-		\vspace{\baselineskip}
-		\item \textbf{Related work:}
-		\begin{itemize}
-			\item Existing subgroup-discovery methods~\cite{atzmueller2015subgroup, helal2016subgroup, herrera2011overview, ventura2018subgroup} typically algorithmic (exhaustive or heuristic)
-			%JB: i.e., exhaustive routines do not use an off-the-shelf solver
-			%JB: further, term "subgroup" is a bit overloaded; also used in algorithmic fairness (predefined groups like race, gender), medicine, and re-inventions with slightly different problem definitions in different communities (like management of data)
-			\item Few white-box formulations of (other) variants of subgroup discovery~\cite{bonates2008maximum, eckstein2002maximum, guns2011itemset, koccak2020exploiting, louveaux2014combinatorial}
-			%JB: typically evaluation limited, e.g., not comparing to existing SD methods
-			%JB: also, different problem definitions (e.g., further constraints) and neither feature cardinality nor alternatives
-			\item Concept of feature cardinality well-established~\cite{herrera2011overview, meeng2021real}, but empirical studies varying it~\cite{friedman1999bump, lemmerich2010fast, meeng2021real, proencca2022robust} are limited
-			%JB: e.g., just one SD method
-			%JB: some studies also use just one fixed cardinality
-			%JB: don't want to say that studies narrow in general; just have a different focus
-			\item Concept of alternative subgroups well-established~\cite{atzmueller2015subgroup, belfodil2019fssd, bosc2018anytime, leeuwen2012diverse, lucas2018ssdp+}, but alternative descriptions~\cite{boley2009non, galbrun2017redescription, leeuwen2012diverse, lopez2023discovering} less
-			%JB: former (also called "diverse") wants to capture different data objects / regions, not use different features
-			%JB: the referenced related work for alternative descriptions pursues different problem definitions than we do
-			%JB: alternatives are also a theme in other fields of ML, e.g., clustering, itemset mining, feature selection, and XAI
 		\end{itemize}
 	\end{itemize}
 \end{frame}
@@ -211,6 +194,36 @@
 	\end{itemize}
 \end{frame}
 
+\begin{frame}[t]{Formalization -- Alternative Subgroup Descriptions}
+	\begin{itemize}
+		\item \textbf{Concept:} Cover similar set of data objects as given subgroup with different set of selected features
+		\begin{itemize}
+			\item Repeat sequentially to get $a \in \mathbb{N}$ alternatives for dissimilarity threshold~$\tau \in \mathbb{R}_{\geq 0}$
+		\end{itemize}
+		\pause
+		\vspace{\baselineskip}
+		\item \textbf{Chosen optimization objective:} Maximize normalized Hamming similarity (= prediction accuracy)
+		%JB: new objective! don't optimize subgroup quality anymore
+		\begin{equation*}
+			\text{sim}_{\text{nHamm}}(b^{(a)}, b^{(0)}) = \frac{1}{m} \cdot \sum_{i=1}^m \left( b_i^{(a)} \leftrightarrow b_i^{(0)} \right) = \frac{1}{m} \cdot \Big( \sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 1}} b_i^{(a)} + \sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 0}} \lnot b_i^{(a)} \Big)
+			%JB: reminder: b_i denotes whether data object in subgroup or not
+			%JB: (0) is orignal subgroup, (a) the alternative
+			%JB: is linear (logical NOT can be linearized easily), while Jaccard similarity is not
+		\end{equation*}
+		\pause
+		\vspace{\baselineskip}
+		\item \textbf{Chosen dissimilarity constraints:} From each existing feature set, deselect at least $\tau_{\text{abs}} \in \mathbb{N}$ (but $\leq k$) features
+		%JB: "deselect": do not select again
+		\begin{equation*}
+			\forall l \in \{0, \dots, a-1\}:~ \text{dis}_{\text{des}}(s^{(a)}, s^{(l)}) = \sum_{\substack{j \in \{1, \dots, n\} \\ s^{(l)}_j = 1}} \lnot s^{(a)}_j \geq \min \left( \tau_{\text{abs}},~k^{(l)} \right)
+			%JB: min prevents infeasibility
+			%JB: not a commonly used measure, not even symmetric
+			%JB: however, linear and antimonotonic (Dice and Jaccard are not), which eases integration into solver and heuristics
+		\end{equation*}
+		%JB: other constraints from subgroup discovery remain in problem as is
+	\end{itemize}
+\end{frame}
+
 \begin{frame}[t]{Experimental Design}
 	\begin{itemize}
 		\item \textbf{27 binary-classification datasets} (with 106--9822 data objects and 20--168 features) from \emph{PMLB}~\cite{olson2017pmlb, romano2021pmlb}
@@ -233,7 +246,7 @@
 		%JB: parameters varied systematically; all other hyperparameters fixed, i.e., no tuning
 		\begin{itemize}
 			\item Solver timeouts: \{1~s, 2~s, 4~s, $\dots$, 2048~s\}
-			\item Feature-cardinality constraints: $k \in \{1, 2, 3, 4, 5\}$
+			\item Feature-cardinality constraints: $k \in \{1, 2, 3, 4, 5\}$, `no' (unconstrained)
 			\item Alternative subgroup descriptions: $k=3$ features, $a=5$ alternatives, and dissimilarity threshold $\tau_{\text{abs}} \in \{1, 2, 3\}$
 			%JB: do not have time to describe details; in a nutshell: find $a$ other subgroup descriptions that should capture a similar set of data objects as a given description but use different features
 		\end{itemize}
@@ -252,10 +265,10 @@
 \begin{frame}[t]{Results -- Feature-Cardinality Constraints}
 	\begin{figure}
 		\centering
-		\begin{subfigure}[t]{0.32\textwidth}
+		\begin{subfigure}[t]{0.35\textwidth}
 			\centering
 			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-cardinality-train-nwracc-all-datasets.pdf}
-			\caption{All 27 datasets, training set.}
+			\caption{All 27 datasets.}
 			\label{fig:csd:cardinality-train-nwracc-all-datasets}
 			%JB: on average, heuristics "Beam" (orange) and "BI" (purple) beat solver-based search "SMT" (dark green) due to timeouts (here, largest timeout setting of 2048~s)
 			%JB: "exhaustive" competitors "BSD" (pink) and "SD-Map" (gray) comparable to SMT (dark green), suffer from discretization (we apply their built-in equal-with binning and optimize over different number of bins, but still way smaller search space than being allowed to choose bounds arbitrarily)
@@ -263,31 +276,50 @@
 			%JB: increase of subgroup quality over "k" is small, i.e., small subgroup descriptions (with just 1 or 2 out of >= 20 features) already yield high quality (encouraging for interpretability)
 		\end{subfigure}
 		\pause
-		\hfill
-		\begin{subfigure}[t]{0.32\textwidth}
+		\hspace{\kitcolumnsep}
+		\begin{subfigure}[t]{0.35\textwidth}
 			\centering
 			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-cardinality-train-nwracc-no-timeout-datasets.pdf}
-			\caption{13 datasets without \emph{SMT} timeouts, training set.}
+			\caption{13 datasets without \emph{SMT} timeouts.}
 			\label{fig:csd:cardinality-train-nwracc-no-timeout-datasets}
 			%JB: datases with timeouts eliminated: "SMT" jumps up to "Beam" and "BI", while the new exhaustive competitors remain below (discretization issue not eliminated)
 			%JB: shows that heuristics still are very close to optimal quality
 		\end{subfigure}
-		\pause
-		\hfill
-		\begin{subfigure}[t]{0.32\textwidth}
-			\centering
-			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-cardinality-test-nwracc-all-datasets.pdf}
-			\caption{All 27 datasets, test set.}
-			\label{fig:csd:cardinality-test-nwracc-all-datasets}
-			%JB: "BSD" and "SD-Map" get closer to "Beam" and "BI" (particulalrly for higher "k"), better than "SMT"
-			%JB: reason: less overfitting (probably due to reduced search space), while "SMT" shows highest overfitting (train-test diff in quality)
-			%JB: quality increase over "k" also smaller due to overfitting
-		\end{subfigure}
 		\onslide<1->\caption*{
-			Mean subgroup quality over datasets and cross-validation folds, by subgroup-discovery method and feature cardinality~$k$.
-			Results from the search for original subgroups.
+			Subgroup quality of original subgroups.
+			% Mean subgroup quality over datasets and cross-validation folds, by subgroup-discovery method and feature cardinality~$k$.
+			% Results from the search for original subgroups.
 		}
-		\label{fig:csd:cardinality}
+		\label{fig:csd:cardinality:main}
+	\end{figure}
+\end{frame}
+
+\begin{frame}[t]{Results -- Alternative Subgroup Descriptions}
+	\begin{figure}
+		\centering
+		\begin{subfigure}[t]{0.4\textwidth}
+			\centering
+			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-alternatives-hamming.pdf}
+			\caption{Subgroup similarity.}
+			\label{fig:csd:alternatives-hamming}
+			%JB: here two just subgroup-discovery methods (our solver-based, one heuristic)
+			%JB: alternative subgroup descriptions less (data-object) similar to original the more alternatives desired and the higher (feature-selection) dissimilarity threshold
+			%JB: strongest decrease to first alternative
+		\end{subfigure}
+		\hspace{\kitcolumnsep}
+		\begin{subfigure}[t]{0.4\textwidth}
+			\centering
+			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-alternatives-train-nwracc.pdf}
+			\caption{Subgroup quality.}
+			\label{fig:csd:alternatives-train-nwracc}
+			%JB: similar trends as for subgroup similarity, but relative drop stronger (note that search does not optimize for quality)
+			%JB: heuristics overall not worse than solver-based approach (better the higher "tau")
+		\end{subfigure}
+		\caption*{
+			Similarity and quality of alternative subgroup descriptions.
+			% Mean similarity and quality of alternative subgroup descriptions, with 95\% confidence intervals based on datasets and cross-validation folds, by subgroup-discovery method, number of alternative, and dissimilarity threshold~$\tau_{\text{abs}}$.
+		}
+		\label{fig:csd:alternatives:main}
 	\end{figure}
 \end{frame}
 
@@ -306,6 +338,7 @@
 		\item \textbf{Experimental results:}
 		\begin{itemize}
 			\item Heuristic search methods yield close-to-optimal subgroup quality in short time
+			%JB: are serious competitors, not only for our new method (unfortunately), but any existing exhaustive method (unless the latter is faster than heuristics)
 			\item Subgroup descriptions using few features yield similar subgroup quality as those using many features
 			\item Different subgroup descriptions (used features) may capture similar subgroup (set of data objects)
 		\end{itemize}
@@ -315,6 +348,7 @@
 		\begin{itemize}
 			\item Paper~\cite{bach2025subgroup} (longer arXiv version~\cite{bach2025using})
 			%JB: all main results are included in conference version
+			%JB: Poster number: 182 (presented in "Poster Session 3", Thursday morning)
 			\item Code~\cite{bach2025constrained} (including Python package \texttt{csd} with subgroup-discovery methods)
 			%JB: we implemented six methods from scratch, while two (BSD and SD-Map) were wrapped from another package (SD4Py)
 			\item Experimental data~\cite{bach2025experimental}
@@ -330,31 +364,22 @@
 	\Huge Appendix
 \end{frame}
 
-\begin{frame}[t]{Formalization -- Alternative Subgroup Descriptions}
+\begin{frame}[t]{Related Work}
 	\begin{itemize}
-		\item \textbf{Concept:} Cover similar set of data objects as given subgroup with different set of selected features
-		\begin{itemize}
-			\item Repeat sequentially to get $a \in \mathbb{N}$ alternatives for dissimilarity threshold~$\tau \in \mathbb{R}_{\geq 0}$
-		\end{itemize}
-		\vspace{\baselineskip}
-		\item \textbf{Chosen optimization objective:} Maximize normalized Hamming similarity (= prediction accuracy)
-		%JB: new objective! don't optimize subgroup quality anymore
-		\begin{equation*}
-			\text{sim}_{\text{nHamm}}(b^{(a)}, b^{(0)}) = \frac{1}{m} \cdot \sum_{i=1}^m \left( b_i^{(a)} \leftrightarrow b_i^{(0)} \right) = \frac{1}{m} \cdot \Big( \sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 1}} b_i^{(a)} + \sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 0}} \lnot b_i^{(a)} \Big)
-			%JB: reminder: b_i denotes whether data object in subgroup or not
-			%JB: (0) is orignal subgroup, (a) the alternative
-			%JB: is linear (logical NOT can be linearized easily), while Jaccard similarity is not
-		\end{equation*}
-		\vspace{\baselineskip}
-		\item \textbf{Chosen dissimilarity constraints:} From each existing feature set, deselect at least $\tau_{\text{abs}} \in \mathbb{N}$ (but $\leq k$) features
-		%JB: "deselect": do not select again
-		\begin{equation*}
-			\forall l \in \{0, \dots, a-1\}:~ \text{dis}_{\text{des}}(s^{(a)}, s^{(l)}) = \sum_{\substack{j \in \{1, \dots, n\} \\ s^{(l)}_j = 1}} \lnot s^{(a)}_j \geq \min \left( \tau_{\text{abs}},~k^{(l)} \right)
-			%JB: min prevents infeasibility
-			%JB: not a commonly used measure, not even symmetric
-			%JB: however, linear and antimonotonic (Dice and Jaccard are not), which eases integration into solver and heuristics
-		\end{equation*}
-		%JB: other constraints from subgroup discovery remain in problem as is
+		\item Existing subgroup-discovery methods~\cite{atzmueller2015subgroup, helal2016subgroup, herrera2011overview, ventura2018subgroup} typically algorithmic (exhaustive or heuristic)
+		%JB: i.e., exhaustive routines do not use an off-the-shelf solver
+		%JB: further, term "subgroup" is a bit overloaded; also used in algorithmic fairness (predefined groups like race, gender), medicine, and re-inventions with slightly different problem definitions in different communities (like management of data)
+		\item Few white-box formulations of (other) variants of subgroup discovery~\cite{bonates2008maximum, eckstein2002maximum, guns2011itemset, koccak2020exploiting, louveaux2014combinatorial}
+		%JB: typically evaluation limited, e.g., not comparing to existing SD methods
+		%JB: also, different problem definitions (e.g., further constraints) and neither feature cardinality nor alternatives
+		\item Concept of feature cardinality well-established~\cite{herrera2011overview, meeng2021real}, but empirical studies varying it~\cite{friedman1999bump, lemmerich2010fast, meeng2021real, proencca2022robust} are limited
+		%JB: e.g., just one SD method
+		%JB: some studies also use just one fixed cardinality
+		%JB: don't want to say that studies narrow in general; just have a different focus
+		\item Concept of alternative subgroups well-established~\cite{atzmueller2015subgroup, belfodil2019fssd, bosc2018anytime, leeuwen2012diverse, lucas2018ssdp+}, but alternative descriptions~\cite{boley2009non, galbrun2017redescription, leeuwen2012diverse, lopez2023discovering} less
+		%JB: former (also called "diverse") wants to capture different data objects / regions, not use different features
+		%JB: the referenced related work for alternative descriptions pursues different problem definitions than we do
+		%JB: alternatives are also a theme in other fields of ML, e.g., clustering, itemset mining, feature selection, and XAI
 	\end{itemize}
 \end{frame}
 
@@ -392,80 +417,104 @@
 	\end{itemize}
 \end{frame}
 
-\begin{frame}[t]{Results -- Alternative Subgroup Descriptions}
-	\begin{figure}[t]
+\begin{frame}[t]{More Results -- Feature-Cardinality Constraints}
+	\begin{figure}
 		\centering
-		\begin{subfigure}[t]{0.32\textwidth}
+		\begin{subfigure}[t]{0.35\textwidth}
 			\centering
-			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-alternatives-jaccard.pdf}
-			\caption{Jaccard similarity.}
-			\label{fig:csd:alternatives-jaccard}
-			%JB: here two just subgroup-discovery methods (our solver-based, one heuristic)
-			%JB: alternative subgroup descriptions less (data-object) similar to original the more alternatives desired and the higher (feature-selection) dissimilarity threshold
-			%JB: strongest decrease to first alternative
+			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-cardinality-test-nwracc-all-datasets.pdf}
+			\caption{All 27 datasets.}
+			\label{fig:csd:cardinality-test-nwracc-all-datasets}
+			%JB: "BSD" and "SD-Map" get closer to "Beam" and "BI" than on training set (particulalrly for higher "k"), better than "SMT"
+			%JB: reason: less overfitting (probably due to reduced search space), while "SMT" shows highest overfitting (train-test diff in quality)
+			%JB: quality increase over "k" also smaller due to overfitting
 		\end{subfigure}
-		\hfill
-		\begin{subfigure}[t]{0.32\textwidth}
+		\hspace{\kitcolumnsep}
+		\begin{subfigure}[t]{0.35\textwidth}
 			\centering
-			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-alternatives-train-nwracc.pdf}
-			\caption{Training-set subgroup quality (nWRAcc).}
-			\label{fig:csd:alternatives-train-nwracc}
-			%JB: similar trends for subgroup quality
-			%JB: heuristics similar or better quality than solver-based approach (while for Jaccard similarity, SMT seemed better, but that does not even transfer to Hamming similarity)
-		\end{subfigure}
-		\hfill
-		\begin{subfigure}[t]{0.32\textwidth}
-			\centering
-			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-alternatives-test-nwracc.pdf}
-			\caption{Test-set subgroup quality (nWRAcc).}
-			\label{fig:csd:alternatives-test-nwracc}
+			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-cardinality-test-nwracc-no-timeout-datasets.pdf}
+			\caption{13 datasets without \emph{SMT} timeouts.}
+			\label{fig:csd:cardinality-test-nwracc-no-timeout-datasets}
+			%JB: can see that (exact!) SMT solution loses quality if using all features
 		\end{subfigure}
 		\caption*{
-			Mean similarity and quality of alternative subgroup descriptions, with 95\% confidence intervals based on datasets and cross-validation folds, by subgroup-discovery method, number of alternative, and dissimilarity threshold~$\tau_{\text{abs}}$.
+			Subgroup quality of original subgroups on the test set.
+			% Mean subgroup quality over datasets and cross-validation folds, by subgroup-discovery method and feature cardinality~$k$.
+			% Results from the search for original subgroups.
 		}
-		\label{fig:csd:alternatives}
+		\label{fig:csd:cardinality:appendix}
 	\end{figure}
 \end{frame}
 
-\begin{frame}[t]{Results -- Solver Timeouts}
+\begin{frame}[t]{More Results -- Alternative Subgroup Descriptions}
 	\begin{figure}
 		\centering
-		\begin{subfigure}[t]{0.32\textwidth}
+		\begin{subfigure}[t]{0.4\textwidth}
+			\centering
+			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-alternatives-jaccard.pdf}
+			\caption{Subgroup similarity (Jaccard).}
+			\label{fig:csd:alternatives-jaccard}
+			%JB: broader range than Hamming similarity (only considers data objects that are in at least one subgroup)
+			%JB: SMT is better than "Beam" here, but that does not transfer to Hamming similarity or subgroup quality (as seen before)
+		\end{subfigure}
+		\hspace{\kitcolumnsep}
+		\begin{subfigure}[t]{0.4\textwidth}
+			\centering
+			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-alternatives-test-nwracc.pdf}
+			\caption{Subgroup quality on the test set.}
+			\label{fig:csd:alternatives-test-nwracc}
+			%JB: same trend as on training set and for similarity
+		\end{subfigure}
+		\caption*{
+			Similarity and quality of alternative subgroup descriptions.
+			% Mean similarity and quality of alternative subgroup descriptions, with 95\% confidence intervals based on datasets and cross-validation folds, by subgroup-discovery method, number of alternative, and dissimilarity threshold~$\tau_{\text{abs}}$.
+		}
+		\label{fig:csd:alternatives:appendix}
+	\end{figure}
+\end{frame}
+
+\begin{frame}[t]{More Results -- Solver Timeouts}
+	\begin{figure}
+		\centering
+		\begin{subfigure}[t]{0.4\textwidth}
 			\centering
 			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-timeouts-finished-tasks.pdf}
 			\caption{
-				Frequency of finished \emph{SMT} tasks over datasets and cross-validation folds, by feature cardinality~$k$.
+				Frequency of finished \emph{SMT} tasks.
+				% Frequency of finished \emph{SMT} tasks over datasets and cross-validation folds, by feature cardinality~$k$.
 			}
 			\label{fig:csd:timeouts-finished-tasks}
 			%JB: increase of finished tasks with timeout, and decreasing marginal gain (note logarithmic x-axis) -> may tasks finish fast, but some take really long
 		\end{subfigure}
-		\hspace{1cm}
-		\begin{subfigure}[t]{0.32\textwidth}
+		\hspace{\kitcolumnsep}
+		\begin{subfigure}[t]{0.4\textwidth}
 			\centering
 			\includegraphics[width=\textwidth, trim=10 25 10 10, clip]{plots/csd-timeouts-nwracc.pdf}
 			\caption{
-				Mean subgroup quality, with 95\% confidence intervals based on datasets and cross-validation folds.
-				Results without a feature-cardinality constraint.
+				Subgroup quality.
+				% Mean subgroup quality, with 95\% confidence intervals based on datasets and cross-validation folds.
+				% Results without a feature-cardinality constraint.
 			}
 			\label{fig:csd:timeouts-nwracc}
 			%JB: subgroup quality also shows decreasing marginal gain
 		\end{subfigure}
 		\caption*{
 			Impact of solver timeouts for \emph{SMT} as the subgroup-discovery method.
-			Results from the search for original subgroups.
+			% Results from the search for original subgroups.
 		}
 		\label{fig:csd:timeouts}
 	\end{figure}
 \end{frame}
 
-\begin{frame}[t]{Results -- Runtime}
+\begin{frame}[t]{More Results -- Runtime}
 	\begin{columns}[T]
 		\begin{column}{\kitthreecolumns}
 			\begin{table}
 				\centering
 				\caption*{
-					Mean runtime (in seconds) over datasets and cross-validation folds, by subgroup-discovery method and feature cardinality~$k$.
-					Results from the search for original subgroups.
+					Mean runtime (in sec.) for searching original subgroups.
+					% Mean runtime (in seconds) over datasets and cross-validation folds, by subgroup-discovery method and feature cardinality~$k$.
+					% Results from the search for original subgroups.
 				}
 				\begin{tabular}{lrrrrrr}
 					\toprule
@@ -493,8 +542,9 @@
 			\begin{table}[t]
 				\centering
 				\caption*{
-					Mean runtime (in seconds) over datasets and cross-validation folds, by subgroup-discovery method, dissimilarity threshold~$\tau_{\text{abs}}$, and number of alternative.
-					Results from the search for alternative subgroup descriptions.
+					Mean runtime (in sec.) for searching alternative subgroup descriptions.
+					% Mean runtime (in seconds) over datasets and cross-validation folds, by subgroup-discovery method, dissimilarity threshold~$\tau_{\text{abs}}$, and number of alternative.
+					% Results from the search for alternative subgroup descriptions.
 				}
 				\begin{tabular}{llrrrrrr}
 					\toprule

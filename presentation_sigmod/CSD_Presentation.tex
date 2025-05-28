@@ -196,7 +196,7 @@
 
 \begin{frame}[t]{Formalization -- Alternative Subgroup Descriptions}
 	\begin{itemize}
-		\item \textbf{Concept:} Cover similar set of data objects as given subgroup with different set of selected features
+		\item \textbf{Concept:} Cover similar set of data objects as a given subgroup with different set of selected features
 		\begin{itemize}
 			\item Repeat sequentially to get $a \in \mathbb{N}$ alternatives for dissimilarity threshold~$\tau \in \mathbb{R}_{\geq 0}$
 		\end{itemize}
@@ -208,6 +208,7 @@
 			\text{sim}_{\text{nHamm}}(b^{(a)}, b^{(0)}) = \frac{1}{m} \cdot \sum_{i=1}^m \left( b_i^{(a)} \leftrightarrow b_i^{(0)} \right) = \frac{1}{m} \cdot \Big( \sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 1}} b_i^{(a)} + \sum\limits_{\substack{i \in \{1, \dots, m\} \\ b_i^{(0)} = 0}} \lnot b_i^{(a)} \Big)
 			%JB: reminder: b_i denotes whether data object in subgroup or not
 			%JB: (0) is orignal subgroup, (a) the alternative
+			%JB: two binary vectors, and we count how many entries are equal
 			%JB: is linear (logical NOT can be linearized easily), while Jaccard similarity is not
 		\end{equation*}
 		\pause
@@ -339,7 +340,7 @@
 		\begin{itemize}
 			\item Heuristic search methods yield close-to-optimal subgroup quality in short time
 			%JB: are serious competitors, not only for our new method (unfortunately), but any existing exhaustive method (unless the latter is faster than heuristics)
-			\item Subgroup descriptions using few features yield similar subgroup quality as those using many features
+			\item Using few features in subgroup descriptions suffices to reach close-to-optimal subgroup quality
 			\item Different subgroup descriptions (used features) may capture similar subgroup (set of data objects)
 		\end{itemize}
 		\pause
@@ -398,18 +399,18 @@
 				\item Dataset~$X \in \{0, 1\}^{(m + 1) \times n}$ with $X_{ij} := (e_i \in S_j)$
 				%JB: elements become data objects, sets become features, set membership becomes feature value
 				%JB: binary is special case of real-valued
-				\item Data Object $m+1$ represents an element not contained in any set, i.e., $X_{(m+1)j} = 0$ for all~$j \in \{1, \dots, n\}$
+				\item Data object $m+1$ represents an element not contained in any set, i.e., $X_{(m+1)j} = 0$ for all~$j \in \{1, \dots, n\}$
 				\item Prediction target $y \in \{0, 1\}^{m+1}$ with $y_{m+1} = 1$ and $y_i = 0$ otherwise
 				%JB: indicates whether not contained in any set
 				%JB: further, parameter "k" remains as-is
 			\end{itemize}
-			\item Perfect subgroup only contains Data Object $m+1$ and uses $\mathit{lb}_j = \mathit{ub}_j = 0$ conditions for selected features
+			\item Perfect subgroup only contains data object $m+1$ and uses $\mathit{lb}_j = \mathit{ub}_j = 0$ conditions for selected features
 			%JB: new data object only has 0 as feature values
 			%JB: bounds [0, 1] represent unselected features
 			\item Other data objects have value 1 for at least one selected feature $\rightarrow$ each element is in a selected set
 			\item I.e., algorithm for perfect-subgroup discovery also solves \textsc{Set Covering}
 			%JB: however, latter is NP-hard, so former is NP-hard as well (and NP-complete since in NP)
-			\item Finally, optimizing subgroup quality typically at least as hard as finding perfect subgroup
+			\item Optimizing subgroup quality typically at least as hard as finding perfect subgroup
 			%JB: depends on notion of subgroup quality, but mild condition (perfect subgroup is unique optimum if exists), satisfied for WRAcc
 		\end{itemize}
 		\vspace{\baselineskip}

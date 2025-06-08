@@ -7,6 +7,7 @@ ACM-Reference-Format.bst
 
 ## KIT/SDQ:
 logos/
+KITposter.sty
 sdqbeamer.cls
 
 ### GitLab's default TeX .gitignore

@@ -50,7 +50,7 @@
 	\vspace{0pt} % specifying vspace in both columns necessary to have them start at same y-position
 	\begin{standardbox}{Scenario}
 		\begin{itemize}
-			\item \textbf{Subgroup discovery:} Find interesting, simple-to-describe region(s)
+			\item \textbf{Problem:} Find interesting, simple-to-describe region(s) in dataset
 		\end{itemize}
 		%
 		\centering
@@ -98,7 +98,7 @@
 	\vspace{10pt}
 	%
 	% QR codes generated with https://www.qrcode-monkey.com/
-	\setlength{\tabcolsep}{30pt} % increase space between columns
+	\setlength{\tabcolsep}{80pt} % increase space between columns
 	\centering
 	\begin{tabular}{ccc} % using floats (via "subcaption") does not work
 		\includegraphics[width=0.15\textwidth]{qr_codes/qr-code-paper.pdf} &
@@ -138,7 +138,7 @@
 		\begin{itemize}
 			\item 27 datasets from \emph{PMLB} (with $m \in [106, 9822]$ and $n \in [20, 168]$)
 			\item 8 subgroup-discovery methods: SMT-solver-based and 7 competitors
-			\item Multiple parametrizations of constraints and solver's timeout
+			\item Vary parameter values for constraints ($k$, $a$, $\tau$) and solver's timeout
 		\end{itemize}
 	\end{standardbox}
 	%
@@ -168,7 +168,7 @@
 		\begin{itemize}
 			\item Left: similarity to original subgroup; right: subgroup quality
 			\item Similarity and quality of alternatives decreases over~$a$ and~$\tau$
-			\item Strongest decrease from original to first alternative
+			\item Strongest decrease from original subgroup to first alternative
 		\end{itemize}
 	\end{standardbox}
 \end{minipage}

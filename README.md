@@ -3,6 +3,8 @@
 This repository contains the LaTeX source code for two papers and related materials on constrained subgroup discovery.
 You can also find copies of the corresponding published versions as PDFs in the folder `final_versions/`.
 
+## arXiv Version
+
 > Bach, Jakob (2024): "Using Constraints to Discover Sparse and Alternative Subgroup Descriptions"
 
 is published on [*arXiv*](https://doi.org/10.48550/arXiv.2406.01411).
@@ -14,6 +16,8 @@ There are (as of May 2025) two published versions of this paper (use the tags of
 - Code for experiments on [*GitHub*](https://github.com/Jakob-Bach/Constrained-Subgroup-Discovery)
 - Experimental data (v1) on [*RADAR4KIT*](https://doi.org/10.35097/caKKJCtoKqgxyvqG)
 - Experimental data (v2) on [*RADAR4KIT*](https://doi.org/10.35097/8ppb5x50nyvw1wa7)
+
+## Conference Version
 
 > Bach, Jakob (2025): "Subgroup Discovery with Small and Alternative Feature Sets"
 

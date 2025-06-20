@@ -30,3 +30,4 @@ However, you cannot compile these documents without some externals files (classe
 - Code for experiments on [*GitHub*](https://github.com/Jakob-Bach/Constrained-Subgroup-Discovery)
 - Experimental data on [*RADAR4KIT*](https://doi.org/10.35097/nftgaf7w73hy2491)
 - Poster on [*KITopen*](https://doi.org/10.5445/IR/1000182482)
+- Presentation on [*KITopen*](https://doi.org/10.5445/IR/1000182483)
